@@ -186,7 +186,7 @@ std::shared_ptr<core::FlowFile> ProcessSession::clone(const std::shared_ptr<core
         // Set offset and size
         logger_->log_error("clone offset %" PRId64 " and size %" PRId64 " exceed parent size %" PRIu64, offset, size, parent->getSize());
         // Remove the Add FlowFile for the session
-        std::map<std::string, std::shared_ptr<core::FlowFile> >::iterator it = this->_addedFlowFiles.find(record->getUUIDStr());
+        auto it = this->_addedFlowFiles.find(record->getUUIDStr());
         if (it != this->_addedFlowFiles.end())
           this->_addedFlowFiles.erase(record->getUUIDStr());
         return nullptr;
@@ -321,7 +321,6 @@ void ProcessSession::append(const std::shared_ptr<core::FlowFile> &flow, OutputS
       rollback();
       return;
     }
-    uint64_t appendSize = stream->getSize() - oldPos;
     flow->setSize(stream->getSize());
 
     std::stringstream details;
