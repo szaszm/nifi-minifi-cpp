@@ -36,23 +36,14 @@ namespace io {
  */
 class DataStream {
  public:
-
-  DataStream()
-      : readBuffer(0) {
-
-  }
-
-  virtual ~DataStream() {
-
-  }
+  DataStream() = default;
+  virtual ~DataStream() noexcept = default;
 
   /**
    * Constructor
    **/
-  explicit DataStream(const uint8_t *buf, const uint32_t buflen)
-      : DataStream() {
+  explicit DataStream(const uint8_t *buf, const uint32_t buflen) {
     writeData((uint8_t*) buf, buflen);
-
   }
 
   virtual short initialize() {
@@ -65,9 +56,7 @@ class DataStream {
     readBuffer += offset;
   }
 
-  virtual void closeStream() {
-
-  }
+  virtual void closeStream() { }
 
   /**
    * Reads data and places it into buf
@@ -119,14 +108,14 @@ class DataStream {
    * Retrieve size of data stream
    * @return size of data stream
    **/
-  virtual const uint64_t getSize() const {
+  virtual uint64_t getSize() const {
     return buffer.size();
   }
 
  protected:
   // All serialization related method and internal buf
   std::vector<uint8_t> buffer;
-  uint32_t readBuffer;
+  uint32_t readBuffer = 0;
 };
 
 } /* namespace io */
