@@ -17,19 +17,35 @@
 #ifndef LIBMINIFI_INCLUDE_UTILS_DELETERS_H
 #define LIBMINIFI_INCLUDE_UTILS_DELETERS_H
 
+#include <cstdlib>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <ifaddrs.h>
+
 namespace org {
 namespace apache {
 namespace nifi {
 namespace minifi {
 namespace utils {
 
-class FreeDeleter
-{
-public:
-	void operator()(void* ptr) { 
-		// free(null) is guaranteed to be safe, so no need to be defensive.
-		free(ptr); 
-	}
+struct FreeDeleter {
+  void operator()(void* const ptr) const noexcept{
+    // free(null) is guaranteed to be safe, so no need to be defensive.
+    free(ptr);
+  }
+};
+
+struct addrinfo_deleter {
+  void operator()(addrinfo* const p) const noexcept {
+    freeaddrinfo(p);
+  }
+};
+
+struct ifaddr_deleter {
+  void operator()(ifaddrs* const p) const noexcept {
+    freeifaddrs(p);
+  }
 };
 
 } /* namespace utils */

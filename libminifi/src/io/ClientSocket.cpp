@@ -33,15 +33,14 @@
 #include <cerrno>
 #include <string>
 #include <system_error>
+#include <cinttypes>
+#include <Exception.h>
+#include <utils/Deleters.h>
 #include "io/validation.h"
 #include "core/logging/LoggerConfiguration.h"
+#include "utils/GeneralUtils.h"
 
 namespace {
-struct addrinfo_deleter {
-  void operator()(addrinfo* const p) const noexcept {
-    freeaddrinfo(p);
-  }
-};
 
 std::string get_last_err_str() {
 #ifdef WIN32
@@ -68,6 +67,48 @@ bool valid_sock_fd(org::apache::nifi::minifi::io::SocketDescriptor fd) {
   return fd >= 0;
 #endif /* WIN32 */
 }
+
+#ifndef WIN32
+#define MAY_ALIAS __attibute__((__may_alias__))
+#else
+#define MAY_ALIAS /* prey */
+#endif /* WIN32 */
+
+std::string sockaddr_ntop(const sockaddr* const sa) {
+  if (sa->sa_family == AF_INET) {
+    sockaddr_in sa_in{};
+    std::memcpy(reinterpret_cast<void*>(&sa_in), sa, sizeof(sockaddr_in));
+    std::string result;
+    result.resize(INET_ADDRSTRLEN);
+    if (inet_ntop(AF_INET, &sa_in.sin_addr, &result[0], INET_ADDRSTRLEN) == nullptr) {
+      throw minifi::Exception{ minifi::ExceptionType::GENERAL_EXCEPTION, get_last_err_str() };
+    }
+    result.resize(strlen(result.c_str()));  // discard remaining null bytes at the end
+    return result;
+  } else if (sa->sa_family == AF_INET6) {
+    sockaddr_in6 sa_in6{};
+    std::memcpy(reinterpret_cast<void*>(&sa_in6), sa, sizeof(sockaddr_in6));
+    std::string result;
+    result.resize(INET6_ADDRSTRLEN);
+    if (inet_ntop(AF_INET6, &sa_in6.sin6_addr, &result[0], INET6_ADDRSTRLEN) == nullptr) {
+      throw minifi::Exception{ minifi::ExceptionType::GENERAL_EXCEPTION, get_last_err_str() };
+    }
+    result.resize(strlen(result.c_str()));  // discard remaining null bytes at the end
+    return result;
+  }
+  return "";
+}
+
+template<typename T, typename Pred, typename Adv>
+auto find_if_custom_linked_list(T* const list, const Adv advance_func, const Pred predicate) ->
+    typename std::enable_if<std::is_convertible<decltype(advance_func(std::declval<T*>())), T*>::value && std::is_convertible<decltype(predicate(std::declval<T*>())), bool>::value, T*>::type
+{
+  for (T* it = list; it; it = advance_func(it)) {
+    if (predicate(it)) return it;
+  }
+  return nullptr;
+}
+
 }  // namespace
 
 namespace org {
@@ -91,18 +132,48 @@ Socket::Socket(const std::shared_ptr<SocketContext>& context, std::string hostna
 }
 
 Socket::Socket(Socket &&other) noexcept
-    : requested_hostname_(std::move(other.requested_hostname_)),
-      canonical_hostname_(std::move(other.canonical_hostname_)),
-      port_(other.port_),
-      socket_file_descriptor_(other.socket_file_descriptor_),
-      total_list_(other.total_list_),
-      read_fds_(other.read_fds_),
-      socket_max_(other.socket_max_.load()),
-      total_written_(other.total_written_.load()),
-      total_read_(other.total_read_.load()),
-      listeners_(other.listeners_),
-      logger_(std::move(other.logger_))
-{ }
+    : requested_hostname_{ std::move(other.requested_hostname_) },
+      canonical_hostname_{ std::move(other.canonical_hostname_) },
+      port_{ other.port_ },
+      is_loopback_only_{ other.is_loopback_only_ },
+      local_network_interface_{ std::move(other.local_network_interface_) },
+      socket_file_descriptor_{ other.socket_file_descriptor_ },
+      total_list_{ other.total_list_ },
+      read_fds_{ other.read_fds_ },
+      socket_max_{ other.socket_max_.load() },
+      total_written_{ other.total_written_.load() },
+      total_read_{ other.total_read_.load() },
+      listeners_{ other.listeners_ },
+      nonBlocking_{ other.nonBlocking_ },
+      logger_{ other.logger_ }
+{
+  other = Socket{ {}, {}, {} };
+}
+
+Socket& Socket::operator=(Socket &&other) noexcept {
+  using utils::exchange;
+  if (&other == this) return *this;
+  requested_hostname_ = exchange(other.requested_hostname_, {});
+  canonical_hostname_ = exchange(other.canonical_hostname_, {});
+  port_ = exchange(other.port_, 0);
+  is_loopback_only_ = exchange(other.is_loopback_only_, false);
+  local_network_interface_ = exchange(other.local_network_interface_, {});
+  socket_file_descriptor_ = exchange(other.socket_file_descriptor_, INVALID_SOCKET);
+  total_list_ = other.total_list_;
+  FD_ZERO(&other.total_list_);
+  read_fds_ = other.read_fds_;
+  FD_ZERO(&other.read_fds_);
+  socket_max_.exchange(other.socket_max_);
+  other.socket_max_.exchange(0);
+  total_written_.exchange(other.total_written_);
+  other.total_written_.exchange(0);
+  total_read_.exchange(other.total_read_);
+  other.total_read_.exchange(0);
+  listeners_ = exchange(other.listeners_, 0);
+  nonBlocking_ = exchange(other.nonBlocking_, false);
+  logger_ = other.logger_;
+  return *this;
+}
 
 Socket::~Socket() {
   Socket::closeStream();
@@ -126,6 +197,7 @@ void Socket::closeStream() {
     local_network_interface_.log_read(total_read_);
     total_read_ = 0;
   }
+  logger_->log_info("0x%x closeStream %s:%" PRIu16 ", listeners: %" PRIu16, this, requested_hostname_, port_, listeners_);
 }
 
 void Socket::setNonBlocking() {
@@ -134,13 +206,104 @@ void Socket::setNonBlocking() {
   }
 }
 
-int8_t Socket::createConnection(const addrinfo *p, ip4addr &addr) {
-  if (!valid_sock_fd(socket_file_descriptor_ = socket(p->ai_family, p->ai_socktype, p->ai_protocol))) {
+int8_t Socket::createConnection(const addrinfo* const destination_addresses) {
+  for (const auto *current_addr = destination_addresses; current_addr; current_addr = current_addr->ai_next) {
+    if (!valid_sock_fd(socket_file_descriptor_ = socket(current_addr->ai_family, current_addr->ai_socktype, current_addr->ai_protocol))) {
+      logger_->log_warn("socket: %s", get_last_err_str());
+      continue;
+    }
+    setSocketOptions(socket_file_descriptor_);
+
+    if (listeners_ > 0) {
+      // server socket
+      const auto bind_result = bind(socket_file_descriptor_, current_addr->ai_addr, current_addr->ai_addrlen);
+      if (bind_result == SOCKET_ERROR) {
+        logger_->log_warn("bind: %s", get_last_err_str());
+        closeStream();
+        continue;
+      }
+
+      const auto listen_result = listen(socket_file_descriptor_, listeners_);
+      if (listen_result == SOCKET_ERROR) {
+        logger_->log_warn("listen: %s", get_last_err_str());
+        closeStream();
+        continue;
+      }
+
+      logger_->log_info("Listening on %s:%" PRIu16 " with backlog %" PRIu16, sockaddr_ntop(current_addr->ai_addr), port_, listeners_);
+    } else {
+      // client socket
+#ifndef WIN32
+      if (listeners_ <= 0 && !local_network_interface_.getInterface().empty()) {
+        // bind to local network interface
+        using ifaddrs_uniq_ptr = std::unique_ptr<ifaddrs, utils::ifaddr_deleter>;
+        const auto if_list_ptr = []() -> ifaddrs_uniq_ptr {
+          ifaddrs* list = nullptr;
+          const auto get_ifa_success = getifaddrs(&list) == 0;
+          assert(get_ifa_success || !list);
+          return ifaddrs_uniq_ptr { list };
+        }();
+        if (if_list_ptr) {
+          const auto advance_func = [](const ifaddrs* const p) { return p->ifa_next; };
+          const auto predicate = [this](const ifaddrs* const item) {
+            return item->ifa_addr && item->ifa_name && (item->ifa_addr->sa_family == AF_INET || item->ifa_addr->sa_family == AF_INET6)
+                && item->ifa_name == local_network_interface_.getInterface();
+          };
+          const auto* const itemFound = find_if_custom_linked_list(if_list_ptr.get(), advance_func, predicate);
+          if (itemFound != nullptr) {
+            const auto bind_result = bind(socket_file_descriptor_, itemFound->ifa_addr, sizeof(struct sockaddr_in));
+            if (bind_result < 0)
+              logger_->log_info("Bind to interface %s failed %s", local_network_interface_.getInterface(), strerror(errno));
+            else
+              logger_->log_info("Bind to interface %s", local_network_interface_.getInterface());
+          }
+        }
+      }
+#endif /* !WIN32 */
+
+      const auto connect_result = connect(socket_file_descriptor_, current_addr->ai_addr, current_addr->ai_addrlen);
+      if (connect_result == SOCKET_ERROR) {
+        logger_->log_warn("Couldn't connect to %s:%" PRIu16 ": %s", sockaddr_ntop(current_addr->ai_addr), port_, get_last_err_str());
+        closeStream();
+        continue;
+      }
+
+      logger_->log_info("Connected to %s:%" PRIu16, sockaddr_ntop(current_addr->ai_addr), port_);
+    }
+
+    // Put the socket in non-blocking mode:
+    if (nonBlocking_) {
+#ifndef WIN32
+      if (fcntl(socket_file_descriptor_, F_SETFL, O_NONBLOCK) < 0) {
+        // handle error
+        logger_->log_error("Could not create non blocking to socket", strerror(errno));
+      } else {
+        logger_->log_debug("Successfully applied O_NONBLOCK to fd");
+      }
+#else
+      u_long iMode = 1;
+      if (ioctlsocket(socket_file_descriptor_, FIONBIO, &iMode) == NO_ERROR) {
+        logger_->log_debug("Successfully applied O_NONBLOCK to fd");
+      }
+#endif /* WIN32 */
+    }
+
+    FD_SET(socket_file_descriptor_, &total_list_);
+    socket_max_ = socket_file_descriptor_;
+
+    return 0;
+  }
+  return -1;
+}
+
+int8_t Socket::createConnection(const addrinfo *, ip4addr &addr) {
+  if (!valid_sock_fd(socket_file_descriptor_ = socket(AF_INET, SOCK_STREAM, 0))) {
     logger_->log_error("error while connecting to server socket");
     return -1;
   }
 
   setSocketOptions(socket_file_descriptor_);
+
 
 #ifndef WIN32
   if (listeners_ <= 0 && !local_network_interface_.getInterface().empty()) {
@@ -174,15 +337,17 @@ int8_t Socket::createConnection(const addrinfo *p, ip4addr &addr) {
 #endif /* !WIN32 */
 
   if (listeners_ > 0) {
-    auto *sa_loc = reinterpret_cast<struct sockaddr_in*>(p->ai_addr);
-    sa_loc->sin_family = AF_INET;
-    sa_loc->sin_port = htons(port_);
+    sockaddr_in sa{};
+    memset(&sa, 0, sizeof(struct sockaddr_in));
+    sa.sin_family = AF_INET;
+    sa.sin_port = htons(port_);
     if (is_loopback_only_) {
-      sa_loc->sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+      sa.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
     } else {
-      sa_loc->sin_addr.s_addr = htonl(INADDR_ANY);
+      sa.sin_addr.s_addr = htonl(INADDR_ANY);
     }
-    if (bind(socket_file_descriptor_, p->ai_addr, p->ai_addrlen) == -1) {
+
+    if (bind(socket_file_descriptor_, reinterpret_cast<const sockaddr*>(&sa), sizeof(struct sockaddr_in)) == -1) {
       logger_->log_error("Could not bind to socket, reason %s", get_last_err_str());
       return -1;
     }
@@ -219,21 +384,21 @@ int8_t Socket::createConnection(const addrinfo *p, ip4addr &addr) {
         return -1;
       }
 #else
-      auto *sa_loc = (struct sockaddr_in*) p->ai_addr;
-      sa_loc->sin_family = AF_INET;
-      sa_loc->sin_port = htons(port_);
+      sockaddr_in sa_loc{};
+      sa_loc.sin_family = AF_INET;
+      sa_loc.sin_port = htons(port_);
       // use any address if you are connecting to the local machine for testing
       // otherwise we must use the requested hostname
       if (IsNullOrEmpty(requested_hostname_) || requested_hostname_ == "localhost") {
         if (is_loopback_only_) {
-          sa_loc->sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+          sa_loc.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
         } else {
-          sa_loc->sin_addr.s_addr = htonl(INADDR_ANY);
+          sa_loc.sin_addr.s_addr = htonl(INADDR_ANY);
         }
       } else {
-        sa_loc->sin_addr.s_addr = addr;
+        sa_loc.sin_addr.s_addr = addr;
       }
-      if (connect(socket_file_descriptor_, p->ai_addr, p->ai_addrlen) < 0) {
+      if (connect(socket_file_descriptor_, reinterpret_cast<const sockaddr *>(&sa_loc), sizeof(sockaddr_in)) < 0) {
         closeStream();
         return -1;
       }
@@ -257,73 +422,36 @@ int8_t Socket::createConnection(const addrinfo *p, ip4addr &addr) {
 }
 
 int16_t Socket::initialize() {
-  addrinfo hints = { sizeof(addrinfo) };
+  addrinfo hints{};
   memset(&hints, 0, sizeof hints);  // make sure the struct is empty
   hints.ai_family = AF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_CANONNAME;
-  if (listeners_ > 0)
-    hints.ai_flags |= AI_PASSIVE;
+  if (listeners_ > 0 && !is_loopback_only_)
+    hints.ai_flags = AI_PASSIVE;
   hints.ai_protocol = 0; /* any protocol */
 
+  const char* const gai_node = [this]() -> const char* {
+    if (is_loopback_only_) return "localhost";
+    if (!is_loopback_only_ && listeners_ > 0) return nullptr;  // all non-localhost server sockets listen on wildcard address
+    if (!requested_hostname_.empty()) return requested_hostname_.c_str();
+    return nullptr;
+  }();
+  const auto gai_service = std::to_string(port_);
   addrinfo* getaddrinfo_result = nullptr;
-  const int errcode = getaddrinfo(requested_hostname_.c_str(), nullptr, &hints, &getaddrinfo_result);
+  const int errcode = getaddrinfo(gai_node, gai_service.c_str(), &hints, &getaddrinfo_result);
+  const std::unique_ptr<addrinfo, utils::addrinfo_deleter> addr_info{ getaddrinfo_result };
+  getaddrinfo_result = nullptr;
   if (errcode != 0) {
-    logger_->log_error("Saw error during getaddrinfo, error: %s", get_last_getaddrinfo_err_str(errcode));
+    logger_->log_error("getaddrinfo: %s", get_last_getaddrinfo_err_str(errcode));
     return -1;
   }
-  const std::unique_ptr<addrinfo, addrinfo_deleter> addr_info{ getaddrinfo_result };
-  getaddrinfo_result = nullptr;
   socket_file_descriptor_ = INVALID_SOCKET;
 
-  ip4addr addr;
-  struct hostent *h;
-#if defined(__MACH__) || defined(WIN32)
-  h = gethostbyname(requested_hostname_.c_str());
-#else
-  const char *host;
+  // AI_CANONNAME always sets ai_canonname of the first addrinfo structure
+  canonical_hostname_ = !IsNullOrEmpty(addr_info->ai_canonname) ? addr_info->ai_canonname : requested_hostname_;
 
-  host = requested_hostname_.c_str();
-  char buf[1024];
-  struct hostent he{};
-  int hh_errno;
-  gethostbyname_r(host, &he, buf, sizeof(buf), &h, &hh_errno);
-#endif /* __MACH__ || WIN32 */
-  if (h == nullptr) {
-    logger_->log_error("hostname not defined for %s", requested_hostname_);
-    return -1;
-  }
-  memcpy(reinterpret_cast<char*>(&addr), h->h_addr_list[0], h->h_length);
-
-  for (const auto* p = addr_info.get(); p; p = p->ai_next) {
-    if (IsNullOrEmpty(canonical_hostname_) && !IsNullOrEmpty(p) && !IsNullOrEmpty(p->ai_canonname)) {
-      canonical_hostname_ = p->ai_canonname;
-    }
-    // we've successfully connected
-    if (port_ > 0 && createConnection(p, addr) >= 0) {
-      // Put the socket in non-blocking mode:
-      if (nonBlocking_) {
-#ifndef WIN32
-        if (fcntl(socket_file_descriptor_, F_SETFL, O_NONBLOCK) < 0) {
-          // handle error
-          logger_->log_error("Could not create non blocking to socket", strerror(errno));
-        } else {
-          logger_->log_debug("Successfully applied O_NONBLOCK to fd");
-        }
-#else
-        u_long iMode = 1;
-        if (ioctlsocket(socket_file_descriptor_, FIONBIO, &iMode) == NO_ERROR) {
-          logger_->log_debug("Successfully applied O_NONBLOCK to fd");
-        }
-#endif /* WIN32 */
-      }
-      logger_->log_debug("Successfully created connection");
-      return 0;
-    }
-  }
-
-  logger_->log_debug("Could not find device for our connection");
-  return -1;
+  return port_ > 0 ? createConnection(addr_info.get()) : -1;
 }
 
 int16_t Socket::select_descriptor(const uint16_t msec) {
