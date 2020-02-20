@@ -21,9 +21,8 @@
 #include <string>
 #include <algorithm>
 #include <iterator>
-#include <Exception.h>
 #include <cassert>
-#include <iterator>
+#include <Exception.h>
 
 namespace org {
 namespace apache {
