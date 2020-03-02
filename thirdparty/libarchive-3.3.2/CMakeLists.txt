@@ -96,7 +96,6 @@ IF (CMAKE_C_COMPILER_ID MATCHES "^GNU$")
   #################################################################
   # Set compile flags for debug build.
   # This is added into CMAKE_C_FLAGS when CMAKE_BUILD_TYPE is "Debug"
-  SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Werror")
   SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wextra")
   SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wunused")
   SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wshadow")
@@ -112,7 +111,6 @@ IF (CMAKE_C_COMPILER_ID MATCHES "^Clang$")
   # Set compile flags for debug build.
   # This is added into CMAKE_C_FLAGS when CMAKE_BUILD_TYPE is "Debug"
   SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g")
-  SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Werror")
   SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wextra")
   SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wunused")
   SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wshadow")
@@ -166,7 +164,6 @@ IF (MSVC)
   #                       result of an assignment.
   SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /we4706")
   # /WX option is the same as gcc's -Werror option.
-  SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /WX")
   # /Oi option enables built-in functions.
   SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /Oi")
   #################################################################
@@ -896,7 +893,6 @@ MACRO(CHECK_ICONV LIB TRY_ICONV_CONST)
       # success of iconv detection with a warnig which success is a miss
       # detection. So this needs for all build mode(even it's a release mode).
       #
-      SET(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -Werror")
     ENDIF (CMAKE_C_COMPILER_ID MATCHES "^GNU$" OR
            CMAKE_C_COMPILER_ID MATCHES "^Clang$")
     IF (CMAKE_C_COMPILER_ID MATCHES "^XL$")
@@ -904,7 +900,6 @@ MACRO(CHECK_ICONV LIB TRY_ICONV_CONST)
     ENDIF (CMAKE_C_COMPILER_ID MATCHES "^XL$")
     IF (MSVC)
       # NOTE: /WX option is the same as gcc's -Werror option.
-      SET(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} /WX")
     ENDIF (MSVC)
     #
     CHECK_C_SOURCE_COMPILES(
