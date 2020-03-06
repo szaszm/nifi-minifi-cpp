@@ -25,6 +25,7 @@
 #include "core/ContentRepository.h"
 #include "properties/Configure.h"
 #include "core/logging/LoggerConfiguration.h"
+
 namespace org {
 namespace apache {
 namespace nifi {
@@ -35,11 +36,9 @@ namespace repository {
 class StringAppender : public rocksdb::AssociativeMergeOperator {
  public:
   // Constructor: specify delimiter
-  explicit StringAppender() {
+  explicit StringAppender() = default;
 
-  }
-
-  virtual bool Merge(const rocksdb::Slice& key, const rocksdb::Slice* existing_value, const rocksdb::Slice& value, std::string* new_value, rocksdb::Logger* logger) const {
+  bool Merge(const rocksdb::Slice& key, const rocksdb::Slice* existing_value, const rocksdb::Slice& value, std::string* new_value, rocksdb::Logger* logger) const override {
     // Clear the *new_value for writing.
     if (nullptr == new_value) {
       return false;
@@ -58,54 +57,47 @@ class StringAppender : public rocksdb::AssociativeMergeOperator {
     return true;
   }
 
-  virtual const char* Name() const {
+  const char* Name() const override {
     return "StringAppender";
   }
-
- private:
-
 };
 
 /**
  * DatabaseContentRepository is a content repository that stores data onto the local file system.
  */
-class DatabaseContentRepository : public core::ContentRepository, public core::Connectable {
+class DatabaseContentRepository final : public core::ContentRepository, public core::Connectable {
  public:
 
-  DatabaseContentRepository(std::string name = getClassName<DatabaseContentRepository>(), utils::Identifier uuid = utils::Identifier())
-      : core::Connectable(name, uuid),
-        is_valid_(false),
-        db_(nullptr),
-        logger_(logging::LoggerFactory<DatabaseContentRepository>::getLogger()) {
+  explicit DatabaseContentRepository(const std::string& name = getClassName<DatabaseContentRepository>(), const utils::Identifier& uuid = utils::Identifier())
+      : core::Connectable(name, uuid) {
   }
-  virtual ~DatabaseContentRepository() {
+
+  ~DatabaseContentRepository() final {
     stop();
   }
 
-  virtual bool initialize(const std::shared_ptr<minifi::Configure> &configuration);
+  bool initialize(const std::shared_ptr<minifi::Configure> &configuration) final;
 
-  virtual void stop();
+  void stop() final;
 
-  virtual std::shared_ptr<io::BaseStream> write(const std::shared_ptr<minifi::ResourceClaim> &claim, bool append = false);
+  std::shared_ptr<io::BaseStream> write(const std::shared_ptr<minifi::ResourceClaim> &claim, bool append = false) final;
 
-  virtual std::shared_ptr<io::BaseStream> read(const std::shared_ptr<minifi::ResourceClaim> &claim);
+  std::shared_ptr<io::BaseStream> read(const std::shared_ptr<minifi::ResourceClaim> &claim) final;
 
-  virtual bool close(const std::shared_ptr<minifi::ResourceClaim> &claim) {
+  bool close(const std::shared_ptr<minifi::ResourceClaim> &claim) final {
     return remove(claim);
   }
 
-  virtual bool remove(const std::shared_ptr<minifi::ResourceClaim> &claim);
+  bool remove(const std::shared_ptr<minifi::ResourceClaim> &claim) final;
 
-  virtual bool exists(const std::shared_ptr<minifi::ResourceClaim> &streamId);
+  bool exists(const std::shared_ptr<minifi::ResourceClaim> &streamId) final;
 
-  virtual void yield() {
-
-  }
+  void yield() final { }
 
   /**
    * Determines if we are connected and operating
    */
-  virtual bool isRunning() {
+  bool isRunning() final {
     return true;
   }
 
@@ -113,14 +105,14 @@ class DatabaseContentRepository : public core::ContentRepository, public core::C
    * Determines if work is available by this connectable
    * @return boolean if work is available.
    */
-  virtual bool isWorkAvailable() {
+  bool isWorkAvailable() final {
     return true;
   }
 
  private:
-  bool is_valid_;
-  rocksdb::DB* db_;
-  std::shared_ptr<logging::Logger> logger_;
+  bool is_valid_{ false };
+  rocksdb::DB* db_{ nullptr };
+  std::shared_ptr<logging::Logger> logger_{ logging::LoggerFactory<DatabaseContentRepository>::getLogger() };
 };
 
 } /* namespace repository */

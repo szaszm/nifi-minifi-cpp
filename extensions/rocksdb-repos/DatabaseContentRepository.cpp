@@ -30,16 +30,23 @@ namespace core {
 namespace repository {
 
 bool DatabaseContentRepository::initialize(const std::shared_ptr<minifi::Configure> &configuration) {
-  std::string value;
-  if (configuration->get(Configure::nifi_dbcontent_repository_directory_default, value)) {
-    directory_ = value;
-  } else {
-    directory_ = configuration->getHome() + "/dbcontentrepository";
+  {
+    std::string default_directory;
+    if (configuration->get(Configure::nifi_dbcontent_repository_directory_default, default_directory)) {
+        directory_ = default_directory;
+    } else {
+        directory_ = configuration->getHome() + "/dbcontentrepository";
+    }
   }
+  const bool use_direct_io = [&configuration] {
+    std::string use_direct_io_str{ "true" };
+    configuration->get(Configure::nifi_dbcontent_repository_use_direct_io, use_direct_io_str);
+    return use_direct_io_str != "false";
+  }();
   rocksdb::Options options;
   options.create_if_missing = true;
-  options.use_direct_io_for_flush_and_compaction = true;
-  options.use_direct_reads = true;
+  options.use_direct_io_for_flush_and_compaction = use_direct_io;
+  options.use_direct_reads = use_direct_io;
   options.merge_operator = std::make_shared<StringAppender>();
   options.error_if_exists = false;
   options.max_successive_merges = 0;

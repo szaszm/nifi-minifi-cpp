@@ -48,6 +48,7 @@ const char *Configure::nifi_flowfile_repository_max_storage_size = "nifi.flowfil
 const char *Configure::nifi_flowfile_repository_max_storage_time = "nifi.flowfile.repository.max.storage.time";
 const char *Configure::nifi_flowfile_repository_directory_default = "nifi.flowfile.repository.directory.default";
 const char *Configure::nifi_dbcontent_repository_directory_default = "nifi.database.content.repository.directory.default";
+const char *Configure::nifi_dbcontent_repository_use_direct_io = "nifi.database.content.repository.use.direct.io";
 const char *Configure::nifi_remote_input_secure = "nifi.remote.input.secure";
 const char *Configure::nifi_remote_input_http = "nifi.remote.input.http.enabled";
 const char *Configure::nifi_security_need_ClientAuth = "nifi.security.need.ClientAuth";

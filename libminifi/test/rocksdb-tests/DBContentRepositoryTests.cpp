@@ -28,11 +28,12 @@
 TEST_CASE("Write Claim", "[TestDBCR1]") {
   TestController testController;
   char format[] = "/tmp/testRepo.XXXXXX";
-auto dir = testController.createTempDirectory(format);
+  auto dir = testController.createTempDirectory(format);
   auto content_repo = std::make_shared<core::repository::DatabaseContentRepository>();
 
   auto configuration = std::make_shared<org::apache::nifi::minifi::Configure>();
   configuration->set(minifi::Configure::nifi_dbcontent_repository_directory_default, dir);
+  configuration->set(minifi::Configure::nifi_dbcontent_repository_use_direct_io, "false");
   REQUIRE(true == content_repo->initialize(configuration));
 
 
@@ -51,6 +52,7 @@ auto dir = testController.createTempDirectory(format);
 
   configuration = std::make_shared<org::apache::nifi::minifi::Configure>();
   configuration->set(minifi::Configure::nifi_dbcontent_repository_directory_default, dir);
+  configuration->set(minifi::Configure::nifi_dbcontent_repository_use_direct_io, "false");
   REQUIRE(true == content_repo->initialize(configuration));
 
   auto read_stream = content_repo->read(claim);
@@ -74,6 +76,7 @@ auto dir = testController.createTempDirectory(format);
 
   auto configuration = std::make_shared<org::apache::nifi::minifi::Configure>();
   configuration->set(minifi::Configure::nifi_dbcontent_repository_directory_default, dir);
+  configuration->set(minifi::Configure::nifi_dbcontent_repository_use_direct_io, "false");
   REQUIRE(true == content_repo->initialize(configuration));
 
 
@@ -93,6 +96,7 @@ auto dir = testController.createTempDirectory(format);
 
   configuration = std::make_shared<org::apache::nifi::minifi::Configure>();
   configuration->set(minifi::Configure::nifi_dbcontent_repository_directory_default, dir);
+  configuration->set(minifi::Configure::nifi_dbcontent_repository_use_direct_io, "false");
   REQUIRE(true == content_repo->initialize(configuration));
 
   content_repo->remove(claim);
@@ -113,6 +117,7 @@ auto dir = testController.createTempDirectory(format);
 
   auto configuration = std::make_shared<org::apache::nifi::minifi::Configure>();
   configuration->set(minifi::Configure::nifi_dbcontent_repository_directory_default, dir);
+  configuration->set(minifi::Configure::nifi_dbcontent_repository_use_direct_io, "false");
   REQUIRE(true == content_repo->initialize(configuration));
 
   auto claim = std::make_shared<minifi::ResourceClaim>(content_repo);
@@ -131,6 +136,7 @@ auto dir = testController.createTempDirectory(format);
 
   configuration = std::make_shared<org::apache::nifi::minifi::Configure>();
   configuration->set(minifi::Configure::nifi_dbcontent_repository_directory_default, dir);
+  configuration->set(minifi::Configure::nifi_dbcontent_repository_use_direct_io, "false");
   REQUIRE(true == content_repo->initialize(configuration));
 
   auto read_stream = content_repo->read(claim);
@@ -149,6 +155,7 @@ auto dir = testController.createTempDirectory(format);
 
   auto configuration = std::make_shared<org::apache::nifi::minifi::Configure>();
   configuration->set(minifi::Configure::nifi_dbcontent_repository_directory_default, dir);
+  configuration->set(minifi::Configure::nifi_dbcontent_repository_use_direct_io, "false");
   REQUIRE(true == content_repo->initialize(configuration));
 
 
@@ -170,6 +177,7 @@ auto dir = testController.createTempDirectory(format);
 
   auto configuration = std::make_shared<org::apache::nifi::minifi::Configure>();
   configuration->set(minifi::Configure::nifi_dbcontent_repository_directory_default, dir);
+  configuration->set(minifi::Configure::nifi_dbcontent_repository_use_direct_io, "false");
   REQUIRE(true == content_repo->initialize(configuration));
 
   auto claim = std::make_shared<minifi::ResourceClaim>(content_repo);
@@ -188,6 +196,7 @@ auto dir = testController.createTempDirectory(format);
 
   configuration = std::make_shared<org::apache::nifi::minifi::Configure>();
   configuration->set(minifi::Configure::nifi_dbcontent_repository_directory_default, dir);
+  configuration->set(minifi::Configure::nifi_dbcontent_repository_use_direct_io, "false");
   REQUIRE(true == content_repo->initialize(configuration));
 
   REQUIRE(false == content_repo->remove(nullptr));
@@ -210,6 +219,7 @@ auto dir = testController.createTempDirectory(format);
 
   auto configuration = std::make_shared<org::apache::nifi::minifi::Configure>();
   configuration->set(minifi::Configure::nifi_dbcontent_repository_directory_default, dir);
+  configuration->set(minifi::Configure::nifi_dbcontent_repository_use_direct_io, "false");
   REQUIRE(true == content_repo->initialize(configuration));
 
   auto claim = std::make_shared<minifi::ResourceClaim>(content_repo);
@@ -229,6 +239,7 @@ auto dir = testController.createTempDirectory(format);
 
   configuration = std::make_shared<org::apache::nifi::minifi::Configure>();
   configuration->set(minifi::Configure::nifi_dbcontent_repository_directory_default, dir);
+  configuration->set(minifi::Configure::nifi_dbcontent_repository_use_direct_io, "false");
   REQUIRE(true == content_repo->initialize(configuration));
 
   // we won't complain if it does not exist
@@ -252,7 +263,8 @@ auto dir = testController.createTempDirectory(format);
 
   auto configuration = std::make_shared<org::apache::nifi::minifi::Configure>();
   configuration->set(minifi::Configure::nifi_dbcontent_repository_directory_default, dir);
-  REQUIRE(true == content_repo->initialize(configuration));
+  configuration->set(minifi::Configure::nifi_dbcontent_repository_use_direct_io, "false");
+  REQUIRE(content_repo->initialize(configuration));
 
   auto claim = std::make_shared<minifi::ResourceClaim>(content_repo);
   auto claim2 = std::make_shared<minifi::ResourceClaim>(content_repo);
@@ -271,6 +283,7 @@ auto dir = testController.createTempDirectory(format);
 
   configuration = std::make_shared<org::apache::nifi::minifi::Configure>();
   configuration->set(minifi::Configure::nifi_dbcontent_repository_directory_default, dir);
+  configuration->set(minifi::Configure::nifi_dbcontent_repository_use_direct_io, "false");
   REQUIRE(true == content_repo->initialize(configuration));
 
   // increment twice. verify we have 2 for the stream count
