@@ -25,6 +25,7 @@
 #include <map>
 #include <memory>
 #include <set>
+#include <type_traits>
 
 #define DEFAULT_DYNAMIC_PROPERTY_DESC "Dynamic Property"
 
@@ -190,6 +191,8 @@ class ConfigurableComponent {
    * @return true/false
    */
   virtual bool canEdit()= 0;
+
+  bool canEdit() const { return const_cast<std::remove_const<std::remove_pointer<decltype(this)>::type>::type*>(this)->canEdit(); }
 
   mutable std::mutex configuration_mutex_;
 

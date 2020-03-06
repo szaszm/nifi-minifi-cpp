@@ -24,6 +24,8 @@
 #include "rocksdb/slice.h"
 #include "rocksdb/utilities/checkpoint.h"
 #include "core/Repository.h"
+
+#include <utility>
 #include "core/Core.h"
 #include "Connection.h"
 #include "core/logging/LoggerConfiguration.h"
@@ -56,29 +58,24 @@ class FlowFileRepository : public core::Repository, public std::enable_shared_fr
  public:
   // Constructor
 
-  FlowFileRepository(std::string name, utils::Identifier uuid)
-      : FlowFileRepository(name) {
+  FlowFileRepository(const std::string& repo_name, const utils::Identifier&)
+      : FlowFileRepository(repo_name) {
   }
 
-  FlowFileRepository(const std::string repo_name = "", std::string directory = FLOWFILE_REPOSITORY_DIRECTORY, int64_t maxPartitionMillis = MAX_FLOWFILE_REPOSITORY_ENTRY_LIFE_TIME,
+  FlowFileRepository(const std::string& repo_name = "", std::string directory = FLOWFILE_REPOSITORY_DIRECTORY, int64_t maxPartitionMillis = MAX_FLOWFILE_REPOSITORY_ENTRY_LIFE_TIME,
                      int64_t maxPartitionBytes = MAX_FLOWFILE_REPOSITORY_STORAGE_SIZE, uint64_t purgePeriod = FLOWFILE_REPOSITORY_PURGE_PERIOD)
       : core::SerializableComponent(repo_name),
         Repository(repo_name.length() > 0 ? repo_name : core::getClassName<FlowFileRepository>(), directory, maxPartitionMillis, maxPartitionBytes, purgePeriod),
         content_repo_(nullptr),
         checkpoint_(nullptr),
         logger_(logging::LoggerFactory<FlowFileRepository>::getLogger()) {
-    db_ = NULL;
+    db_ = nullptr;
   }
 
   // Destructor
-  ~FlowFileRepository() {
-    if (db_)
-      delete db_;
-  }
+  ~FlowFileRepository() = default;
 
-  virtual bool isNoop() {
-    return false;
-  }
+  virtual bool isNoop() { return false; }
 
   virtual void flush();
 
@@ -116,7 +113,9 @@ class FlowFileRepository : public core::Repository, public std::enable_shared_fr
     options.write_buffer_size = 8 << 20;
     options.max_write_buffer_number = 20;
     options.min_write_buffer_number_to_merge = 1;
-    rocksdb::Status status = rocksdb::DB::Open(options, directory_, &db_);
+    rocksdb::DB* db;
+    rocksdb::Status status = rocksdb::DB::Open(options, directory_, &db);
+    db_ = std::unique_ptr<rocksdb::DB>{ db };
     if (status.ok()) {
       logger_->log_debug("NiFi FlowFile Repository database open %s success", directory_);
     } else {
@@ -203,7 +202,7 @@ class FlowFileRepository : public core::Repository, public std::enable_shared_fr
 
   moodycamel::ConcurrentQueue<std::string> keys_to_delete;
   std::shared_ptr<core::ContentRepository> content_repo_;
-  rocksdb::DB* db_;
+  std::unique_ptr<rocksdb::DB> db_;
   std::unique_ptr<rocksdb::Checkpoint> checkpoint_;
   std::shared_ptr<logging::Logger> logger_;
 };

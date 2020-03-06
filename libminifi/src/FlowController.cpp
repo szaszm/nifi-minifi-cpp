@@ -21,6 +21,7 @@
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <utility>
 #include <vector>
 #include <queue>
 #include <map>
@@ -28,7 +29,6 @@
 #include <chrono>
 #include <future>
 #include <thread>
-#include <utility>
 #include <memory>
 #include <string>
 
@@ -71,7 +71,7 @@ std::shared_ptr<utils::IdGenerator> FlowController::id_generator_ = utils::IdGen
 #define DEFAULT_CONFIG_NAME "conf/config.yml"
 
 FlowController::FlowController(std::shared_ptr<core::Repository> provenance_repo, std::shared_ptr<core::Repository> flow_file_repo, std::shared_ptr<Configure> configure,
-                               std::unique_ptr<core::FlowConfiguration> flow_configuration, std::shared_ptr<core::ContentRepository> content_repo, const std::string name, bool headless_mode)
+                               std::unique_ptr<core::FlowConfiguration> flow_configuration, std::shared_ptr<core::ContentRepository> content_repo, const std::string& name, bool headless_mode)
     : core::controller::ControllerServiceProvider(core::getClassName<FlowController>()),
       root_(nullptr),
       max_timer_driven_threads_(0),
@@ -80,25 +80,22 @@ FlowController::FlowController(std::shared_ptr<core::Repository> provenance_repo
       updating_(false),
       c2_enabled_(true),
       initialized_(false),
-      provenance_repo_(provenance_repo),
-      flow_file_repo_(flow_file_repo),
-      protocol_(0),
+      provenance_repo_(std::move(provenance_repo)),
+      flow_file_repo_(std::move(flow_file_repo)),
+      protocol_(nullptr),
       controller_service_map_(std::make_shared<core::controller::ControllerServiceMap>()),
       timer_scheduler_(nullptr),
       event_scheduler_(nullptr),
       cron_scheduler_(nullptr),
       controller_service_provider_(nullptr),
       flow_configuration_(std::move(flow_configuration)),
-      configuration_(configure),
-      content_repo_(content_repo),
+      configuration_(std::move(configure)),
+      content_repo_(std::move(content_repo)),
       logger_(logging::LoggerFactory<FlowController>::getLogger()) {
-  if (provenance_repo == nullptr)
-    throw std::runtime_error("Provenance Repo should not be null");
-  if (flow_file_repo == nullptr)
-    throw std::runtime_error("Flow Repo should not be null");
-  if (IsNullOrEmpty(configuration_)) {
-    throw std::runtime_error("Must supply a configuration.");
-  }
+  if (provenance_repo_ == nullptr) throw std::runtime_error("Provenance Repo should not be null");
+  if (flow_file_repo_ == nullptr) throw std::runtime_error("Flow Repo should not be null");
+  if (IsNullOrEmpty(configuration_)) throw std::runtime_error("Must supply a configuration.");
+
   id_generator_->generate(uuid_);
   setUUID(uuid_);
 
@@ -114,11 +111,11 @@ FlowController::FlowController(std::shared_ptr<core::Repository> provenance_repo
   c2_initialized_ = false;
   root_ = nullptr;
 
-  protocol_ = new FlowControlProtocol(this, configure);
+  protocol_ = new FlowControlProtocol(this, configuration_);
 
   if (!headless_mode) {
     std::string rawConfigFileString;
-    configure->get(Configure::nifi_flow_configuration_file, rawConfigFileString);
+    configuration_->get(Configure::nifi_flow_configuration_file, rawConfigFileString);
 
     if (!rawConfigFileString.empty()) {
       configuration_filename_ = rawConfigFileString;
@@ -128,7 +125,7 @@ FlowController::FlowController(std::shared_ptr<core::Repository> provenance_repo
     if (!configuration_filename_.empty()) {
       // perform a naive determination if this is a relative path
       if (configuration_filename_.c_str()[0] != '/') {
-        adjustedFilename = adjustedFilename + configure->getHome() + "/" + configuration_filename_;
+        adjustedFilename = adjustedFilename + configuration_->getHome() + "/" + configuration_filename_;
       } else {
         adjustedFilename = configuration_filename_;
       }
@@ -153,7 +150,7 @@ void FlowController::initializeExternalComponents() {
 }
 
 void FlowController::initializePaths(const std::string &adjustedFilename) {
-  char *path = NULL;
+  char *path = nullptr;
 #ifndef WIN32
   char full_path[PATH_MAX];
   path = realpath(adjustedFilename.c_str(), full_path);
@@ -161,24 +158,18 @@ void FlowController::initializePaths(const std::string &adjustedFilename) {
   path = const_cast<char*>(adjustedFilename.c_str());
 #endif
 
-  if (path == NULL) {
+  if (path == nullptr) {
     throw std::runtime_error("Path is not specified. Either manually set MINIFI_HOME or ensure ../conf exists");
   }
   std::string pathString(path);
   configuration_filename_ = pathString;
   logger_->log_info("FlowController NiFi Configuration file %s", pathString);
-
-  if (!path) {
-    logger_->log_error("Could not locate path from provided configuration file name (%s).  Exiting.", path);
-    exit(1);
-  }
 }
 
 FlowController::~FlowController() {
   stop(true);
   unload();
-  if (NULL != protocol_)
-    delete protocol_;
+  delete protocol_;
   flow_file_repo_ = nullptr;
   provenance_repo_ = nullptr;
 }
@@ -285,8 +276,6 @@ void FlowController::unload() {
     initialized_ = false;
     name_ = "";
   }
-
-  return;
 }
 
 void FlowController::load(const std::shared_ptr<core::ProcessGroup> &root, bool reload) {
@@ -472,7 +461,7 @@ void FlowController::initializeC2() {
 
     std::map<std::string, std::shared_ptr<Connection>> connections;
     root_->getConnections(connections);
-    for (auto con : connections) {
+    for (const auto& con : connections) {
       queueMetrics->addConnection(con.second);
     }
     device_information_[queueMetrics->getName()] = queueMetrics;
@@ -488,7 +477,7 @@ void FlowController::initializeC2() {
   if (configuration_->get("nifi.c2.root.classes", class_csv)) {
     std::vector<std::string> classes = utils::StringUtils::split(class_csv, ",");
 
-    for (std::string clazz : classes) {
+    for (const std::string& clazz : classes) {
       auto ptr = core::ClassLoader::getDefaultClassLoader().instantiate(clazz, clazz);
 
       if (nullptr == ptr) {
@@ -517,7 +506,7 @@ void FlowController::initializeC2() {
       std::map<std::string, std::shared_ptr<Connection>> connections;
       root_->getConnections(connections);
       if (flowMonitor != nullptr) {
-        for (auto con : connections) {
+        for (const auto& con : connections) {
           flowMonitor->addConnection(con.second);
         }
         flowMonitor->setStateMonitor(shared_from_this());
@@ -534,7 +523,7 @@ void FlowController::initializeC2() {
   if (configuration_->get("nifi.flow.metrics.classes", class_csv)) {
     std::vector<std::string> classes = utils::StringUtils::split(class_csv, ",");
 
-    for (std::string clazz : classes) {
+    for (const std::string& clazz : classes) {
       auto ptr = core::ClassLoader::getDefaultClassLoader().instantiate(clazz, clazz);
 
       if (nullptr == ptr) {
@@ -561,7 +550,7 @@ void FlowController::initializeC2() {
       if (nullptr != rep) {
         std::vector<std::shared_ptr<state::response::ResponseNode>> metric_vector;
         rep->getResponseNodes(metric_vector);
-        for (auto metric : metric_vector) {
+        for (const auto& metric : metric_vector) {
           component_metrics_[metric->getName()] = metric;
         }
       }
@@ -572,7 +561,7 @@ void FlowController::initializeC2() {
   if (configuration_->get("nifi.flow.metrics.class.definitions", class_definitions)) {
     std::vector<std::string> classes = utils::StringUtils::split(class_definitions, ",");
 
-    for (std::string metricsClass : classes) {
+    for (const std::string& metricsClass : classes) {
       try {
         int id = std::stoi(metricsClass);
         std::stringstream option;
@@ -580,7 +569,7 @@ void FlowController::initializeC2() {
         if (configuration_->get(option.str(), class_definitions)) {
           std::vector<std::string> classes = utils::StringUtils::split(class_definitions, ",");
 
-          for (std::string clazz : classes) {
+          for (const std::string& clazz : classes) {
             std::lock_guard<std::mutex> lock(metrics_mutex_);
             auto ret = component_metrics_[clazz];
             if (nullptr == ret) {
@@ -608,7 +597,7 @@ void FlowController::loadC2ResponseConfiguration(const std::string &prefix) {
   if (configuration_->get(prefix, class_definitions)) {
     std::vector<std::string> classes = utils::StringUtils::split(class_definitions, ",");
 
-    for (std::string metricsClass : classes) {
+    for (const std::string& metricsClass : classes) {
       try {
         std::stringstream option;
         option << prefix << "." << metricsClass;
@@ -626,7 +615,7 @@ void FlowController::loadC2ResponseConfiguration(const std::string &prefix) {
           if (configuration_->get(classOption.str(), class_definitions)) {
             std::vector<std::string> classes = utils::StringUtils::split(class_definitions, ",");
 
-            for (std::string clazz : classes) {
+            for (const std::string& clazz : classes) {
               std::lock_guard<std::mutex> lock(metrics_mutex_);
 
               // instantiate the object
@@ -669,7 +658,7 @@ std::shared_ptr<state::response::ResponseNode> FlowController::loadC2ResponseCon
   if (configuration_->get(prefix, class_definitions)) {
     std::vector<std::string> classes = utils::StringUtils::split(class_definitions, ",");
 
-    for (std::string metricsClass : classes) {
+    for (const std::string& metricsClass : classes) {
       try {
         std::stringstream option;
         option << prefix << "." << metricsClass;
@@ -683,9 +672,9 @@ std::shared_ptr<state::response::ResponseNode> FlowController::loadC2ResponseCon
 
         if (configuration_->get(nameOption.str(), name)) {
           std::shared_ptr<state::response::ResponseNode> new_node = std::make_shared<state::response::ObjectNode>(name);
-          if (name.find(",") != std::string::npos) {
+          if (name.find(',') != std::string::npos) {
             std::vector<std::string> sub_classes = utils::StringUtils::split(name, ",");
-            for (std::string subClassStr : classes) {
+            for (const std::string& subClassStr : classes) {
               auto node = loadC2ResponseConfiguration(subClassStr, prev_node);
               if (node != nullptr)
                 std::static_pointer_cast<state::response::ObjectNode>(prev_node)->add_node(node);
@@ -695,7 +684,7 @@ std::shared_ptr<state::response::ResponseNode> FlowController::loadC2ResponseCon
             if (configuration_->get(classOption.str(), class_definitions)) {
               std::vector<std::string> classes = utils::StringUtils::split(class_definitions, ",");
 
-              for (std::string clazz : classes) {
+              for (const std::string& clazz : classes) {
                 std::lock_guard<std::mutex> lock(metrics_mutex_);
 
                 // instantiate the object

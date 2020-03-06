@@ -88,7 +88,7 @@ class SecureSocketTest : public IntegrationBase {
     std::shared_ptr<minifi::processors::GetTCP> inv = std::dynamic_pointer_cast<minifi::processors::GetTCP>(proc);
 
     assert(inv != nullptr);
-    std::string url = "";
+    std::string url;
     configuration->set("nifi.remote.input.secure", "true");
     std::string path = key_dir + "cn.crt.pem";
     configuration->set("nifi.security.client.certificate", path);

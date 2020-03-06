@@ -53,7 +53,7 @@ namespace controllers {
  * controller service within the execute java process.
  *
  */
-class ExecuteJavaControllerService : public ConfigurationContext, public std::enable_shared_from_this<ConfigurationContext> {
+class ExecuteJavaControllerService : public ConfigurationContext, public std::enable_shared_from_this<ExecuteJavaControllerService> {
  public:
 
   // Constructor
@@ -80,24 +80,24 @@ class ExecuteJavaControllerService : public ConfigurationContext, public std::en
   static core::Property NiFiControllerService;
   // Supported Relationships
 
-  virtual void onEnable() override;
-  virtual void initialize() override;
-  virtual bool supportsDynamicProperties() override {
+  void onEnable() override;
+  void initialize() override;
+  bool supportsDynamicProperties() override {
     return true;
   }
 
-  virtual void yield() override {
+  void yield() override {
   }
 
-  virtual bool isRunning() override {
+  bool isRunning() override {
     return getState() == core::controller::ControllerServiceState::ENABLED;
   }
 
-  virtual bool isWorkAvailable() override {
+  bool isWorkAvailable() override {
     return false;
   }
 
-  virtual void notifyStop() override {
+  void notifyStop() override {
     auto env = java_servicer_->attach();
     auto onEnabledName = java_servicer_->getAnnotation(class_name_, "OnDisabled");
     current_cs_class = java_servicer_->getObjectClass(class_name_, clazzInstance);
@@ -116,7 +116,7 @@ class ExecuteJavaControllerService : public ConfigurationContext, public std::en
       env->DeleteGlobalRef(contextInstance);
   }
 
-  virtual jobject getClassInstance() override {
+  jobject getClassInstance() override {
     return clazzInstance;
   }
 

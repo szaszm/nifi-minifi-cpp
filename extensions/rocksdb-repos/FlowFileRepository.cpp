@@ -28,7 +28,7 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <list>
+#include <algorithm>
 
 namespace org {
 namespace apache {
@@ -44,7 +44,7 @@ void FlowFileRepository::flush() {
   std::vector<std::shared_ptr<FlowFileRecord>> purgeList;
 
   std::vector<rocksdb::Slice> keys;
-  std::list<std::string> keystrings;
+  std::vector<std::string> keystrings;
   std::vector<std::string> values;
 
   while (keys_to_delete.size_approx() > 0) {
@@ -55,16 +55,22 @@ void FlowFileRepository::flush() {
     }
   }
 
-  auto multistatus = db_->MultiGet(options, keys, &values);
+  const auto multistatus = db_->MultiGet(options, keys, &values);
 
+  assert(keys.size() == values.size() && values.size() == multistatus.size());
   for(size_t i=0; i<keys.size() && i<values.size() && i<multistatus.size(); ++i) {
     if(!multistatus[i].ok()) {
+      using std::begin;
+      using std::end;
       logger_->log_error("Failed to read key from rocksdb: %s! DB is most probably in an inconsistent state!", keys[i].data());
-      keystrings.remove(keys[i].data());
+#if defined(DEBUG) || !defined(NDEBUG)
+      std::abort();
+#endif /* DEBUG || !NDEBUG */
+      keystrings.erase(std::remove(begin(keystrings), end(keystrings), keys[i].data()), end(keystrings));
       continue;
     }
 
-    std::shared_ptr<FlowFileRecord> eventRead = std::make_shared<FlowFileRecord>(shared_from_this(), content_repo_);
+    const auto eventRead = std::make_shared<FlowFileRecord>(shared_from_this(), content_repo_);
     if (eventRead->DeSerialize(reinterpret_cast<const uint8_t *>(values[i].data()), values[i].size())) {
       purgeList.push_back(eventRead);
     }
@@ -72,9 +78,7 @@ void FlowFileRepository::flush() {
     batch.Delete(keys[i]);
   }
 
-  auto operation = [this, &batch]() { return db_->Write(rocksdb::WriteOptions(), &batch); };
-
-  if (!ExecuteWithRetry(operation)) {
+  if (!ExecuteWithRetry([this, &batch]() { return db_->Write(rocksdb::WriteOptions(), &batch); })) {
     for (const auto& key: keystrings) {
       keys_to_delete.enqueue(key);  // Push back the values that we could get but couldn't delete
     }
@@ -122,11 +126,10 @@ void FlowFileRepository::run() {
 }
 
 void FlowFileRepository::prune_stored_flowfiles() {
-  rocksdb::DB* stored_database_ = nullptr;
+  rocksdb::DB* stored_database_ = nullptr;  // owner by default, becomes observer if db_ if rocksdb::DB::OpenForReadOnly fails
   utils::ScopeGuard db_guard([&stored_database_]() {
     delete stored_database_;
   });
-  bool corrupt_checkpoint = false;
   if (nullptr != checkpoint_) {
     rocksdb::Options options;
     options.create_if_missing = true;
@@ -134,7 +137,7 @@ void FlowFileRepository::prune_stored_flowfiles() {
     options.use_direct_reads = true;
     rocksdb::Status status = rocksdb::DB::OpenForReadOnly(options, FLOWFILE_CHECKPOINT_DIRECTORY, &stored_database_);
     if (!status.ok()) {
-      stored_database_ = db_;
+      stored_database_ = db_.get();
       db_guard.disable();
     }
   } else {
@@ -142,24 +145,22 @@ void FlowFileRepository::prune_stored_flowfiles() {
     return;
   }
 
-  rocksdb::Iterator* it = stored_database_->NewIterator(rocksdb::ReadOptions());
+  const std::unique_ptr<rocksdb::Iterator> it{ stored_database_->NewIterator(rocksdb::ReadOptions()) };
   for (it->SeekToFirst(); it->Valid(); it->Next()) {
-    std::shared_ptr<FlowFileRecord> eventRead = std::make_shared<FlowFileRecord>(shared_from_this(), content_repo_);
-    std::string key = it->key().ToString();
+    const auto eventRead = std::make_shared<FlowFileRecord>(shared_from_this(), content_repo_);
+    const auto key = it->key().ToString();
     if (eventRead->DeSerialize(reinterpret_cast<const uint8_t *>(it->value().data()), it->value().size())) {
       logger_->log_debug("Found connection for %s, path %s ", eventRead->getConnectionUuid(), eventRead->getContentFullPath());
-      auto search = connectionMap.find(eventRead->getConnectionUuid());
-      if (!corrupt_checkpoint && search != connectionMap.end()) {
+      const auto search = connectionMap.find(eventRead->getConnectionUuid());
+      if (search != connectionMap.end()) {
         // we find the connection for the persistent flowfile, create the flowfile and enqueue that
-        std::shared_ptr<core::FlowFile> flow_file_ref = std::static_pointer_cast<core::FlowFile>(eventRead);
+        std::shared_ptr<core::FlowFile> flow_file_ref = eventRead;
         eventRead->setStoredToRepository(true);
         search->second->put(eventRead);
       } else {
         logger_->log_warn("Could not find connection for %s, path %s ", eventRead->getConnectionUuid(), eventRead->getContentFullPath());
-        if (eventRead->getContentFullPath().length() > 0) {
-          if (nullptr != eventRead->getResourceClaim()) {
-            content_repo_->remove(eventRead->getResourceClaim());
-          }
+        if (eventRead->getContentFullPath().length() > 0 && nullptr != eventRead->getResourceClaim()) {
+          content_repo_->remove(eventRead->getResourceClaim());
         }
         keys_to_delete.enqueue(key);
       }
@@ -167,14 +168,12 @@ void FlowFileRepository::prune_stored_flowfiles() {
       keys_to_delete.enqueue(key);
     }
   }
-
-  delete it;
 }
 
 bool FlowFileRepository::ExecuteWithRetry(std::function<rocksdb::Status()> operation) {
   int waitTime = 0;
   for (int i=0; i<3; ++i) {
-    auto status = operation();
+    const auto status = operation();
     if (status.ok()) {
       logger_->log_trace("Rocksdb operation executed successfully");
       return true;
@@ -191,12 +190,11 @@ bool FlowFileRepository::ExecuteWithRetry(std::function<rocksdb::Status()> opera
  * @return true if our db has data stored.
  */
 bool FlowFileRepository::need_checkpoint(){
-  std::unique_ptr<rocksdb::Iterator> it = std::unique_ptr<rocksdb::Iterator>(db_->NewIterator(rocksdb::ReadOptions()));
-  for (it->SeekToFirst(); it->Valid(); it->Next()) {
-    return true;
-  }
-  return false;
+  const auto it = std::unique_ptr<rocksdb::Iterator>(db_->NewIterator(rocksdb::ReadOptions()));
+  it->SeekToFirst();
+  return it->Valid();
 }
+
 void FlowFileRepository::initialize_repository() {
   // first we need to establish a checkpoint iff it is needed.
   if (!need_checkpoint()){
@@ -205,15 +203,18 @@ void FlowFileRepository::initialize_repository() {
   }
   rocksdb::Checkpoint *checkpoint;
   // delete any previous copy
-  if (utils::file::FileUtils::delete_dir(FLOWFILE_CHECKPOINT_DIRECTORY) >= 0 && rocksdb::Checkpoint::Create(db_, &checkpoint).ok()) {
+  if (utils::file::FileUtils::delete_dir(FLOWFILE_CHECKPOINT_DIRECTORY) >= 0 && rocksdb::Checkpoint::Create(db_.get(), &checkpoint).ok()) {
     if (checkpoint->CreateCheckpoint(FLOWFILE_CHECKPOINT_DIRECTORY).ok()) {
       checkpoint_ = std::unique_ptr<rocksdb::Checkpoint>(checkpoint);
       logger_->log_trace("Created checkpoint directory");
     } else {
-      logger_->log_trace("Could not create checkpoint. Corrupt?");
+      logger_->log_warn("Could not create checkpoint. Corrupt?");
+      std::abort();
     }
-  } else
-    logger_->log_trace("Could not create checkpoint directory. Not properly deleted?");
+  } else {
+    logger_->log_warn("Could not create checkpoint directory. Not properly deleted?");
+    std::abort();
+  }
 }
 
 void FlowFileRepository::loadComponent(const std::shared_ptr<core::ContentRepository> &content_repo) {

@@ -39,8 +39,7 @@
 #include "cxxopts.hpp"
 
 int main(int argc, char **argv) {
-
-  std::shared_ptr<logging::Logger> logger = logging::LoggerConfiguration::getConfiguration().getLogger("controller");
+  const auto logger = logging::LoggerConfiguration::getConfiguration().getLogger("controller");
 
   const std::string minifiHome = determineMinifiHome(logger);
   if (minifiHome.empty()) {
@@ -48,22 +47,20 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  std::shared_ptr<minifi::Configure> configuration = std::make_shared<minifi::Configure>();
+  const auto configuration = std::make_shared<minifi::Configure>();
   configuration->setHome(minifiHome);
   configuration->loadConfigureFile(DEFAULT_NIFI_PROPERTIES_FILE);
 
-  std::shared_ptr<logging::LoggerProperties> log_properties = std::make_shared<logging::LoggerProperties>();
+  const auto log_properties = std::make_shared<logging::LoggerProperties>();
   log_properties->setHome(minifiHome);
   log_properties->loadConfigureFile(DEFAULT_LOG_PROPERTIES_FILE);
   logging::LoggerConfiguration::getConfiguration().initialize(log_properties);
 
-  std::string context_name;
-
-  std::shared_ptr<minifi::controllers::SSLContextService> secure_context = nullptr;
-
   // if the user wishes to use a controller service we need to instantiate the flow
+  std::string context_name;
+  std::shared_ptr<minifi::controllers::SSLContextService> secure_context;
   if (configuration->get("controller.ssl.context.service", context_name)) {
-    std::shared_ptr<core::controller::ControllerService> service = getControllerService(configuration, context_name);
+    const auto service = getControllerService(configuration, context_name);
     if (nullptr != service) {
       secure_context = std::static_pointer_cast<minifi::controllers::SSLContextService>(service);
     }
@@ -88,20 +85,20 @@ int main(int argc, char **argv) {
   cxxopts::Options options("MiNiFiController", "MiNiFi local agent controller");
   options.positional_help("[optional args]").show_positional_help();
 
-  options.add_options()  //NOLINT
-  ("h,help", "Shows Help")  //NOLINT
-  ("host", "Specifies connecting host name", cxxopts::value<std::string>())  //NOLINT
-  ("port", "Specifies connecting host port", cxxopts::value<int>())  //NOLINT
-  ("stop", "Shuts down the provided component", cxxopts::value<std::vector<std::string>>())  //NOLINT
-  ("start", "Starts provided component", cxxopts::value<std::vector<std::string>>())  //NOLINT
-  ("l,list", "Provides a list of connections or processors", cxxopts::value<std::string>())  //NOLINT
-  ("c,clear", "Clears the associated connection queue", cxxopts::value<std::vector<std::string>>())  //NOLINT
-  ("getsize", "Reports the size of the associated connection queue", cxxopts::value<std::vector<std::string>>())  //NOLINT
-  ("updateflow", "Updates the flow of the agent using the provided flow file", cxxopts::value<std::string>())  //NOLINT
-  ("getfull", "Reports a list of full connections")  //NOLINT
-  ("jstack", "Returns backtraces from the agent")  //NOLINT
-  ("manifest", "Generates a manifest for the current binary")  //NOLINT
-  ("noheaders", "Removes headers from output streams");
+  options.add_options()
+      ("h,help", "Shows Help")
+      ("host", "Specifies connecting host name", cxxopts::value<std::string>())
+      ("port", "Specifies connecting host port", cxxopts::value<int>())
+      ("stop", "Shuts down the provided component", cxxopts::value<std::vector<std::string>>())
+      ("start", "Starts provided component", cxxopts::value<std::vector<std::string>>())
+      ("l,list", "Provides a list of connections or processors", cxxopts::value<std::string>())
+      ("c,clear", "Clears the associated connection queue", cxxopts::value<std::vector<std::string>>())
+      ("getsize", "Reports the size of the associated connection queue", cxxopts::value<std::vector<std::string>>())
+      ("updateflow", "Updates the flow of the agent using the provided flow file", cxxopts::value<std::string>())
+      ("getfull", "Reports a list of full connections")
+      ("jstack", "Returns backtraces from the agent")
+      ("manifest", "Generates a manifest for the current binary")
+      ("noheaders", "Removes headers from output streams");
 
   bool show_headers = true;
 
@@ -121,16 +118,14 @@ int main(int argc, char **argv) {
 
     if (result.count("port")) {
       port = result["port"].as<int>();
-    } else {
-      if (port == -1 && configuration->get("controller.socket.port", portStr)) {
-        port = std::stoi(portStr);
-      }
+    } else if (configuration->get("controller.socket.port", portStr)) {
+      port = std::stoi(portStr);
     }
 
     if ((IsNullOrEmpty(host) && port == -1)) {
       std::cout << "MiNiFi Controller is disabled" << std::endl;
       exit(0);
-    } else
+    }
 
     if (result.count("noheaders")) {
       show_headers = false;

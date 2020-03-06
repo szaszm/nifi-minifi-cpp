@@ -152,9 +152,8 @@ class ControllerService : public ConfigurableComponent, public Connectable {
   std::vector<std::shared_ptr<controller::ControllerService> > linked_services_;
   std::shared_ptr<Configure> configuration_;
   std::atomic<ControllerServiceState> current_state_;
-  virtual bool canEdit() {
-    return true;
-  }
+
+  bool canEdit() final { return true; }
 };
 
 } /* namespace controller */

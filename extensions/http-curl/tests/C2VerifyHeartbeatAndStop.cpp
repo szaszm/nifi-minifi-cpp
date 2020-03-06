@@ -145,11 +145,9 @@ class VerifyC2Heartbeat : public CoapIntegrationBase {
   }
 
   void runAssertions() {
-    assert(LogTestController::getInstance().contains("Received Ack from Server") == true);
-
-    assert(LogTestController::getInstance().contains("C2Agent] [debug] Stopping component invoke") == true);
-
-    assert(LogTestController::getInstance().contains("C2Agent] [debug] Stopping component FlowController") == true);
+    assert(LogTestController::getInstance().contains("Received Ack from Server"));
+    assert(LogTestController::getInstance().contains("C2Agent] [debug] Stopping component invoke"));
+    assert(LogTestController::getInstance().contains("C2Agent] [debug] Stopping component FlowController"));
   }
 
   void queryRootProcessGroup(std::shared_ptr<core::ProcessGroup> pg) {
@@ -159,7 +157,7 @@ class VerifyC2Heartbeat : public CoapIntegrationBase {
     std::shared_ptr<minifi::processors::InvokeHTTP> inv = std::dynamic_pointer_cast<minifi::processors::InvokeHTTP>(proc);
 
     assert(inv != nullptr);
-    std::string url = "";
+    std::string url;
     inv->getProperty(minifi::processors::InvokeHTTP::URL.getName(), url);
 
     std::string c2_url = std::string("http") + (isSecure ? "s" : "") + "://localhost:" + getWebPort() + "/api/heartbeat";

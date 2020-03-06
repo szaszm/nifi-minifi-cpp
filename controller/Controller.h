@@ -269,10 +269,9 @@ std::shared_ptr<core::controller::ControllerService> getControllerService(const 
 
   std::unique_ptr<core::FlowConfiguration> flow_configuration = core::createFlowConfiguration(prov_repo, flow_repo, content_repo, configuration, stream_factory, nifi_configuration_class_name);
 
-  std::shared_ptr<minifi::FlowController> controller = std::unique_ptr<minifi::FlowController>(
-      new minifi::FlowController(prov_repo, flow_repo, configuration, std::move(flow_configuration), content_repo));
-  controller->load();
-  auto service = controller->getControllerService(service_name);
+  minifi::FlowController controller{ prov_repo, flow_repo, configuration, std::move(flow_configuration), content_repo };
+  controller.load();
+  const auto service = controller.getControllerService(service_name);
   if (service)
     service->onEnable();
   return service;
@@ -326,12 +325,11 @@ void printManifest(const std::shared_ptr<minifi::Configure> &configuration) {
 
   std::unique_ptr<core::FlowConfiguration> flow_configuration = core::createFlowConfiguration(prov_repo, flow_repo, content_repo, configuration, stream_factory, nifi_configuration_class_name);
 
-  std::shared_ptr<minifi::FlowController> controller = std::unique_ptr<minifi::FlowController>(
-      new minifi::FlowController(prov_repo, flow_repo, configuration, std::move(flow_configuration), content_repo, "manifest", false));
-  controller->load();
-  controller->start();
+  minifi::FlowController controller(prov_repo, flow_repo, configuration, std::move(flow_configuration), content_repo, "manifest", false);
+  controller.load();
+  controller.start();
   std::this_thread::sleep_for(std::chrono::milliseconds(10000));
-  controller->stop(true);
+  controller.stop(true);
 }
 
 #endif /* CONTROLLER_CONTROLLER_H_ */

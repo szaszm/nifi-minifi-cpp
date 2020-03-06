@@ -147,7 +147,7 @@ class IdGenerator {
  public:
   void generate(Identifier &output);
   Identifier generate();
-  void initialize(const std::shared_ptr<Properties> & properties);
+  void initialize(const std::shared_ptr<Properties>& properties);
 
   ~IdGenerator();
 
@@ -179,9 +179,9 @@ class NonRepeatingStringGenerator {
   std::string generate() {
     return prefix_ + std::to_string(incrementor_++);
   }
-    uint64_t generateId() {
-      return incrementor_++;
-    }
+  uint64_t generateId() {
+    return incrementor_++;
+  }
  private:
   std::atomic<uint64_t> incrementor_;
   std::string prefix_;

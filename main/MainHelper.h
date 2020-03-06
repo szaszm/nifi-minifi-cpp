@@ -63,7 +63,6 @@ extern "C" {
 #define CONFIG_YAML_CONNECTIONS_KEY "Connections"
 #define CONFIG_YAML_REMOTE_PROCESSING_GROUPS_KEY "Remote Processing Groups"
 
-
 #ifdef _MSC_VER
 #ifndef PATH_MAX
 #define PATH_MAX 260
