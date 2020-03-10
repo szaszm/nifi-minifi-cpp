@@ -32,14 +32,19 @@ function(use_bundled_libarchive SOURCE_DIR BINARY_DIR)
             -DENABLE_NETTLE=FALSE
             -DENABLE_OPENSSL=FALSE
             -DENABLE_TAR=FALSE
+            -DENABLE_CAT=FALSE
             -DENABLE_CPIO=FALSE
-            -DENABLE_TEST=FALSE)
+            -DENABLE_LZ4=FALSE
+            -DENABLE_ZSTD=FALSE
+            -DSKIP_TESTS=TRUE
+            -DENABLE_WERROR=FALSE
+            -DENABLE_INSTALL=FALSE)
 
     # Build project
     ExternalProject_Add(
             libarchive-external
-            URL "https://www.libarchive.org/downloads/libarchive-3.3.2.tar.gz"
-            URL_HASH "SHA256=ed2dbd6954792b2c054ccf8ec4b330a54b85904a80cef477a1c74643ddafa0ce"
+            URL "https://www.libarchive.org/downloads/libarchive-3.4.2.tar.gz"
+            URL_HASH "SHA256=b60d58d12632ecf1e8fad7316dc82c6b9738a35625746b47ecdcaf4aed176176"
             SOURCE_DIR "${SOURCE_DIR}/thirdparty/libarchive-src"
             CMAKE_ARGS ${LIBARCHIVE_CMAKE_ARGS}
             PATCH_COMMAND ${PC}

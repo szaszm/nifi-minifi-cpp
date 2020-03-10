@@ -49,7 +49,7 @@ createExtension(DISABLE_LIBARCHIVE
 				"extensions/libarchive"
 				"${TEST_DIR}/archive-tests"
 				BUILD_TP
-				"thirdparty/libarchive-3.3.2")
+				"thirdparty/libarchive-3.4.2")
 ```
 
 It is advised that you also add your extension to bootstrap.sh as that is the suggested method of configuring MiNiFi C++

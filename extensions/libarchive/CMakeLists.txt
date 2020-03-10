@@ -21,7 +21,7 @@ include(${CMAKE_SOURCE_DIR}/extensions/ExtensionHeader.txt)
 
 find_package(LibArchive)
 	
-include_directories(../../thirdparty/libarchive-3.3.2/libarchive)
+include_directories(../../thirdparty/libarchive-3.4.2/libarchive)
 
 file(GLOB SOURCES  "*.cpp")
 
