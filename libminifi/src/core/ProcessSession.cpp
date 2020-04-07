@@ -543,7 +543,7 @@ void ProcessSession::import(const std::string& source, std::vector<std::shared_p
         throw Exception(FILE_OPERATION_EXCEPTION, "File Import Error");
       }
       if (offset != 0U) {
-        input.seekg(offset, input.beg);
+        input.seekg(offset, std::ifstream::beg);
         if (!input.good()) {
           logger_->log_error("Seeking to %lu failed for file %s (does file/filesystem support seeking?)", offset, source);
           throw Exception(FILE_OPERATION_EXCEPTION, "File Import Error");
@@ -567,7 +567,11 @@ void ProcessSession::import(const std::string& source, std::vector<std::shared_p
         while (true) {
           startTime = getTimeMillis();
           uint8_t* delimiterPos = std::find(begin, end, static_cast<uint8_t>(inputDelimiter));
-          int len = delimiterPos - begin;
+          const ptrdiff_t zlen{ delimiterPos - begin };
+          if (zlen < std::numeric_limits<int>::min() || zlen > std::numeric_limits<int>::max()) {
+            logger_->log_error("narrowing conversion failed");
+          }
+          const int len = zlen;
 
           logging::LOG_TRACE(logger_) << "Read input of " << read << " length is " << len << " is at end?" << (delimiterPos == end);
           /*
@@ -728,7 +732,7 @@ void ProcessSession::commit() {
       std::shared_ptr<core::FlowFile> record = it.second;
       if (record->isDeleted())
         continue;
-      std::map<std::string, Relationship>::iterator itRelationship = this->_transferRelationship.find(record->getUUIDStr());
+      auto itRelationship = this->_transferRelationship.find(record->getUUIDStr());
       if (itRelationship != _transferRelationship.end()) {
         Relationship relationship = itRelationship->second;
         // Find the relationship, we need to find the connections for that relationship
@@ -745,7 +749,7 @@ void ProcessSession::commit() {
           }
         } else {
           // We connections, clone the flow and assign the connection accordingly
-          for (std::set<std::shared_ptr<Connectable>>::iterator itConnection = connections.begin(); itConnection != connections.end(); ++itConnection) {
+          for (auto itConnection = connections.begin(); itConnection != connections.end(); ++itConnection) {
             std::shared_ptr<Connectable> connection = *itConnection;
             if (itConnection == connections.begin()) {
               // First connection which the flow need be routed to
@@ -768,11 +772,11 @@ void ProcessSession::commit() {
     }
 
     // Do the same thing for added flow file
-    for (const auto it : _addedFlowFiles) {
+    for (const auto& it : _addedFlowFiles) {
       std::shared_ptr<core::FlowFile> record = it.second;
       if (record->isDeleted())
         continue;
-      std::map<std::string, Relationship>::iterator itRelationship = this->_transferRelationship.find(record->getUUIDStr());
+      auto itRelationship = this->_transferRelationship.find(record->getUUIDStr());
       if (itRelationship != _transferRelationship.end()) {
         Relationship relationship = itRelationship->second;
         // Find the relationship, we need to find the connections for that relationship
@@ -790,7 +794,7 @@ void ProcessSession::commit() {
           }
         } else {
           // We connections, clone the flow and assign the connection accordingly
-          for (std::set<std::shared_ptr<Connectable>>::iterator itConnection = connections.begin(); itConnection != connections.end(); ++itConnection) {
+          for (auto itConnection = connections.begin(); itConnection != connections.end(); ++itConnection) {
             std::shared_ptr<Connectable> connection(*itConnection);
             if (itConnection == connections.begin()) {
               // First connection which the flow need be routed to
@@ -916,9 +920,9 @@ void ProcessSession::rollback() {
 std::shared_ptr<core::FlowFile> ProcessSession::get() {
   std::shared_ptr<Connectable> first = process_context_->getProcessorNode()->getNextIncomingConnection();
 
-  if (first == NULL) {
+  if (first == nullptr) {
     logger_->log_trace("Get is null for %s", process_context_->getProcessorNode()->getName());
-    return NULL;
+    return nullptr;
   }
 
   std::shared_ptr<Connection> current = std::static_pointer_cast<Connection>(first);
@@ -926,10 +930,9 @@ std::shared_ptr<core::FlowFile> ProcessSession::get() {
   do {
     std::set<std::shared_ptr<core::FlowFile> > expired;
     std::shared_ptr<core::FlowFile> ret = current->poll(expired);
-    if (expired.size() > 0) {
+    if (!expired.empty()) {
       // Remove expired flow record
-      for (std::set<std::shared_ptr<core::FlowFile> >::iterator it = expired.begin(); it != expired.end(); ++it) {
-        std::shared_ptr<core::FlowFile> record = *it;
+      for (const auto& record : expired) {
         std::stringstream details;
         details << process_context_->getProcessorNode()->getName() << " expire flow record " << record->getUUIDStr();
         provenance_report_->expire(record, details.str());
@@ -954,9 +957,9 @@ std::shared_ptr<core::FlowFile> ProcessSession::get() {
       return ret;
     }
     current = std::static_pointer_cast<Connection>(process_context_->getProcessorNode()->getNextIncomingConnection());
-  } while (current != NULL && current != first);
+  } while (current != nullptr && current != first);
 
-  return NULL;
+  return nullptr;
 }
 
 bool ProcessSession::outgoingConnectionsFull(const std::string& relationship) {

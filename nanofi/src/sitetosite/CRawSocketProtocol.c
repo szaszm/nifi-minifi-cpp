@@ -94,14 +94,16 @@ int handShake(struct CRawSiteToSiteClient * client) {
   current = (PropertyValue *)malloc(sizeof(PropertyValue));
 
   current->name = HandShakePropertyStr[GZIP];
-  strncpy(current->value, "false", strlen("false") +1);
+  strncpy(current->value, "false", sizeof(current->value));
+  current->value[sizeof(current->value) - 1] = '\0';
 
   HASH_ADD_KEYPTR(hh, properties, current->name, strlen(current->name), current);
 
   current = (PropertyValue *)malloc(sizeof(PropertyValue));
 
   current->name = HandShakePropertyStr[PORT_IDENTIFIER];
-  strncpy(current->value, client->_port_id_str, strlen(client->_port_id_str) +1);
+  strncpy(current->value, client->_port_id_str, sizeof(current->value));
+  current->value[sizeof(current->value) - 1] = '\0';
 
   HASH_ADD_KEYPTR(hh, properties, current->name, strlen(current->name), current);
 
