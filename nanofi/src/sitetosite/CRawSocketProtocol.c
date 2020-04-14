@@ -429,7 +429,7 @@ int transmitPayload(struct CRawSiteToSiteClient * client, const char * payload, 
     tearDown(client);
     return resp;
   }
-  logc(info, "Site2Site transaction %s sent bytes length %lu", transactionID, strlen(payload));
+  logc(info, "Site2Site transaction %s sent bytes length %zu", transactionID, strlen(payload));
 
 
   int ret = confirm(client, transactionID);
