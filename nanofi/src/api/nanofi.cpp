@@ -63,7 +63,7 @@ file_buffer file_to_buffer(const char *path) {
   const size_t read_result = fread(buffer, filelen, 1, fileptr);
   fclose(fileptr);
 
-  if (read_result != filelen) {
+  if (read_result != 1) {
     free(buffer);
     return fb;
   }
