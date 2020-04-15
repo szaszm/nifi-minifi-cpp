@@ -132,20 +132,6 @@ core::Property ListSFTP::StateFile(
 
 core::Relationship ListSFTP::Success("success", "All FlowFiles that are received are routed to success");
 
-
-constexpr char const *ListSFTP::LISTING_STRATEGY_TRACKING_TIMESTAMPS;
-constexpr char const *ListSFTP::LISTING_STRATEGY_TRACKING_ENTITIES;
-
-constexpr char const *ListSFTP::TARGET_SYSTEM_TIMESTAMP_PRECISION_AUTO_DETECT;
-constexpr char const *ListSFTP::TARGET_SYSTEM_TIMESTAMP_PRECISION_MILLISECONDS;
-constexpr char const *ListSFTP::TARGET_SYSTEM_TIMESTAMP_PRECISION_SECONDS;
-constexpr char const *ListSFTP::TARGET_SYSTEM_TIMESTAMP_PRECISION_MINUTES;
-
-constexpr char const *ListSFTP::ENTITY_TRACKING_INITIAL_LISTING_TARGET_TRACKING_TIME_WINDOW;
-constexpr char const *ListSFTP::ENTITY_TRACKING_INITIAL_LISTING_TARGET_ALL_AVAILABLE;
-
-constexpr char const* ListSFTP::ProcessorName;
-
 const std::map<std::string, uint64_t> ListSFTP::LISTING_LAG_MAP = {
   {ListSFTP::TARGET_SYSTEM_TIMESTAMP_PRECISION_SECONDS, 1000},
   {ListSFTP::TARGET_SYSTEM_TIMESTAMP_PRECISION_MINUTES, 60000},
