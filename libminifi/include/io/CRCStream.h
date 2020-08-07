@@ -222,7 +222,7 @@ template<typename T>
 int CRCStream<T>::readData(uint8_t *buf, int buflen) {
   int ret = child_stream_->read(buf, buflen);
   if (ret > 0) {
-    crc_ = crc32(crc_, buf, ret);
+    crc_ = crc32(gsl::narrow<uLong>(crc_), buf, ret);
   }
   return ret;
 }

@@ -73,12 +73,10 @@ class PublishKafka : public core::Processor {
    * Create a new processor
    */
   explicit PublishKafka(std::string name, utils::Identifier uuid = utils::Identifier())
-      : core::Processor(std::move(name), uuid),
-        logger_(logging::LoggerFactory<PublishKafka>::getLogger()),
-        interrupted_(false) {
+      : core::Processor(std::move(name), uuid) {
   }
 
-  virtual ~PublishKafka() = default;
+  ~PublishKafka() override = default;
 
   static constexpr char const* ProcessorName = "PublishKafka";
 
@@ -115,11 +113,25 @@ class PublishKafka : public core::Processor {
   static const core::Relationship Success;
 
   // Message
+#define MINIFI_PUBLISHKAFKA_MESSAGESTATUS_ENUM_VALUES \
+    X(MESSAGESTATUS_UNCOMPLETE)                       \
+    X(MESSAGESTATUS_ERROR)                            \
+    X(MESSAGESTATUS_SUCCESS)
+
   enum class MessageStatus : uint8_t {
-    MESSAGESTATUS_UNCOMPLETE,
-    MESSAGESTATUS_ERROR,
-    MESSAGESTATUS_SUCCESS
+#define X(val) val,
+    MINIFI_PUBLISHKAFKA_MESSAGESTATUS_ENUM_VALUES
+#undef X
   };
+
+  static const char* MessageStatus_str(MessageStatus s) {
+    switch (s) {
+#define X(val) case MessageStatus::val: return #val;
+      MINIFI_PUBLISHKAFKA_MESSAGESTATUS_ENUM_VALUES
+#undef X
+    }
+    gsl_ASSUME(false && "unreachable");
+  }
 
   struct MessageResult {
     MessageStatus status = MessageStatus::MESSAGESTATUS_UNCOMPLETE;
@@ -131,59 +143,79 @@ class PublishKafka : public core::Processor {
     std::vector<MessageResult> messages;
   };
 
-  struct Messages {
-    std::mutex mutex;
-    std::condition_variable cv;
-    std::vector<FlowFileResult> flow_files;
-    bool interrupted = false;
+  class Messages {
+    std::mutex mutex_;
+    std::condition_variable cv_;
+    std::vector<FlowFileResult> flow_files_;
+    bool interrupted_ = false;
+    const std::shared_ptr<logging::Logger> logger_;
+
+    std::string logStatus(std::unique_lock<std::mutex>&) const {
+      std::ostringstream oss;
+      if(interrupted_) { oss << "interrupted, "; }
+      for(size_t ffi = 0; ffi < flow_files_.size(); ++ffi) {
+        oss << '[' << ffi << "]: {";
+        if(flow_files_[ffi].flow_file_error) { oss << "error, "; }
+        for(size_t msgi = 0; msgi < flow_files_[ffi].messages.size(); ++msgi) {
+          oss << '<' << msgi << ">: (" << MessageStatus_str(flow_files_[ffi].messages[msgi].status) << ", " << rd_kafka_err2str(flow_files_[ffi].messages[msgi].err_code) << "), ";
+        }
+        oss << "}, ";
+      }
+      return oss.str();
+    }
+
+   public:
+    explicit Messages(std::shared_ptr<logging::Logger> logger) :logger_{std::move(logger)} {}
 
     void waitForCompletion() {
-      std::unique_lock<std::mutex> lock(mutex);
-      cv.wait(lock, [this]() -> bool {
-        if (interrupted) {
-          return true;
+      std::unique_lock<std::mutex> lock(mutex_);
+      cv_.wait(lock, [this, &lock] {
+        if(logger_->should_log(logging::LOG_LEVEL::trace)) {
+          logger_->log_trace("%s", logStatus(lock));
         }
-        size_t index = 0U;
-        return std::all_of(this->flow_files.begin(), this->flow_files.end(), [&](const FlowFileResult& flow_file) {
-          index++;
-          if (flow_file.flow_file_error) {
-            return true;
-          }
-          return std::all_of(flow_file.messages.begin(), flow_file.messages.end(), [](const MessageResult& message) {
+        return interrupted_ || std::all_of(std::begin(this->flow_files_), std::end(this->flow_files_), [](const FlowFileResult& flow_file) {
+          return flow_file.flow_file_error || std::all_of(std::begin(flow_file.messages), std::end(flow_file.messages), [](const MessageResult& message) {
             return message.status != MessageStatus::MESSAGESTATUS_UNCOMPLETE;
           });
         });
       });
     }
 
-    void modifyResult(size_t index, const std::function<void(FlowFileResult&)>& fun) {
-      std::unique_lock<std::mutex> lock(mutex);
-      fun(flow_files.at(index));
-      cv.notify_all();
+    template<typename Func>
+    auto modifyResult(size_t index, Func fun) -> decltype(fun(flow_files_.at(index))) {
+      std::unique_lock<std::mutex> lock(mutex_);
+      const auto notifier = gsl::finally([this]{ cv_.notify_all(); });
+      try {
+        return fun(flow_files_.at(index));
+      } catch(const std::exception& ex) {
+        logger_->log_warn("Messages::modifyResult exception: %s", ex.what());
+        throw;
+      }
     }
 
     size_t addFlowFile() {
-      std::lock_guard<std::mutex> lock(mutex);
-      flow_files.emplace_back();
-      return flow_files.size() - 1;
+      std::lock_guard<std::mutex> lock(mutex_);
+      flow_files_.emplace_back();
+      return flow_files_.size() - 1;
     }
 
-    void iterateFlowFiles(const std::function<void(size_t /*index*/, const FlowFileResult& /*flow_file_result*/)>& fun) {
-      std::lock_guard<std::mutex> lock(mutex);
-      for (size_t index = 0U; index < flow_files.size(); index++) {
-        fun(index, flow_files[index]);
+    template<typename Func>
+    auto iterateFlowFiles(Func fun) -> utils::void_t<decltype(fun(size_t{0}, flow_files_.front()))> {
+      std::lock_guard<std::mutex> lock(mutex_);
+      for (size_t index = 0U; index < flow_files_.size(); index++) {
+        fun(index, flow_files_[index]);
       }
     }
 
     void interrupt() {
-      std::unique_lock<std::mutex> lock(mutex);
-      interrupted = true;
-      cv.notify_all();
+      std::unique_lock<std::mutex> lock(mutex_);
+      interrupted_ = true;
+      cv_.notify_all();
     }
 
     bool wasInterrupted() {
-      std::lock_guard<std::mutex> lock(mutex);
-      return interrupted;
+      std::lock_guard<std::mutex> lock(mutex_);
+      return interrupted_;
     }
   };
 
@@ -223,11 +255,17 @@ class PublishKafka : public core::Processor {
     rd_kafka_resp_err_t produce(const size_t segment_num, std::vector<unsigned char>& buffer, const size_t buflen) const {
       const std::shared_ptr<Messages> messages_ptr_copy = this->messages_;
       const auto flow_file_index_copy = this->flow_file_index_;
-      const auto produce_callback = [messages_ptr_copy, flow_file_index_copy, segment_num](rd_kafka_t * /*rk*/, const rd_kafka_message_t *rkmessage) {
-        messages_ptr_copy->modifyResult(flow_file_index_copy, [segment_num, rkmessage](FlowFileResult &flow_file) {
+      const auto logger = logger_;
+      const auto produce_callback = [messages_ptr_copy, flow_file_index_copy, segment_num, logger](rd_kafka_t * /*rk*/, const rd_kafka_message_t *rkmessage) {
+        messages_ptr_copy->modifyResult(flow_file_index_copy, [segment_num, rkmessage, logger, flow_file_index_copy](FlowFileResult &flow_file) {
           auto &message = flow_file.messages.at(segment_num);
           message.err_code = rkmessage->err;
           message.status = message.err_code == 0 ? MessageStatus::MESSAGESTATUS_SUCCESS : MessageStatus::MESSAGESTATUS_ERROR;
+          if (message.err_code != RD_KAFKA_RESP_ERR_NO_ERROR) {
+            logger->log_warn("PublishKafka produce, flow file #%zu/segment #%zu: %s", flow_file_index_copy, segment_num, rd_kafka_err2str(message.err_code));
+          } else {
+            logger->log_debug("PublishKafka produce, flow file #%zu/segment #%zu: success", flow_file_index_copy, segment_num);
+          }
         });
       };
       // release()d below, deallocated in PublishKafka::messageDeliveryCallback
@@ -258,7 +296,8 @@ class PublishKafka : public core::Processor {
                  utils::Regex &attributeNameRegex,
                  std::shared_ptr<Messages> messages,
                  const size_t flow_file_index,
-                 const bool fail_empty_flow_files)
+                 const bool fail_empty_flow_files,
+                 std::shared_ptr<logging::Logger> logger)
         : flow_size_(flowFile.getSize()),
           max_seg_size_(max_seg_size == 0 || flow_size_ < max_seg_size ? flow_size_ : max_seg_size),
           key_(std::move(key)),
@@ -267,10 +306,11 @@ class PublishKafka : public core::Processor {
           hdrs(make_headers(flowFile, attributeNameRegex)),
           messages_(std::move(messages)),
           flow_file_index_(flow_file_index),
-          fail_empty_flow_files_(fail_empty_flow_files)
+          fail_empty_flow_files_(fail_empty_flow_files),
+          logger_(std::move(logger))
     { }
 
-    int64_t process(const std::shared_ptr<io::BaseStream> stream) {
+    int64_t process(const std::shared_ptr<io::BaseStream> stream) override {
       std::vector<unsigned char> buffer;
 
       buffer.resize(max_seg_size_);
@@ -330,6 +370,7 @@ class PublishKafka : public core::Processor {
     int read_size_ = 0;
     bool called_ = false;
     const bool fail_empty_flow_files_ = true;
+    const std::shared_ptr<logging::Logger> logger_;
   };
 
  public:
@@ -355,18 +396,18 @@ class PublishKafka : public core::Processor {
  private:
   static void messageDeliveryCallback(rd_kafka_t* rk, const rd_kafka_message_t* rkmessage, void* opaque);
 
-  std::shared_ptr<logging::Logger> logger_;
+  std::shared_ptr<logging::Logger> logger_{logging::LoggerFactory<PublishKafka>::getLogger()};
 
   KafkaConnectionKey key_;
   std::unique_ptr<KafkaConnection> conn_;
   std::mutex connection_mutex_;
 
-  uint32_t batch_size_;
-  uint64_t target_batch_payload_size_;
-  uint64_t max_flow_seg_size_;
+  uint32_t batch_size_{};
+  uint64_t target_batch_payload_size_{};
+  uint64_t max_flow_seg_size_{};
   utils::Regex attributeNameRegex_;
 
-  std::atomic<bool> interrupted_;
+  std::atomic<bool> interrupted_{false};
   std::mutex messages_mutex_;
   std::set<std::shared_ptr<Messages>> messages_set_;
 };

@@ -579,13 +579,13 @@ void PublishKafka::onTrigger(const std::shared_ptr<core::ProcessContext> &contex
   }
   logger_->log_debug("Processing %lu flow files with a total size of %llu B", flowFiles.size(), actual_bytes);
 
-  auto messages = std::make_shared<Messages>();
+  auto messages = std::make_shared<Messages>(logger_);
   // We must add this to the messages set, so that it will be interrupted when notifyStop is called
   {
     std::lock_guard<std::mutex> lock(messages_mutex_);
     messages_set_.emplace(messages);
   }
-  // We also have to insure that it will be removed once we are done with it
+  // We also have to ensure that it will be removed once we are done with it
   const auto messagesSetGuard = gsl::finally([&]() {
     std::lock_guard<std::mutex> lock(messages_mutex_);
     messages_set_.erase(messages);
@@ -637,7 +637,7 @@ void PublishKafka::onTrigger(const std::shared_ptr<core::ProcessContext> &contex
     context->getProperty(FailEmptyFlowFiles.getName(), failEmptyFlowFiles);
 
     PublishKafka::ReadCallback callback(max_flow_seg_size_, kafkaKey, thisTopic->getTopic(), conn_->getConnection(), *flowFile,
-                                        attributeNameRegex_, messages, flow_file_index, failEmptyFlowFiles);
+                                        attributeNameRegex_, messages, flow_file_index, failEmptyFlowFiles, logger_);
     session->read(flowFile, &callback);
 
     if (!callback.called_) {
