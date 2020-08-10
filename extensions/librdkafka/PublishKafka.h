@@ -55,7 +55,6 @@ class PublishKafka : public core::Processor {
  public:
   static constexpr char const* ProcessorName = "PublishKafka";
 
- private:
   // Supported Properties
   static const core::Property SeedBrokers;
   static const core::Property Topic;
@@ -88,7 +87,6 @@ class PublishKafka : public core::Processor {
   static const core::Relationship Failure;
   static const core::Relationship Success;
 
- public:
   explicit PublishKafka(std::string name, utils::Identifier uuid = utils::Identifier())
       : core::Processor(std::move(name), uuid) {
   }
