@@ -196,7 +196,8 @@ class PublishKafka::Messages {
   bool interrupted_ = false;
   const std::shared_ptr<logging::Logger> logger_;
 
-  std::string logStatus(std::unique_lock<std::mutex>&) const {
+  std::string logStatus(const std::unique_lock<std::mutex>& lock) const {
+    gsl_Expects(lock.owns_lock());
     std::ostringstream oss;
     if(interrupted_) { oss << "interrupted, "; }
     for(size_t ffi = 0; ffi < flow_files_.size(); ++ffi) {
@@ -257,6 +258,7 @@ class PublishKafka::Messages {
     std::unique_lock<std::mutex> lock(mutex_);
     interrupted_ = true;
     cv_.notify_all();
+    gsl_Ensures(interrupted_);
   }
 
   bool wasInterrupted() {
@@ -283,6 +285,7 @@ class ReadCallback : public InputStreamCallback {
       if (flow_file.messages.size() < segment_num + 1) {
         flow_file.messages.resize(segment_num + 1);
       }
+      gsl_Ensures(flow_file.messages.size() > segment_num);
     });
   }
 
@@ -364,7 +367,7 @@ class ReadCallback : public InputStreamCallback {
     status_ = 0;
     called_ = true;
 
-    assert(max_seg_size_ != 0 || flow_size_ == 0 && "max_seg_size_ == 0 implies flow_size_ == 0");
+    gsl_Expects(max_seg_size_ != 0 || flow_size_ == 0 && "max_seg_size_ == 0 implies flow_size_ == 0");
     // ^^ therefore checking max_seg_size_ == 0 handles both division by zero and flow_size_ == 0 cases
     const size_t reserved_msg_capacity = max_seg_size_ == 0 ? 1 : utils::intdiv_ceil(flow_size_, max_seg_size_);
     messages_->modifyResult(flow_file_index_, [reserved_msg_capacity](FlowFileResult& flow_file) {
@@ -373,7 +376,11 @@ class ReadCallback : public InputStreamCallback {
 
     // If the flow file is empty, we still want to send the message, unless the user wants to fail_empty_flow_files_
     if (flow_size_ == 0 && !fail_empty_flow_files_) {
-      produce(0, buffer, 0);
+      const auto err = produce(0, buffer, 0);
+      if (err != RD_KAFKA_RESP_ERR_NO_ERROR) {
+        status_ = -1;
+        error_ = rd_kafka_err2str(err);
+      }
       return 0;
     }
 
