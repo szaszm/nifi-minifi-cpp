@@ -162,26 +162,21 @@ struct rd_kafka_topic_conf_deleter {
 };
 
 // Message
-#define MESSAGESTATUS_ENUM_VALUES \
-    X(MESSAGESTATUS_UNCOMPLETE)                       \
-    X(MESSAGESTATUS_ERROR)                            \
-    X(MESSAGESTATUS_SUCCESS)
 
 enum class MessageStatus : uint8_t {
-#define X(val) val,
-  MESSAGESTATUS_ENUM_VALUES
-#undef X
+  MESSAGESTATUS_UNCOMPLETE,
+  MESSAGESTATUS_ERROR,
+  MESSAGESTATUS_SUCCESS
 };
 
 const char* to_string(const MessageStatus s) {
   switch (s) {
-#define X(val) case MessageStatus::val: return #val;
-    MESSAGESTATUS_ENUM_VALUES
-#undef X
+    case MessageStatus::MESSAGESTATUS_UNCOMPLETE: return "MESSAGESTATUS_UNCOMPLETE";
+    case MessageStatus::MESSAGESTATUS_ERROR: return "MESSAGESTATUS_ERROR";
+    case MessageStatus::MESSAGESTATUS_SUCCESS: return "MESSAGESTATUS_SUCCESS";
   }
-  gsl_ASSUME(false && "unreachable");
+  throw std::runtime_error{"PublishKafka to_string(MessageStatus): unreachable code"};
 }
-#undef MESSAGESTATUS_ENUM_VALUES
 
 struct MessageResult {
   MessageStatus status = MessageStatus::MESSAGESTATUS_UNCOMPLETE;
