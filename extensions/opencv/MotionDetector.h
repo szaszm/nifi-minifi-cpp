@@ -55,8 +55,8 @@ class MotionDetector : public core::Processor {
   static core::Relationship Failure;
 
   virtual void initialize(void) override;
-  virtual void onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
-  virtual void onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) override;
+  virtual void onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
+  virtual void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) override;
 
   void notifyStop() override;
 

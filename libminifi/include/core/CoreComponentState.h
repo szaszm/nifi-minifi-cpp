@@ -48,9 +48,9 @@ class CoreComponentStateManagerProvider {
  public:
   virtual ~CoreComponentStateManagerProvider() = default;
 
-  virtual std::shared_ptr<CoreComponentStateManager> getCoreComponentStateManager(const std::string& uuid) = 0;
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<CoreComponentStateManager> getCoreComponentStateManager(const std::string& uuid) = 0;
 
-  virtual std::shared_ptr<CoreComponentStateManager> getCoreComponentStateManager(const CoreComponent& component) {
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<CoreComponentStateManager> getCoreComponentStateManager(const CoreComponent& component) {
     return getCoreComponentStateManager(component.getUUIDStr());
   }
 

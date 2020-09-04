@@ -65,14 +65,14 @@ TEST_CASE("QueueMetricsTestConnections", "[c2m3]") {
 
   REQUIRE("QueueMetrics" == metrics.getName());
 
-  std::shared_ptr<minifi::Configure> configuration = std::make_shared<minifi::Configure>();
-  std::shared_ptr<core::ContentRepository> content_repo = std::make_shared<core::repository::VolatileContentRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> configuration = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo = org::apache::nifi::minifi::utils::debug_make_shared<core::repository::VolatileContentRepository>();
 
   content_repo->initialize(configuration);
 
-  std::shared_ptr<core::Repository> repo = std::make_shared<TestRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> repo = org::apache::nifi::minifi::utils::debug_make_shared<TestRepository>();
 
-  std::shared_ptr<minifi::Connection> connection = std::make_shared<minifi::Connection>(repo, content_repo, "testconnection");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> connection = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Connection>(repo, content_repo, "testconnection");
 
   metrics.addConnection(connection);
 
@@ -121,7 +121,7 @@ TEST_CASE("RepositorymetricsHaveRepo", "[c2m4]") {
 
   REQUIRE("RepositoryMetrics" == metrics.getName());
 
-  std::shared_ptr<TestRepository> repo = std::make_shared<TestRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestRepository> repo = org::apache::nifi::minifi::utils::debug_make_shared<TestRepository>();
 
   metrics.addRepository(repo);
   {

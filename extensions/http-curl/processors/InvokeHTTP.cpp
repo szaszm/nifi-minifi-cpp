@@ -164,7 +164,7 @@ bool getTimeMSFromString(const std::string& propertyName, uint64_t& valInt) {
       && core::Property::ConvertTimeUnitToMS(valInt, unit, valInt);
 }
 
-void InvokeHTTP::onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
+void InvokeHTTP::onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
   if (!context->getProperty(Method.getName(), method_)) {
     logger_->log_debug("%s attribute is missing, so default value of %s will be used", Method.getName(), Method.getValue());
     return;
@@ -229,9 +229,9 @@ void InvokeHTTP::onSchedule(const std::shared_ptr<core::ProcessContext> &context
 
   std::string context_name;
   if (context->getProperty(SSLContext.getName(), context_name) && !IsNullOrEmpty(context_name)) {
-    std::shared_ptr<core::controller::ControllerService> service = context->getControllerService(context_name);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerService> service = context->getControllerService(context_name);
     if (nullptr != service) {
-      ssl_context_service_ = std::static_pointer_cast<minifi::controllers::SSLContextService>(service);
+      ssl_context_service_ = static_pointer_cast<minifi::controllers::SSLContextService>(service);
     }
   }
 
@@ -260,15 +260,15 @@ bool InvokeHTTP::emitFlowFile(const std::string &method) {
   return ("POST" == method || "PUT" == method || "PATCH" == method);
 }
 
-void InvokeHTTP::onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
-  std::shared_ptr<FlowFileRecord> flowFile = std::static_pointer_cast<FlowFileRecord>(session->get());
+void InvokeHTTP::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> flowFile = static_pointer_cast<FlowFileRecord>(session->get());
 
   std::string url = url_;
 
   if (flowFile == nullptr) {
     if (!emitFlowFile(method_)) {
       logger_->log_debug("InvokeHTTP -- create flow file with  %s", method_);
-      flowFile = std::static_pointer_cast<FlowFileRecord>(session->create());
+      flowFile = static_pointer_cast<FlowFileRecord>(session->create());
     } else {
       logger_->log_debug("Exiting because method is %s and there is no flowfile available to execute it, yielding", method_);
       yield();
@@ -306,7 +306,7 @@ void InvokeHTTP::onTrigger(const std::shared_ptr<core::ProcessContext> &context,
   std::unique_ptr<utils::HTTPUploadCallback> callbackObj = nullptr;
   if (emitFlowFile(method_)) {
     logger_->log_trace("InvokeHTTP -- reading flowfile");
-    std::shared_ptr<ResourceClaim> claim = flowFile->getResourceClaim();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim> claim = flowFile->getResourceClaim();
     if (claim) {
       callback = std::unique_ptr<utils::ByteInputCallBack>(new utils::ByteInputCallBack());
       session->read(flowFile, callback.get());
@@ -350,13 +350,13 @@ void InvokeHTTP::onTrigger(const std::shared_ptr<core::ProcessContext> &context,
     bool output_body_to_content = isSuccess && !putToAttribute;
 
     logger_->log_debug("isSuccess: %d, response code %" PRId64, isSuccess, http_code);
-    std::shared_ptr<FlowFileRecord> response_flow = nullptr;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> response_flow = nullptr;
 
     if (output_body_to_content) {
       if (flowFile != nullptr) {
-        response_flow = std::static_pointer_cast<FlowFileRecord>(session->create(flowFile));
+        response_flow = static_pointer_cast<FlowFileRecord>(session->create(flowFile));
       } else {
-        response_flow = std::static_pointer_cast<FlowFileRecord>(session->create());
+        response_flow = static_pointer_cast<FlowFileRecord>(session->create());
       }
 
       // if content type isn't returned we should return application/octet-stream
@@ -378,8 +378,8 @@ void InvokeHTTP::onTrigger(const std::shared_ptr<core::ProcessContext> &context,
   }
 }
 
-void InvokeHTTP::route(std::shared_ptr<FlowFileRecord> &request, std::shared_ptr<FlowFileRecord> &response, const std::shared_ptr<core::ProcessSession> &session,
-                       const std::shared_ptr<core::ProcessContext> &context, bool isSuccess, int64_t statusCode) {
+void InvokeHTTP::route(org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> &request, org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> &response, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session,
+                       const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, bool isSuccess, int64_t statusCode) {
   // check if we should yield the processor
   if (!isSuccess && request == nullptr) {
     context->yield();

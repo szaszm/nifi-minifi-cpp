@@ -42,7 +42,7 @@ namespace jni {
  */
 class JniFlowFile : public core::WeakReference {
  public:
-  JniFlowFile(std::shared_ptr<core::FlowFile> ref, const std::shared_ptr<JavaServicer> &servicer, jobject ff)
+  JniFlowFile(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> ref, const org::apache::nifi::minifi::utils::debug_shared_ptr<JavaServicer> &servicer, jobject ff)
       : removed(false),
         ff_object(ff),
         ref_(ref),
@@ -54,7 +54,7 @@ class JniFlowFile : public core::WeakReference {
 
   virtual void remove() override;
 
-  std::shared_ptr<core::FlowFile> get() const {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> get() const {
     return ref_;
   }
 
@@ -79,17 +79,17 @@ class JniFlowFile : public core::WeakReference {
 
   std::mutex session_mutex_;
 
-  std::shared_ptr<core::FlowFile> ref_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> ref_;
 
-  std::shared_ptr<JavaServicer> servicer_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<JavaServicer> servicer_;
 
 };
 
 /**
  * Quick check to determine if a FF is empty.
  */
-struct check_empty_ff : public std::unary_function<std::shared_ptr<JniFlowFile>, bool> {
-  bool operator()(std::shared_ptr<JniFlowFile> session) const {
+struct check_empty_ff : public std::unary_function<org::apache::nifi::minifi::utils::debug_shared_ptr<JniFlowFile>, bool> {
+  bool operator()(org::apache::nifi::minifi::utils::debug_shared_ptr<JniFlowFile> session) const {
     return session->empty();
   }
 };
@@ -103,7 +103,7 @@ class JniByteOutStream : public minifi::OutputStreamCallback {
   }
 
   virtual ~JniByteOutStream() = default;
-  virtual int64_t process(std::shared_ptr<minifi::io::BaseStream> stream) {
+  virtual int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::io::BaseStream> stream) {
     return stream->write((uint8_t*) bytes_, length_);
   }
  private:
@@ -126,7 +126,7 @@ class JniByteInputStream : public minifi::InputStreamCallback {
     if (buffer_)
       delete[] buffer_;
   }
-  int64_t process(std::shared_ptr<minifi::io::BaseStream> stream) {
+  int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::io::BaseStream> stream) {
     stream_ = stream;
     return 0;
   }
@@ -166,7 +166,7 @@ class JniByteInputStream : public minifi::InputStreamCallback {
     return stream_->read(arr);
   }
 
-  std::shared_ptr<minifi::io::BaseStream> stream_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::io::BaseStream> stream_;
   uint8_t *buffer_;
   uint64_t buffer_size_;
   uint64_t read_size_;
@@ -174,7 +174,7 @@ class JniByteInputStream : public minifi::InputStreamCallback {
 
 class JniInputStream : public core::WeakReference {
  public:
-  JniInputStream(std::unique_ptr<JniByteInputStream> jbi, jobject in_instance, const std::shared_ptr<JavaServicer> &servicer)
+  JniInputStream(std::unique_ptr<JniByteInputStream> jbi, jobject in_instance, const org::apache::nifi::minifi::utils::debug_shared_ptr<JavaServicer> &servicer)
       : removed_(false),
         jbi_(std::move(jbi)),
         in_instance_(in_instance),
@@ -211,12 +211,12 @@ class JniInputStream : public core::WeakReference {
   bool removed_;
   jobject in_instance_;
   std::unique_ptr<JniByteInputStream> jbi_;
-  std::shared_ptr<JavaServicer> servicer_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<JavaServicer> servicer_;
 };
 
 class JniSession : public core::WeakReference {
  public:
-  JniSession(const std::shared_ptr<core::ProcessSession> &session, jobject session_instance, const std::shared_ptr<JavaServicer> &servicer)
+  JniSession(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session, jobject session_instance, const org::apache::nifi::minifi::utils::debug_shared_ptr<JavaServicer> &servicer)
       : removed_(false),
         session_(session),
         servicer_(servicer),
@@ -240,11 +240,11 @@ class JniSession : public core::WeakReference {
 
   }
 
-  std::shared_ptr<core::ProcessSession> &getSession() {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &getSession() {
     return session_;
   }
 
-  JniFlowFile *getFlowFileReference(const std::shared_ptr<core::FlowFile> &ff) {
+  JniFlowFile *getFlowFileReference(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &ff) {
     for (auto &jni_ff : global_ff_objects_) {
       if (jni_ff->get().get() == ff.get()) {
         return jni_ff.get();
@@ -253,18 +253,18 @@ class JniSession : public core::WeakReference {
     return nullptr;
   }
 
-  JniFlowFile * addFlowFile(std::shared_ptr<JniFlowFile> ff) {
+  JniFlowFile * addFlowFile(org::apache::nifi::minifi::utils::debug_shared_ptr<JniFlowFile> ff) {
     std::lock_guard<std::mutex> guard(session_mutex_);
     global_ff_objects_.push_back(ff);
     return ff.get();
   }
 
-  void addInputStream(std::shared_ptr<JniInputStream> in) {
+  void addInputStream(org::apache::nifi::minifi::utils::debug_shared_ptr<JniInputStream> in) {
     std::lock_guard<std::mutex> guard(session_mutex_);
     input_streams_.push_back(in);
   }
 
-  std::shared_ptr<JavaServicer> getServicer() const {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<JavaServicer> getServicer() const {
     return servicer_;
   }
 
@@ -288,15 +288,15 @@ class JniSession : public core::WeakReference {
   bool removed_;
   mutable std::mutex session_mutex_;
   jobject session_instance_;
-  std::shared_ptr<core::ProcessSession> session_;
-  std::shared_ptr<JavaServicer> servicer_;
-  std::vector<std::shared_ptr<JniInputStream>> input_streams_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> session_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<JavaServicer> servicer_;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<JniInputStream>> input_streams_;
   // we own
-  std::vector<std::shared_ptr<JniFlowFile>> global_ff_objects_;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<JniFlowFile>> global_ff_objects_;
 };
 
-struct check_empty : public std::unary_function<std::shared_ptr<JniSession>, bool> {
-  bool operator()(std::shared_ptr<JniSession> session) const {
+struct check_empty : public std::unary_function<org::apache::nifi::minifi::utils::debug_shared_ptr<JniSession>, bool> {
+  bool operator()(org::apache::nifi::minifi::utils::debug_shared_ptr<JniSession> session) const {
     return session->prune();
   }
 };
@@ -304,7 +304,7 @@ struct check_empty : public std::unary_function<std::shared_ptr<JniSession>, boo
 class JniSessionFactory : public core::WeakReference {
  public:
 
-  JniSessionFactory(const std::shared_ptr<core::ProcessSessionFactory> &factory, const std::shared_ptr<JavaServicer> &servicer, jobject java_object)
+  JniSessionFactory(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &factory, const org::apache::nifi::minifi::utils::debug_shared_ptr<JavaServicer> &servicer, jobject java_object)
       : servicer_(servicer),
         java_object_(java_object),
         factory_(factory) {
@@ -329,17 +329,17 @@ class JniSessionFactory : public core::WeakReference {
     return java_object_;
   }
 
-  std::shared_ptr<JavaServicer> getServicer() const {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<JavaServicer> getServicer() const {
     return servicer_;
   }
 
-  std::shared_ptr<core::ProcessSessionFactory> getFactory() const {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> getFactory() const {
     return factory_;
   }
 
   /**
    */
-  JniSession *addSession(std::shared_ptr<JniSession> session) {
+  JniSession *addSession(org::apache::nifi::minifi::utils::debug_shared_ptr<JniSession> session) {
     std::lock_guard<std::mutex> guard(session_mutex_);
 
     sessions_.erase(std::remove_if(sessions_.begin(), sessions_.end(), check_empty()), sessions_.end());
@@ -350,12 +350,12 @@ class JniSessionFactory : public core::WeakReference {
   }
 
  protected:
-  std::shared_ptr<JavaServicer> servicer_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<JavaServicer> servicer_;
   std::mutex session_mutex_;
   // we do not own this shared ptr
-  std::shared_ptr<core::ProcessSessionFactory> factory_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> factory_;
   // we own the sessions
-  std::vector<std::shared_ptr<JniSession>> sessions_;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<JniSession>> sessions_;
   // we own the java object
   jobject java_object_;
 

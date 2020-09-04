@@ -56,8 +56,8 @@ namespace core {
 
 class YamlConfiguration : public FlowConfiguration {
  public:
-  explicit YamlConfiguration(std::shared_ptr<core::Repository> repo, std::shared_ptr<core::Repository> flow_file_repo, std::shared_ptr<core::ContentRepository> content_repo,
-                             std::shared_ptr<io::StreamFactory> stream_factory, std::shared_ptr<Configure> configuration, const std::string path = DEFAULT_FLOW_YAML_FILE_NAME)
+  explicit YamlConfiguration(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> repo, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_file_repo, org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo,
+                             org::apache::nifi::minifi::utils::debug_shared_ptr<io::StreamFactory> stream_factory, org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configuration, const std::string path = DEFAULT_FLOW_YAML_FILE_NAME)
       : FlowConfiguration(repo, flow_file_repo, content_repo, stream_factory, configuration, path),
         logger_(logging::LoggerFactory<YamlConfiguration>::getLogger()) {
     stream_factory_ = stream_factory;
@@ -135,7 +135,7 @@ class YamlConfiguration : public FlowConfiguration {
    * @param component_name
    * @param yaml_section
    */
-  void validateComponentProperties(const std::shared_ptr<ConfigurableComponent> &component, const std::string &component_name, const std::string &yaml_section) const;
+  void validateComponentProperties(const org::apache::nifi::minifi::utils::debug_shared_ptr<ConfigurableComponent> &component, const std::string &component_name, const std::string &yaml_section) const;
 
  protected:
   /**
@@ -217,7 +217,7 @@ class YamlConfiguration : public FlowConfiguration {
   core::ProcessGroup *parseRootProcessGroupYaml(YAML::Node rootNode);
 
   // Process Property YAML
-  void parseProcessorPropertyYaml(YAML::Node *doc, YAML::Node *node, std::shared_ptr<core::Processor> processor);
+  void parseProcessorPropertyYaml(YAML::Node *doc, YAML::Node *node, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor);
   /**
    * Parse controller services
    * @param controllerServicesNode controller services YAML node.
@@ -266,7 +266,7 @@ class YamlConfiguration : public FlowConfiguration {
    * @param propertiesNode the YAML::Node containing the properties
    * @param processor      the Processor to which to add the resulting properties
    */
-  void parsePropertiesNodeYaml(YAML::Node *propertiesNode, std::shared_ptr<core::ConfigurableComponent> processor, const std::string &component_name, const std::string &yaml_section);
+  void parsePropertiesNodeYaml(YAML::Node *propertiesNode, org::apache::nifi::minifi::utils::debug_shared_ptr<core::ConfigurableComponent> processor, const std::string &component_name, const std::string &yaml_section);
 
   /**
    * A helper function for parsing or generating optional id fields.
@@ -323,11 +323,11 @@ class YamlConfiguration : public FlowConfiguration {
   YAML::Node getOptionalField(YAML::Node *yamlNode, const std::string &fieldName, const YAML::Node &defaultValue, const std::string &yamlSection = "", const std::string &infoMessage = "");
 
  protected:
-  std::shared_ptr<io::StreamFactory> stream_factory_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<io::StreamFactory> stream_factory_;
 
  private:
   std::shared_ptr<logging::Logger> logger_;
-  static std::shared_ptr<utils::IdGenerator> id_generator_;
+  static org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> id_generator_;
 
   /**
    * Raises a human-readable configuration error for the given configuration component/section.

@@ -139,7 +139,7 @@ TEST_CASE("TestSiteToSiteVerifySend", "[S2S3]") {
   // Create the transaction
   std::string transactionID;
   std::string payload = "Test MiNiFi payload";
-  std::shared_ptr<minifi::sitetosite::Transaction> transaction;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::sitetosite::Transaction> transaction;
   transaction = protocol.createTransaction(transactionID, minifi::sitetosite::SEND);
   collector->get_next_client_response();
   REQUIRE(collector->get_next_client_response() == "SEND_FLOWFILES");

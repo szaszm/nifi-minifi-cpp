@@ -90,8 +90,8 @@ TEST_CASE("Flow with two loops", "[MultiLoopFlow]") {
   auto controller = testController.controller_;
   auto root = testController.root_;
 
-  auto procGenerator = std::static_pointer_cast<org::apache::nifi::minifi::processors::TestFlowFileGenerator>(root->findProcessor("Generator"));
-  auto procA = std::static_pointer_cast<org::apache::nifi::minifi::processors::TestProcessor>(root->findProcessor("A"));
+  auto procGenerator = static_pointer_cast<org::apache::nifi::minifi::processors::TestFlowFileGenerator>(root->findProcessor("Generator"));
+  auto procA = static_pointer_cast<org::apache::nifi::minifi::processors::TestProcessor>(root->findProcessor("A"));
 
   int tryCount = 0;
   while (tryCount++ < 10 && !(procA->trigger_count.load() > 15)) {

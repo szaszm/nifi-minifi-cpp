@@ -44,7 +44,7 @@ namespace apache {
 namespace nifi {
 namespace minifi {
 
-void ThreadedSchedulingAgent::schedule(std::shared_ptr<core::Processor> processor) {
+void ThreadedSchedulingAgent::schedule(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor) {
   std::lock_guard<std::mutex> lock(mutex_);
 
   admin_yield_duration_ = 100;  // We should prevent burning CPU in case of rollbacks
@@ -77,7 +77,7 @@ void ThreadedSchedulingAgent::schedule(std::shared_ptr<core::Processor> processo
     return;
   }
 
-  std::shared_ptr<core::ProcessorNode> processor_node = std::make_shared<core::ProcessorNode>(processor);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessorNode> processor_node = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessorNode>(processor);
 
   auto contextBuilder = core::ClassLoader::getDefaultClassLoader().instantiate<core::ProcessContextBuilder>("ProcessContextBuilder");
 
@@ -86,7 +86,7 @@ void ThreadedSchedulingAgent::schedule(std::shared_ptr<core::Processor> processo
 
   auto processContext = contextBuilder->build(processor_node);
 
-  auto sessionFactory = std::make_shared<core::ProcessSessionFactory>(processContext);
+  auto sessionFactory = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessSessionFactory>(processContext);
 
   processor->onSchedule(processContext, sessionFactory);
 
@@ -123,7 +123,7 @@ void ThreadedSchedulingAgent::stop() {
   }
 }
 
-void ThreadedSchedulingAgent::unschedule(std::shared_ptr<core::Processor> processor) {
+void ThreadedSchedulingAgent::unschedule(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor) {
   std::lock_guard<std::mutex> lock(mutex_);
   logger_->log_debug("Shutting down threads for processor %s/%s", processor->getName(), processor->getUUIDStr());
 

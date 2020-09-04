@@ -47,7 +47,7 @@ using HashReturnType = std::pair<std::string, int64_t>;
 namespace { // NOLINT
 #define HASH_BUFFER_SIZE 16384
 
-  HashReturnType MD5Hash(const std::shared_ptr<org::apache::nifi::minifi::io::BaseStream>& stream) {
+  HashReturnType MD5Hash(const org::apache::nifi::minifi::utils::debug_shared_ptr<org::apache::nifi::minifi::io::BaseStream>& stream) {
     HashReturnType ret_val;
     ret_val.second = 0;
     uint8_t buffer[HASH_BUFFER_SIZE];
@@ -71,7 +71,7 @@ namespace { // NOLINT
     return ret_val;
   }
 
-  HashReturnType SHA1Hash(const std::shared_ptr<org::apache::nifi::minifi::io::BaseStream>& stream) {
+  HashReturnType SHA1Hash(const org::apache::nifi::minifi::utils::debug_shared_ptr<org::apache::nifi::minifi::io::BaseStream>& stream) {
     HashReturnType ret_val;
     ret_val.second = 0;
     uint8_t buffer[HASH_BUFFER_SIZE];
@@ -95,7 +95,7 @@ namespace { // NOLINT
     return ret_val;
   }
 
-  HashReturnType SHA256Hash(const std::shared_ptr<org::apache::nifi::minifi::io::BaseStream>& stream) {
+  HashReturnType SHA256Hash(const org::apache::nifi::minifi::utils::debug_shared_ptr<org::apache::nifi::minifi::io::BaseStream>& stream) {
     HashReturnType ret_val;
     ret_val.second = 0;
     uint8_t buffer[HASH_BUFFER_SIZE];
@@ -127,7 +127,7 @@ namespace nifi {
 namespace minifi {
 namespace processors {
 
-static const std::map<std::string, const std::function<HashReturnType(const std::shared_ptr<io::BaseStream>&)>> HashAlgos =
+static const std::map<std::string, const std::function<HashReturnType(const org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream>&)>> HashAlgos =
   { {"MD5",  MD5Hash}, {"SHA1", SHA1Hash}, {"SHA256", SHA256Hash} };
 
 //! HashContent Class
@@ -160,12 +160,12 @@ class HashContent : public core::Processor {
 
   class ReadCallback : public InputStreamCallback {
    public:
-    ReadCallback(std::shared_ptr<core::FlowFile> flowFile, const HashContent& parent);
+    ReadCallback(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flowFile, const HashContent& parent);
     ~ReadCallback() {}
-    int64_t process(std::shared_ptr<io::BaseStream> stream);
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream);
 
    private:
-    std::shared_ptr<core::FlowFile> flowFile_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flowFile_;
     const HashContent& parent_;
   };
 

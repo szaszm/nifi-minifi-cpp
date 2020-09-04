@@ -31,7 +31,7 @@ namespace apache {
 namespace nifi {
 namespace minifi {
 
-bool SchedulingAgent::hasWorkToDo(std::shared_ptr<core::Processor> processor) {
+bool SchedulingAgent::hasWorkToDo(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor) {
   // Whether it has work to do
   if (processor->getTriggerWhenEmpty() || !processor->hasIncomingConnections() || processor->flowFilesQueued())
     return true;
@@ -39,7 +39,7 @@ bool SchedulingAgent::hasWorkToDo(std::shared_ptr<core::Processor> processor) {
     return false;
 }
 
-std::future<utils::TaskRescheduleInfo> SchedulingAgent::enableControllerService(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
+std::future<utils::TaskRescheduleInfo> SchedulingAgent::enableControllerService(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
   logger_->log_info("Enabling CSN in SchedulingAgent %s", serviceNode->getName());
   // reference the enable function from serviceNode
   std::function<utils::TaskRescheduleInfo()> f_ex = [serviceNode] {
@@ -59,7 +59,7 @@ std::future<utils::TaskRescheduleInfo> SchedulingAgent::enableControllerService(
   return future;
 }
 
-std::future<utils::TaskRescheduleInfo> SchedulingAgent::disableControllerService(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
+std::future<utils::TaskRescheduleInfo> SchedulingAgent::disableControllerService(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
   logger_->log_info("Disabling CSN in SchedulingAgent %s", serviceNode->getName());
   // reference the disable function from serviceNode
   std::function<utils::TaskRescheduleInfo()> f_ex = [serviceNode] {
@@ -80,12 +80,12 @@ std::future<utils::TaskRescheduleInfo> SchedulingAgent::disableControllerService
   return future;
 }
 
-bool SchedulingAgent::hasTooMuchOutGoing(std::shared_ptr<core::Processor> processor) {
+bool SchedulingAgent::hasTooMuchOutGoing(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor) {
   return processor->flowFilesOutGoingFull();
 }
 
-bool SchedulingAgent::onTrigger(const std::shared_ptr<core::Processor> &processor, const std::shared_ptr<core::ProcessContext> &processContext,
-                                const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
+bool SchedulingAgent::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> &processor, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &processContext,
+                                const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
   if (processor->isYield()) {
     logger_->log_debug("Not running %s since it must yield", processor->getName());
     return false;

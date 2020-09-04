@@ -153,7 +153,7 @@ void setJsonStr(const std::string& key, const state::response::ValueNode& value,
   keyVal.SetString(c_key, key.length(), alloc);
 
   auto type_index = base_type->getTypeIndex();
-  if (auto sub_type = std::dynamic_pointer_cast<core::TransformableValue>(base_type)) {
+  if (auto sub_type = dynamic_pointer_cast<core::TransformableValue>(base_type)) {
     auto str = base_type->getStringValue();
     const char* c_val = str.c_str();
     valueVal.SetString(c_val, str.length(), alloc);

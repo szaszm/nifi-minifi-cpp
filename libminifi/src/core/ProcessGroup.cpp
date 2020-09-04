@@ -36,7 +36,7 @@ namespace nifi {
 namespace minifi {
 namespace core {
 
-std::shared_ptr<utils::IdGenerator> ProcessGroup::id_generator_ = utils::IdGenerator::getIdGenerator();
+org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> ProcessGroup::id_generator_ = utils::IdGenerator::getIdGenerator();
 
 ProcessGroup::ProcessGroup(ProcessGroupType type, std::string name, utils::Identifier &uuid)
     : ProcessGroup(type, name, uuid, 0, 0) {
@@ -106,7 +106,7 @@ bool ProcessGroup::isRootProcessGroup() {
   return (type_ == ROOT_PROCESS_GROUP);
 }
 
-void ProcessGroup::addProcessor(std::shared_ptr<Processor> processor) {
+void ProcessGroup::addProcessor(org::apache::nifi::minifi::utils::debug_shared_ptr<Processor> processor) {
   std::lock_guard<std::recursive_mutex> lock(mutex_);
 
   if (processors_.find(processor) == processors_.end()) {
@@ -116,7 +116,7 @@ void ProcessGroup::addProcessor(std::shared_ptr<Processor> processor) {
   }
 }
 
-void ProcessGroup::removeProcessor(std::shared_ptr<Processor> processor) {
+void ProcessGroup::removeProcessor(org::apache::nifi::minifi::utils::debug_shared_ptr<Processor> processor) {
   std::lock_guard<std::recursive_mutex> lock(mutex_);
 
   if (processors_.find(processor) != processors_.end()) {
@@ -146,11 +146,11 @@ void ProcessGroup::removeProcessGroup(ProcessGroup *child) {
   }
 }
 
-void ProcessGroup::startProcessingProcessors(const std::shared_ptr<TimerDrivenSchedulingAgent> timeScheduler,
-    const std::shared_ptr<EventDrivenSchedulingAgent> &eventScheduler, const std::shared_ptr<CronDrivenSchedulingAgent> &cronScheduler) {
+void ProcessGroup::startProcessingProcessors(const org::apache::nifi::minifi::utils::debug_shared_ptr<TimerDrivenSchedulingAgent> timeScheduler,
+    const org::apache::nifi::minifi::utils::debug_shared_ptr<EventDrivenSchedulingAgent> &eventScheduler, const org::apache::nifi::minifi::utils::debug_shared_ptr<CronDrivenSchedulingAgent> &cronScheduler) {
   std::unique_lock<std::recursive_mutex> lock(mutex_);
 
-  std::set<std::shared_ptr<Processor> > failed_processors;
+  std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<Processor> > failed_processors;
 
   for (const auto &processor : failed_processors_) {
     try {
@@ -198,8 +198,8 @@ void ProcessGroup::startProcessingProcessors(const std::shared_ptr<TimerDrivenSc
   }
 }
 
-void ProcessGroup::startProcessing(const std::shared_ptr<TimerDrivenSchedulingAgent> timeScheduler, const std::shared_ptr<EventDrivenSchedulingAgent> &eventScheduler,
-                                   const std::shared_ptr<CronDrivenSchedulingAgent> &cronScheduler) {
+void ProcessGroup::startProcessing(const org::apache::nifi::minifi::utils::debug_shared_ptr<TimerDrivenSchedulingAgent> timeScheduler, const org::apache::nifi::minifi::utils::debug_shared_ptr<EventDrivenSchedulingAgent> &eventScheduler,
+                                   const org::apache::nifi::minifi::utils::debug_shared_ptr<CronDrivenSchedulingAgent> &cronScheduler) {
   std::lock_guard<std::recursive_mutex> lock(mutex_);
 
   try {
@@ -221,8 +221,8 @@ void ProcessGroup::startProcessing(const std::shared_ptr<TimerDrivenSchedulingAg
   }
 }
 
-void ProcessGroup::stopProcessing(const std::shared_ptr<TimerDrivenSchedulingAgent> timeScheduler, const std::shared_ptr<EventDrivenSchedulingAgent> &eventScheduler,
-                                  const std::shared_ptr<CronDrivenSchedulingAgent> &cronScheduler, const std::function<bool(const std::shared_ptr<Processor>&)>& filter) {
+void ProcessGroup::stopProcessing(const org::apache::nifi::minifi::utils::debug_shared_ptr<TimerDrivenSchedulingAgent> timeScheduler, const org::apache::nifi::minifi::utils::debug_shared_ptr<EventDrivenSchedulingAgent> &eventScheduler,
+                                  const org::apache::nifi::minifi::utils::debug_shared_ptr<CronDrivenSchedulingAgent> &cronScheduler, const std::function<bool(const org::apache::nifi::minifi::utils::debug_shared_ptr<Processor>&)>& filter) {
   std::lock_guard<std::recursive_mutex> lock(mutex_);
 
   if (onScheduleTimer_) {
@@ -263,9 +263,9 @@ void ProcessGroup::stopProcessing(const std::shared_ptr<TimerDrivenSchedulingAge
   }
 }
 
-std::shared_ptr<Processor> ProcessGroup::findProcessor(utils::Identifier &uuid) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<Processor> ProcessGroup::findProcessor(utils::Identifier &uuid) {
   std::lock_guard<std::recursive_mutex> lock(mutex_);
-  std::shared_ptr<Processor> ret = NULL;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Processor> ret = NULL;
   for (auto processor : processors_) {
     logger_->log_debug("find processor %s", processor->getName());
     utils::Identifier processorUUID;
@@ -278,14 +278,14 @@ std::shared_ptr<Processor> ProcessGroup::findProcessor(utils::Identifier &uuid) 
   }
   for (auto processGroup : child_process_groups_) {
     logger_->log_debug("find processor child %s", processGroup->getName());
-    std::shared_ptr<Processor> processor = processGroup->findProcessor(uuid);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<Processor> processor = processGroup->findProcessor(uuid);
     if (processor)
       return processor;
   }
   return ret;
 }
 
-void ProcessGroup::addControllerService(const std::string &nodeId, std::shared_ptr<core::controller::ControllerServiceNode> &node) {
+void ProcessGroup::addControllerService(const std::string &nodeId, org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &node) {
   controller_service_map_.put(nodeId, node);
 }
 
@@ -294,13 +294,13 @@ void ProcessGroup::addControllerService(const std::string &nodeId, std::shared_p
  * @param node node identifier
  * @return controller service node, if it exists.
  */
-std::shared_ptr<core::controller::ControllerServiceNode> ProcessGroup::findControllerService(const std::string &nodeId) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> ProcessGroup::findControllerService(const std::string &nodeId) {
   return controller_service_map_.getControllerServiceNode(nodeId);
 }
 
-void ProcessGroup::getAllProcessors(std::vector<std::shared_ptr<Processor>> &processor_vec) {
+void ProcessGroup::getAllProcessors(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<Processor>> &processor_vec) {
   std::lock_guard<std::recursive_mutex> lock(mutex_);
-  std::shared_ptr<Processor> ret = NULL;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Processor> ret = NULL;
 
   for (auto processor : processors_) {
     logger_->log_debug("Current processor is %s", processor->getName());
@@ -311,16 +311,16 @@ void ProcessGroup::getAllProcessors(std::vector<std::shared_ptr<Processor>> &pro
   }
 }
 
-std::shared_ptr<Processor> ProcessGroup::findProcessor(const std::string &processorName) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<Processor> ProcessGroup::findProcessor(const std::string &processorName) {
   std::lock_guard<std::recursive_mutex> lock(mutex_);
-  std::shared_ptr<Processor> ret = NULL;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Processor> ret = NULL;
   for (auto processor : processors_) {
     logger_->log_debug("Current processor is %s", processor->getName());
     if (processor->getName() == processorName)
       return processor;
   }
   for (auto processGroup : child_process_groups_) {
-    std::shared_ptr<Processor> processor = processGroup->findProcessor(processorName);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<Processor> processor = processGroup->findProcessor(processorName);
     if (processor)
       return processor;
   }
@@ -340,7 +340,7 @@ void ProcessGroup::updatePropertyValue(std::string processorName, std::string pr
   return;
 }
 
-void ProcessGroup::getConnections(std::map<std::string, std::shared_ptr<Connection>> &connectionMap) {
+void ProcessGroup::getConnections(std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<Connection>> &connectionMap) {
   for (auto connection : connections_) {
     connectionMap[connection->getUUIDStr()] = connection;
     connectionMap[connection->getName()] = connection;
@@ -350,7 +350,7 @@ void ProcessGroup::getConnections(std::map<std::string, std::shared_ptr<Connecti
   }
 }
 
-void ProcessGroup::getConnections(std::map<std::string, std::shared_ptr<Connectable>> &connectionMap) {
+void ProcessGroup::getConnections(std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable>> &connectionMap) {
   for (auto connection : connections_) {
     connectionMap[connection->getUUIDStr()] = connection;
     connectionMap[connection->getName()] = connection;
@@ -360,7 +360,7 @@ void ProcessGroup::getConnections(std::map<std::string, std::shared_ptr<Connecta
   }
 }
 
-void ProcessGroup::getFlowFileContainers(std::map<std::string, std::shared_ptr<Connectable>> &containers) const {
+void ProcessGroup::getFlowFileContainers(std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable>> &containers) const {
   for (auto connection : connections_) {
     containers[connection->getUUIDStr()] = connection;
     containers[connection->getName()] = connection;
@@ -374,7 +374,7 @@ void ProcessGroup::getFlowFileContainers(std::map<std::string, std::shared_ptr<C
   }
 }
 
-void ProcessGroup::addConnection(std::shared_ptr<Connection> connection) {
+void ProcessGroup::addConnection(org::apache::nifi::minifi::utils::debug_shared_ptr<Connection> connection) {
   std::lock_guard<std::recursive_mutex> lock(mutex_);
 
   if (connections_.find(connection) == connections_.end()) {
@@ -382,12 +382,12 @@ void ProcessGroup::addConnection(std::shared_ptr<Connection> connection) {
     connections_.insert(connection);
     logger_->log_debug("Add connection %s into process group %s", connection->getName(), name_);
     utils::Identifier sourceUUID;
-    std::shared_ptr<Processor> source = NULL;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<Processor> source = NULL;
     connection->getSourceUUID(sourceUUID);
     source = this->findProcessor(sourceUUID);
     if (source)
       source->addConnection(connection);
-    std::shared_ptr<Processor> destination = NULL;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<Processor> destination = NULL;
     utils::Identifier destinationUUID;
     connection->getDestinationUUID(destinationUUID);
     destination = this->findProcessor(destinationUUID);
@@ -396,7 +396,7 @@ void ProcessGroup::addConnection(std::shared_ptr<Connection> connection) {
   }
 }
 
-void ProcessGroup::removeConnection(std::shared_ptr<Connection> connection) {
+void ProcessGroup::removeConnection(org::apache::nifi::minifi::utils::debug_shared_ptr<Connection> connection) {
   std::lock_guard<std::recursive_mutex> lock(mutex_);
 
   if (connections_.find(connection) != connections_.end()) {
@@ -404,12 +404,12 @@ void ProcessGroup::removeConnection(std::shared_ptr<Connection> connection) {
     connections_.erase(connection);
     logger_->log_debug("Remove connection %s into process group %s", connection->getName(), name_);
     utils::Identifier sourceUUID;
-    std::shared_ptr<Processor> source = NULL;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<Processor> source = NULL;
     connection->getSourceUUID(sourceUUID);
     source = this->findProcessor(sourceUUID);
     if (source)
       source->removeConnection(connection);
-    std::shared_ptr<Processor> destination = NULL;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<Processor> destination = NULL;
     utils::Identifier destinationUUID;
     connection->getDestinationUUID(destinationUUID);
     destination = this->findProcessor(destinationUUID);

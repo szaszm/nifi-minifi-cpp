@@ -30,7 +30,7 @@ namespace minifi {
 namespace processors {
 static const std::string BOOKMARK_KEY = "bookmark";
 
-Bookmark::Bookmark(const std::wstring& channel, const std::wstring& query, const std::string& bookmarkRootDir, const std::string& uuid, bool processOldEvents, std::shared_ptr<core::CoreComponentStateManager> state_manager, std::shared_ptr<logging::Logger> logger)
+Bookmark::Bookmark(const std::wstring& channel, const std::wstring& query, const std::string& bookmarkRootDir, const std::string& uuid, bool processOldEvents, std::shared_ptr<core::CoreComponentStateManager> state_manager, org::apache::nifi::minifi::utils::debug_shared_ptr<logging::Logger> logger)
   : logger_(logger)
   , state_manager_(state_manager) {
   std::unordered_map<std::string, std::string> state_map;

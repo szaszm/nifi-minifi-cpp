@@ -59,18 +59,18 @@ namespace nifi {
 namespace minifi {
 namespace core {
 
-std::shared_ptr<utils::IdGenerator> ProcessSession::id_generator_ = utils::IdGenerator::getIdGenerator();
+org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> ProcessSession::id_generator_ = utils::IdGenerator::getIdGenerator();
 
 ProcessSession::~ProcessSession() {
   removeReferences();
 }
 
-std::shared_ptr<core::FlowFile> ProcessSession::create() {
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> ProcessSession::create() {
   std::map<std::string, std::string> empty;
 
   auto flow_version = process_context_->getProcessorNode()->getFlowIdentifier();
 
-  std::shared_ptr<FlowFileRecord> record = std::make_shared<FlowFileRecord>(process_context_->getFlowFileRepository(), process_context_->getContentRepository(), empty);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> record = org::apache::nifi::minifi::utils::debug_make_shared<FlowFileRecord>(process_context_->getFlowFileRepository(), process_context_->getContentRepository(), empty);
   record->setSize(0);
   if (flow_version != nullptr) {
     auto flow_id = flow_version->getFlowId();
@@ -87,7 +87,7 @@ std::shared_ptr<core::FlowFile> ProcessSession::create() {
   return record;
 }
 
-void ProcessSession::add(const std::shared_ptr<core::FlowFile> &record) {
+void ProcessSession::add(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &record) {
   if (_updatedFlowFiles.find(record->getUUIDStr()) != _updatedFlowFiles.end()) {
     throw Exception(ExceptionType::PROCESSOR_EXCEPTION, "Mustn't add file that was provided by this session");
   }
@@ -95,9 +95,9 @@ void ProcessSession::add(const std::shared_ptr<core::FlowFile> &record) {
   record->setDeleted(false);
 }
 
-std::shared_ptr<core::FlowFile> ProcessSession::create(const std::shared_ptr<core::FlowFile> &parent) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> ProcessSession::create(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &parent) {
   std::map<std::string, std::string> empty;
-  std::shared_ptr<FlowFileRecord> record = std::make_shared<FlowFileRecord>(process_context_->getFlowFileRepository(), process_context_->getContentRepository(), empty);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> record = org::apache::nifi::minifi::utils::debug_make_shared<FlowFileRecord>(process_context_->getFlowFileRepository(), process_context_->getContentRepository(), empty);
   if (record) {
     record->setSize(0);
     auto flow_version = process_context_->getProcessorNode()->getFlowIdentifier();
@@ -127,12 +127,12 @@ std::shared_ptr<core::FlowFile> ProcessSession::create(const std::shared_ptr<cor
   return record;
 }
 
-std::shared_ptr<core::FlowFile> ProcessSession::clone(const std::shared_ptr<core::FlowFile> &parent) {
-  std::shared_ptr<core::FlowFile> record = this->create(parent);
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> ProcessSession::clone(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &parent) {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> record = this->create(parent);
   if (record) {
     logger_->log_debug("Cloned parent flow files %s to %s", parent->getUUIDStr(), record->getUUIDStr());
     // Copy Resource Claim
-    std::shared_ptr<ResourceClaim> parent_claim = parent->getResourceClaim();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim> parent_claim = parent->getResourceClaim();
     record->setResourceClaim(parent_claim);
     if (parent_claim) {
       record->setOffset(parent->getOffset());
@@ -143,9 +143,9 @@ std::shared_ptr<core::FlowFile> ProcessSession::clone(const std::shared_ptr<core
   return record;
 }
 
-std::shared_ptr<core::FlowFile> ProcessSession::cloneDuringTransfer(std::shared_ptr<core::FlowFile> &parent) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> ProcessSession::cloneDuringTransfer(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &parent) {
   std::map<std::string, std::string> empty;
-  std::shared_ptr<core::FlowFile> record = std::make_shared<FlowFileRecord>(process_context_->getFlowFileRepository(), process_context_->getContentRepository(), empty);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> record = org::apache::nifi::minifi::utils::debug_make_shared<FlowFileRecord>(process_context_->getFlowFileRepository(), process_context_->getContentRepository(), empty);
 
   if (record) {
     auto flow_version = process_context_->getProcessorNode()->getFlowIdentifier();
@@ -171,7 +171,7 @@ std::shared_ptr<core::FlowFile> ProcessSession::cloneDuringTransfer(std::shared_
     record->getlineageIdentifiers().insert(parent->getUUIDStr());
 
     // Copy Resource Claim
-    std::shared_ptr<ResourceClaim> parent_claim = parent->getResourceClaim();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim> parent_claim = parent->getResourceClaim();
     record->setResourceClaim(parent_claim);
     if (parent_claim) {
       record->setOffset(parent->getOffset());
@@ -183,8 +183,8 @@ std::shared_ptr<core::FlowFile> ProcessSession::cloneDuringTransfer(std::shared_
   return record;
 }
 
-std::shared_ptr<core::FlowFile> ProcessSession::clone(const std::shared_ptr<core::FlowFile> &parent, int64_t offset, int64_t size) {
-  std::shared_ptr<core::FlowFile> record = this->create(parent);
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> ProcessSession::clone(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &parent, int64_t offset, int64_t size) {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> record = this->create(parent);
   if (record) {
     logger_->log_debug("Cloned parent flow files %s to %s, with %u:%u", parent->getUUIDStr(), record->getUUIDStr(), offset, size);
     if (parent->getResourceClaim()) {
@@ -207,45 +207,45 @@ std::shared_ptr<core::FlowFile> ProcessSession::clone(const std::shared_ptr<core
   return record;
 }
 
-void ProcessSession::remove(const std::shared_ptr<core::FlowFile> &flow) {
+void ProcessSession::remove(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow) {
   flow->setDeleted(true);
   _deletedFlowFiles[flow->getUUIDStr()] = flow;
   std::string reason = process_context_->getProcessorNode()->getName() + " drop flow record " + flow->getUUIDStr();
   provenance_report_->drop(flow, reason);
 }
 
-void ProcessSession::putAttribute(const std::shared_ptr<core::FlowFile> &flow, std::string key, std::string value) {
+void ProcessSession::putAttribute(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow, std::string key, std::string value) {
   flow->setAttribute(key, value);
   std::stringstream details;
   details << process_context_->getProcessorNode()->getName() << " modify flow record " << flow->getUUIDStr() << " attribute " << key << ":" << value;
   provenance_report_->modifyAttributes(flow, details.str());
 }
 
-void ProcessSession::removeAttribute(const std::shared_ptr<core::FlowFile> &flow, std::string key) {
+void ProcessSession::removeAttribute(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow, std::string key) {
   flow->removeAttribute(key);
   std::stringstream details;
   details << process_context_->getProcessorNode()->getName() << " remove flow record " << flow->getUUIDStr() << " attribute " + key;
   provenance_report_->modifyAttributes(flow, details.str());
 }
 
-void ProcessSession::penalize(const std::shared_ptr<core::FlowFile> &flow) {
+void ProcessSession::penalize(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow) {
   uint64_t penalization_period = process_context_->getProcessorNode()->getPenalizationPeriodMsec();
   logging::LOG_INFO(logger_) << "Penalizing " << flow->getUUIDStr() << " for " << penalization_period << "ms at " << process_context_->getProcessorNode()->getName();
   flow->setPenaltyExpiration(utils::timeutils::getTimeMillis() + penalization_period);
 }
 
-void ProcessSession::transfer(const std::shared_ptr<core::FlowFile> &flow, Relationship relationship) {
+void ProcessSession::transfer(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow, Relationship relationship) {
   logging::LOG_INFO(logger_) << "Transferring " << flow->getUUIDStr() << " from " << process_context_->getProcessorNode()->getName() << " to relationship " << relationship.getName();
   _transferRelationship[flow->getUUIDStr()] = relationship;
   flow->setDeleted(false);
 }
 
-void ProcessSession::write(const std::shared_ptr<core::FlowFile> &flow, OutputStreamCallback *callback) {
-  std::shared_ptr<ResourceClaim> claim = std::make_shared<ResourceClaim>(process_context_->getContentRepository());
+void ProcessSession::write(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow, OutputStreamCallback *callback) {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim> claim = org::apache::nifi::minifi::utils::debug_make_shared<ResourceClaim>(process_context_->getContentRepository());
 
   try {
     uint64_t startTime = utils::timeutils::getTimeMillis();
-    std::shared_ptr<io::BaseStream> stream = process_context_->getContentRepository()->write(claim);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream = process_context_->getContentRepository()->write(claim);
     // Call the callback to write the content
     if (nullptr == stream) {
       throw Exception(FILE_OPERATION_EXCEPTION, "Failed to open flowfile content for write");
@@ -271,8 +271,8 @@ void ProcessSession::write(const std::shared_ptr<core::FlowFile> &flow, OutputSt
   }
 }
 
-void ProcessSession::append(const std::shared_ptr<core::FlowFile> &flow, OutputStreamCallback *callback) {
-  std::shared_ptr<ResourceClaim> claim = flow->getResourceClaim();
+void ProcessSession::append(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow, OutputStreamCallback *callback) {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim> claim = flow->getResourceClaim();
   if (!claim) {
     // No existed claim for append, we need to create new claim
     return write(flow, callback);
@@ -280,7 +280,7 @@ void ProcessSession::append(const std::shared_ptr<core::FlowFile> &flow, OutputS
 
   try {
     uint64_t startTime = utils::timeutils::getTimeMillis();
-    std::shared_ptr<io::BaseStream> stream = process_context_->getContentRepository()->write(claim, true);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream = process_context_->getContentRepository()->write(claim, true);
     if (nullptr == stream) {
       throw Exception(FILE_OPERATION_EXCEPTION, "Failed to open flowfile content for append");
     }
@@ -308,9 +308,9 @@ void ProcessSession::append(const std::shared_ptr<core::FlowFile> &flow, OutputS
   }
 }
 
-void ProcessSession::read(const std::shared_ptr<core::FlowFile> &flow, InputStreamCallback *callback) {
+void ProcessSession::read(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow, InputStreamCallback *callback) {
   try {
-    std::shared_ptr<ResourceClaim> claim = nullptr;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim> claim = nullptr;
 
     if (flow->getResourceClaim() == nullptr) {
       // No existed claim for read, we throw exception
@@ -323,7 +323,7 @@ void ProcessSession::read(const std::shared_ptr<core::FlowFile> &flow, InputStre
 
     claim = flow->getResourceClaim();
 
-    std::shared_ptr<io::BaseStream> stream = process_context_->getContentRepository()->read(claim);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream = process_context_->getContentRepository()->read(claim);
 
     if (nullptr == stream) {
       throw Exception(FILE_OPERATION_EXCEPTION, "Failed to open flowfile content for read");
@@ -349,14 +349,14 @@ void ProcessSession::read(const std::shared_ptr<core::FlowFile> &flow, InputStre
  * @param flow flow file
  *
  */
-void ProcessSession::importFrom(io::DataStream &stream, const std::shared_ptr<core::FlowFile> &flow) {
-  std::shared_ptr<ResourceClaim> claim = std::make_shared<ResourceClaim>(process_context_->getContentRepository());
+void ProcessSession::importFrom(io::DataStream &stream, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow) {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim> claim = org::apache::nifi::minifi::utils::debug_make_shared<ResourceClaim>(process_context_->getContentRepository());
   size_t max_read = getpagesize();
   std::vector<uint8_t> charBuffer(max_read);
 
   try {
     auto startTime = utils::timeutils::getTimeMillis();
-    std::shared_ptr<io::BaseStream> content_stream = process_context_->getContentRepository()->write(claim);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> content_stream = process_context_->getContentRepository()->write(claim);
 
     if (nullptr == content_stream) {
       throw Exception(FILE_OPERATION_EXCEPTION, "Could not obtain claim for " + claim->getContentFullPath());
@@ -393,8 +393,8 @@ void ProcessSession::importFrom(io::DataStream &stream, const std::shared_ptr<co
   }
 }
 
-void ProcessSession::import(std::string source, const std::shared_ptr<core::FlowFile> &flow, bool keepSource, uint64_t offset) {
-  std::shared_ptr<ResourceClaim> claim = std::make_shared<ResourceClaim>(process_context_->getContentRepository());
+void ProcessSession::import(std::string source, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow, bool keepSource, uint64_t offset) {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim> claim = org::apache::nifi::minifi::utils::debug_make_shared<ResourceClaim>(process_context_->getContentRepository());
   size_t size = getpagesize();
   std::vector<uint8_t> charBuffer(size);
 
@@ -402,7 +402,7 @@ void ProcessSession::import(std::string source, const std::shared_ptr<core::Flow
     auto startTime = utils::timeutils::getTimeMillis();
     std::ifstream input;
     input.open(source.c_str(), std::fstream::in | std::fstream::binary);
-    std::shared_ptr<io::BaseStream> stream = process_context_->getContentRepository()->write(claim);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream = process_context_->getContentRepository()->write(claim);
     if (nullptr == stream) {
       throw Exception(FILE_OPERATION_EXCEPTION, "Failed to open new flowfile content for write");
     }
@@ -464,10 +464,10 @@ void ProcessSession::import(std::string source, const std::shared_ptr<core::Flow
   }
 }
 
-void ProcessSession::import(const std::string& source, std::vector<std::shared_ptr<FlowFileRecord>> &flows, uint64_t offset, char inputDelimiter) {
-  std::shared_ptr<ResourceClaim> claim;
-  std::shared_ptr<io::BaseStream> stream;
-  std::shared_ptr<FlowFileRecord> flowFile;
+void ProcessSession::import(const std::string& source, std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord>> &flows, uint64_t offset, char inputDelimiter) {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim> claim;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> flowFile;
 
   std::vector<uint8_t> buffer(getpagesize());
   try {
@@ -516,7 +516,7 @@ void ProcessSession::import(const std::string& source, std::vector<std::shared_p
         /* Create claim and stream if needed and append data */
         if (claim == nullptr) {
           startTime = utils::timeutils::getTimeMillis();
-          claim = std::make_shared<ResourceClaim>(process_context_->getContentRepository());
+          claim = org::apache::nifi::minifi::utils::debug_make_shared<ResourceClaim>(process_context_->getContentRepository());
         }
         if (stream == nullptr) {
           stream = process_context_->getContentRepository()->write(claim);
@@ -535,7 +535,7 @@ void ProcessSession::import(const std::string& source, std::vector<std::shared_p
         if (delimiterPos == end) {
           break;
         }
-        flowFile = std::static_pointer_cast<FlowFileRecord>(create());
+        flowFile = static_pointer_cast<FlowFileRecord>(create());
         flowFile->setSize(stream->getSize());
         flowFile->setOffset(0);
         flowFile->setResourceClaim(claim);
@@ -565,7 +565,7 @@ void ProcessSession::import(const std::string& source, std::vector<std::shared_p
   }
 }
 
-void ProcessSession::import(std::string source, std::vector<std::shared_ptr<FlowFileRecord>> &flows, bool keepSource, uint64_t offset, char inputDelimiter) {
+void ProcessSession::import(std::string source, std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord>> &flows, bool keepSource, uint64_t offset, char inputDelimiter) {
 // this function calls a deprecated function, but it is itself deprecated, so suppress warnings
 #if defined(__clang__)
 #pragma clang diagnostic push
@@ -591,7 +591,7 @@ void ProcessSession::import(std::string source, std::vector<std::shared_ptr<Flow
   }
 }
 
-bool ProcessSession::exportContent(const std::string &destination, const std::string &tmpFile, const std::shared_ptr<core::FlowFile> &flow, bool keepContent) {
+bool ProcessSession::exportContent(const std::string &destination, const std::string &tmpFile, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow, bool keepContent) {
   logger_->log_debug("Exporting content of %s to %s", flow->getUUIDStr(), destination);
 
   ProcessSessionReadCallback cb(tmpFile, destination, logger_);
@@ -608,7 +608,7 @@ bool ProcessSession::exportContent(const std::string &destination, const std::st
   return commit_ok;
 }
 
-bool ProcessSession::exportContent(const std::string &destination, const std::shared_ptr<core::FlowFile> &flow, bool keepContent) {
+bool ProcessSession::exportContent(const std::string &destination, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow, bool keepContent) {
   utils::Identifier tmpFileUuid;
   id_generator_->generate(tmpFileUuid);
   std::stringstream tmpFileSs;
@@ -618,7 +618,7 @@ bool ProcessSession::exportContent(const std::string &destination, const std::sh
   return exportContent(destination, tmpFileName, flow, keepContent);
 }
 
-void ProcessSession::stash(const std::string &key, const std::shared_ptr<core::FlowFile> &flow) {
+void ProcessSession::stash(const std::string &key, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow) {
   logger_->log_debug("Stashing content from %s to key %s", flow->getUUIDStr(), key);
 
   auto claim = flow->getResourceClaim();
@@ -636,7 +636,7 @@ void ProcessSession::stash(const std::string &key, const std::shared_ptr<core::F
   flow->clearResourceClaim();
 }
 
-void ProcessSession::restore(const std::string &key, const std::shared_ptr<core::FlowFile> &flow) {
+void ProcessSession::restore(const std::string &key, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow) {
   logger_->log_info("Restoring content to %s from key %s", flow->getUUIDStr(), key);
 
   // Restore the claim
@@ -662,14 +662,14 @@ void ProcessSession::commit() {
   try {
     // First we clone the flow record based on the transfered relationship for updated flow record
     for (auto && it : _updatedFlowFiles) {
-      std::shared_ptr<core::FlowFile> record = it.second;
+      org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> record = it.second;
       if (record->isDeleted())
         continue;
       auto itRelationship = this->_transferRelationship.find(record->getUUIDStr());
       if (itRelationship != _transferRelationship.end()) {
         Relationship relationship = itRelationship->second;
         // Find the relationship, we need to find the connections for that relationship
-        std::set<std::shared_ptr<Connectable>> connections = process_context_->getProcessorNode()->getOutGoingConnections(relationship.getName());
+        std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable>> connections = process_context_->getProcessorNode()->getOutGoingConnections(relationship.getName());
         if (connections.empty()) {
           // No connection
           if (!process_context_->getProcessorNode()->isAutoTerminated(relationship)) {
@@ -683,13 +683,13 @@ void ProcessSession::commit() {
         } else {
           // We connections, clone the flow and assign the connection accordingly
           for (auto itConnection = connections.begin(); itConnection != connections.end(); ++itConnection) {
-            std::shared_ptr<Connectable> connection = *itConnection;
+            org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable> connection = *itConnection;
             if (itConnection == connections.begin()) {
               // First connection which the flow need be routed to
               record->setConnection(connection);
             } else {
               // Clone the flow file and route to the connection
-              std::shared_ptr<core::FlowFile> cloneRecord;
+              org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> cloneRecord;
               cloneRecord = this->cloneDuringTransfer(record);
               if (cloneRecord)
                 cloneRecord->setConnection(connection);
@@ -706,14 +706,14 @@ void ProcessSession::commit() {
 
     // Do the same thing for added flow file
     for (const auto& it : _addedFlowFiles) {
-      std::shared_ptr<core::FlowFile> record = it.second;
+      org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> record = it.second;
       if (record->isDeleted())
         continue;
       auto itRelationship = this->_transferRelationship.find(record->getUUIDStr());
       if (itRelationship != _transferRelationship.end()) {
         Relationship relationship = itRelationship->second;
         // Find the relationship, we need to find the connections for that relationship
-        std::set<std::shared_ptr<Connectable>> connections = process_context_->getProcessorNode()->getOutGoingConnections(relationship.getName());
+        std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable>> connections = process_context_->getProcessorNode()->getOutGoingConnections(relationship.getName());
         if (connections.empty()) {
           // No connection
           if (!process_context_->getProcessorNode()->isAutoTerminated(relationship)) {
@@ -728,13 +728,13 @@ void ProcessSession::commit() {
         } else {
           // We connections, clone the flow and assign the connection accordingly
           for (auto itConnection = connections.begin(); itConnection != connections.end(); ++itConnection) {
-            std::shared_ptr<Connectable> connection(*itConnection);
+            org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable> connection(*itConnection);
             if (itConnection == connections.begin()) {
               // First connection which the flow need be routed to
               record->setConnection(connection);
             } else {
               // Clone the flow file and route to the connection
-              std::shared_ptr<core::FlowFile> cloneRecord;
+              org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> cloneRecord;
               cloneRecord = this->cloneDuringTransfer(record);
               if (cloneRecord)
                 cloneRecord->setConnection(connection);
@@ -749,12 +749,12 @@ void ProcessSession::commit() {
       }
     }
 
-    std::map<std::shared_ptr<Connectable>, std::vector<std::shared_ptr<FlowFile>>> connectionQueues;
+    std::map<org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable>, std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFile>>> connectionQueues;
 
-    std::shared_ptr<Connectable> connection = nullptr;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable> connection = nullptr;
     // Complete process the added and update flow files for the session, send the flow file to its queue
     for (const auto &it : _updatedFlowFiles) {
-      std::shared_ptr<core::FlowFile> record = it.second;
+      org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> record = it.second;
       logger_->log_trace("See %s in %s", record->getUUIDStr(), "_updatedFlowFiles");
       if (record->isDeleted()) {
         continue;
@@ -766,7 +766,7 @@ void ProcessSession::commit() {
       }
     }
     for (const auto &it : _addedFlowFiles) {
-      std::shared_ptr<core::FlowFile> record = it.second;
+      org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> record = it.second;
       logger_->log_trace("See %s in %s", record->getUUIDStr(), "_addedFlowFiles");
       if (record->isDeleted()) {
         continue;
@@ -778,7 +778,7 @@ void ProcessSession::commit() {
     }
     // Process the clone flow files
     for (const auto &it : _clonedFlowFiles) {
-      std::shared_ptr<core::FlowFile> record = it.second;
+      org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> record = it.second;
       logger_->log_trace("See %s in %s", record->getUUIDStr(), "_clonedFlowFiles");
       if (record->isDeleted()) {
         continue;
@@ -810,7 +810,7 @@ void ProcessSession::commit() {
     persistFlowFilesBeforeTransfer(connectionQueues, _flowFileSnapShots);
 
     for (auto& cq : connectionQueues) {
-      auto connection = std::dynamic_pointer_cast<Connection>(cq.first);
+      auto connection = dynamic_pointer_cast<Connection>(cq.first);
       if (connection) {
         connection->multiPut(cq.second);
       } else {
@@ -843,18 +843,18 @@ void ProcessSession::commit() {
 void ProcessSession::rollback() {
   // new FlowFiles are only persisted during commit
   // no need to delete them here
-  std::map<std::shared_ptr<Connectable>, std::vector<std::shared_ptr<FlowFile>>> connectionQueues;
+  std::map<org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable>, std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFile>>> connectionQueues;
 
   try {
-    std::shared_ptr<Connectable> connection = nullptr;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable> connection = nullptr;
     // Restore the flowFiles from the snapshot
     for (const auto &it : _updatedFlowFiles) {
-      std::shared_ptr<core::FlowFile> record = it.second;
+      org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> record = it.second;
       auto snaphost = _flowFileSnapShots[record->getUUIDStr()];
       *record = *snaphost;
       connection = record->getOriginalConnection();
       if ((connection) != nullptr) {
-        std::shared_ptr<FlowFileRecord> flowf = std::static_pointer_cast<FlowFileRecord>(record);
+        org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> flowf = static_pointer_cast<FlowFileRecord>(record);
         flowf->setSnapShot(false);
         logger_->log_debug("ProcessSession rollback for %s, record %s, to connection %s", process_context_->getProcessorNode()->getName(), record->getUUIDStr(), connection->getName());
         connectionQueues[connection].push_back(record);
@@ -867,7 +867,7 @@ void ProcessSession::rollback() {
 
     // put everything back where it came from
     for (auto& cq : connectionQueues) {
-      auto connection = std::dynamic_pointer_cast<Connection>(cq.first);
+      auto connection = dynamic_pointer_cast<Connection>(cq.first);
       if (connection) {
         connection->multiPut(cq.second);
       } else {
@@ -894,8 +894,8 @@ void ProcessSession::rollback() {
 }
 
 void ProcessSession::persistFlowFilesBeforeTransfer(
-    std::map<std::shared_ptr<Connectable>, std::vector<std::shared_ptr<core::FlowFile> > >& transactionMap,
-    const std::map<std::string, std::shared_ptr<FlowFile>>& originalFlowFileSnapShots) {
+    std::map<org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable>, std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> > >& transactionMap,
+    const std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFile>>& originalFlowFileSnapShots) {
 
   std::vector<std::pair<std::string, std::unique_ptr<io::DataStream>>> flowData;
 
@@ -903,8 +903,8 @@ void ProcessSession::persistFlowFilesBeforeTransfer(
   auto contentRepo = process_context_->getContentRepository();
 
   for (auto& transaction : transactionMap) {
-    const std::shared_ptr<Connectable>& target = transaction.first;
-    std::shared_ptr<Connection> connection = std::dynamic_pointer_cast<Connection>(target);
+    const org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable>& target = transaction.first;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<Connection> connection = dynamic_pointer_cast<Connection>(target);
     const bool shouldDropEmptyFiles = connection ? connection->getDropEmptyFlowFiles() : false;
     auto& flows = transaction.second;
     for (auto &ff : flows) {
@@ -927,8 +927,8 @@ void ProcessSession::persistFlowFilesBeforeTransfer(
   }
 
   for (auto& transaction : transactionMap) {
-    const std::shared_ptr<Connectable>& target = transaction.first;
-    std::shared_ptr<Connection> connection = std::dynamic_pointer_cast<Connection>(target);
+    const org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable>& target = transaction.first;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<Connection> connection = dynamic_pointer_cast<Connection>(target);
     const bool shouldDropEmptyFiles = connection ? connection->getDropEmptyFlowFiles() : false;
     auto& flows = transaction.second;
     for (auto &ff : flows) {
@@ -958,19 +958,19 @@ void ProcessSession::persistFlowFilesBeforeTransfer(
   }
 }
 
-std::shared_ptr<core::FlowFile> ProcessSession::get() {
-  std::shared_ptr<Connectable> first = process_context_->getProcessorNode()->pickIncomingConnection();
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> ProcessSession::get() {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable> first = process_context_->getProcessorNode()->pickIncomingConnection();
 
   if (first == nullptr) {
     logger_->log_trace("Get is null for %s", process_context_->getProcessorNode()->getName());
     return nullptr;
   }
 
-  std::shared_ptr<Connection> current = std::static_pointer_cast<Connection>(first);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Connection> current = static_pointer_cast<Connection>(first);
 
   do {
-    std::set<std::shared_ptr<core::FlowFile> > expired;
-    std::shared_ptr<core::FlowFile> ret = current->poll(expired);
+    std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> > expired;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> ret = current->poll(expired);
     if (!expired.empty()) {
       // Remove expired flow record
       for (const auto& record : expired) {
@@ -990,7 +990,7 @@ std::shared_ptr<core::FlowFile> ProcessSession::get() {
       ret->setDeleted(false);
       _updatedFlowFiles[ret->getUUIDStr()] = ret;
       std::map<std::string, std::string> empty;
-      std::shared_ptr<core::FlowFile> snapshot = std::make_shared<FlowFileRecord>(process_context_->getFlowFileRepository(), process_context_->getContentRepository(), empty);
+      org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> snapshot = org::apache::nifi::minifi::utils::debug_make_shared<FlowFileRecord>(process_context_->getFlowFileRepository(), process_context_->getContentRepository(), empty);
       auto flow_version = process_context_->getProcessorNode()->getFlowIdentifier();
       if (flow_version != nullptr) {
         auto flow_id = flow_version->getFlowId();
@@ -1003,14 +1003,14 @@ std::shared_ptr<core::FlowFile> ProcessSession::get() {
       _flowFileSnapShots[snapshot->getUUIDStr()] = snapshot;
       return ret;
     }
-    current = std::static_pointer_cast<Connection>(process_context_->getProcessorNode()->pickIncomingConnection());
+    current = static_pointer_cast<Connection>(process_context_->getProcessorNode()->pickIncomingConnection());
   } while (current != nullptr && current != first);
 
   return nullptr;
 }
 
 bool ProcessSession::outgoingConnectionsFull(const std::string& relationship) {
-  std::set<std::shared_ptr<Connectable>> connections = process_context_->getProcessorNode()->getOutGoingConnections(relationship);
+  std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable>> connections = process_context_->getProcessorNode()->getOutGoingConnections(relationship);
   Connection * connection = nullptr;
   for (const auto& conn : connections) {
     connection = dynamic_cast<Connection*>(conn.get());

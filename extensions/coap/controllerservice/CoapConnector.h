@@ -58,7 +58,7 @@ class CoapConnectorService : public core::controller::ControllerService {
     initialize();
   }
 
-  explicit CoapConnectorService(const std::string &name, const std::shared_ptr<Configure> &configuration)
+  explicit CoapConnectorService(const std::string &name, const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configuration)
       : ControllerService(name) {
     setConfiguration(configuration);
     initialize();

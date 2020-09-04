@@ -46,7 +46,7 @@ namespace nifi {
 namespace minifi {
 namespace processors {
 
-std::shared_ptr<utils::IdGenerator> GetEnvironmentalSensors::id_generator_ = utils::IdGenerator::getIdGenerator();
+org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> GetEnvironmentalSensors::id_generator_ = utils::IdGenerator::getIdGenerator();
 
 const char *GetEnvironmentalSensors::ProcessorName = "GetEnvironmentalSensors";
 
@@ -64,7 +64,7 @@ void GetEnvironmentalSensors::initialize() {
   setSupportedRelationships(relationships);
 }
 
-void GetEnvironmentalSensors::onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
+void GetEnvironmentalSensors::onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
   SensorBase::onSchedule(context, sessionFactory);
 
   humidity_sensor_ = RTHumidity::createHumidity(&settings);
@@ -90,7 +90,7 @@ void GetEnvironmentalSensors::notifyStop() {
 
 GetEnvironmentalSensors::~GetEnvironmentalSensors() = default;
 
-void GetEnvironmentalSensors::onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
+void GetEnvironmentalSensors::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
 
   auto flow_file_ = session->create();
 

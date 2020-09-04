@@ -116,7 +116,7 @@ class ListenHTTP : public core::Processor {
     // Send HTTP 500 error response to client
     void send_error_response(struct mg_connection *conn);
     bool auth_request(mg_connection *conn, const mg_request_info *req_info) const;
-    void set_header_attributes(const mg_request_info *req_info, const std::shared_ptr<FlowFileRecord> &flow_file) const;
+    void set_header_attributes(const mg_request_info *req_info, const org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> &flow_file) const;
     void write_body(mg_connection *conn, const mg_request_info *req_info, bool include_payload = true);
 
     std::string base_uri_;
@@ -136,7 +136,7 @@ class ListenHTTP : public core::Processor {
     explicit ResponseBodyReadCallback(std::string *out_str)
         : out_str_(out_str) {
     }
-    int64_t process(std::shared_ptr<io::BaseStream> stream) {
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
       out_str_->resize(stream->getSize());
       uint64_t num_read = stream->readData(reinterpret_cast<uint8_t *>(&(*out_str_)[0]),
                                            gsl::narrow<int>(stream->getSize()));
@@ -156,7 +156,7 @@ class ListenHTTP : public core::Processor {
   class WriteCallback : public OutputStreamCallback {
    public:
     WriteCallback(struct mg_connection *conn, const struct mg_request_info *reqInfo);
-    int64_t process(std::shared_ptr<io::BaseStream> stream);
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream);
 
    private:
     // Logger

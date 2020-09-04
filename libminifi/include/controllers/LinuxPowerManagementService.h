@@ -64,7 +64,7 @@ class LinuxPowerManagerService : public ThreadManagementService {
         logger_(logging::LoggerFactory<LinuxPowerManagerService>::getLogger()) {
   }
 
-  explicit LinuxPowerManagerService(const std::string &name, const std::shared_ptr<Configure> &configuration)
+  explicit LinuxPowerManagerService(const std::string &name, const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configuration)
       : LinuxPowerManagerService(name) {
     setConfiguration(configuration);
     initialize();

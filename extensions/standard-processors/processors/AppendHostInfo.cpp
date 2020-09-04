@@ -72,7 +72,7 @@ void AppendHostInfo::initialize() {
 }
 
 void AppendHostInfo::onTrigger(core::ProcessContext *context, core::ProcessSession *session) {
-  std::shared_ptr<core::FlowFile> flow = session->get();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow = session->get();
   if (!flow)
     return;
 

@@ -59,7 +59,7 @@ class AWSCredentialsService : public core::controller::ControllerService {
         logger_(logging::LoggerFactory<AWSCredentialsService>::getLogger()) {
   }
 
-  explicit AWSCredentialsService(const std::string &name, const std::shared_ptr<Configure> &configuration)
+  explicit AWSCredentialsService(const std::string &name, const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configuration)
       : ControllerService(name),
         logger_(logging::LoggerFactory<AWSCredentialsService>::getLogger()) {
 

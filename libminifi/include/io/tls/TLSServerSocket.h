@@ -37,7 +37,7 @@ namespace io {
  */
 class TLSServerSocket : public BaseServerSocket, public TLSSocket {
  public:
-  explicit TLSServerSocket(const std::shared_ptr<TLSContext> &context, const std::string &hostname, const uint16_t port, const uint16_t listeners);
+  explicit TLSServerSocket(const org::apache::nifi::minifi::utils::debug_shared_ptr<TLSContext> &context, const std::string &hostname, const uint16_t port, const uint16_t listeners);
 
   virtual ~TLSServerSocket();
 

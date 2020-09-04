@@ -27,15 +27,15 @@ namespace minifi {
 namespace core {
 namespace controller {
 
-std::shared_ptr<ControllerService> &ControllerServiceNode::getControllerServiceImplementation() {
+org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerService> &ControllerServiceNode::getControllerServiceImplementation() {
   return controller_service_;
 }
 
-std::vector<std::shared_ptr<ControllerServiceNode> > &ControllerServiceNode::getLinkedControllerServices() {
+std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerServiceNode> > &ControllerServiceNode::getLinkedControllerServices() {
   return linked_controller_services_;
 }
 
-std::vector<std::shared_ptr<ConfigurableComponent> > &ControllerServiceNode::getLinkedComponents() {
+std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<ConfigurableComponent> > &ControllerServiceNode::getLinkedComponents() {
   return linked_components_;
 }
 

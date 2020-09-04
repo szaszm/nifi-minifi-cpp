@@ -57,8 +57,8 @@ class CaptureRTSPFrame : public core::Processor {
   void onTrigger(core::ProcessContext *context, core::ProcessSession *session) override {
     logger_->log_error("onTrigger invocation with raw pointers is not implemented");
   }
-  void onTrigger(const std::shared_ptr<core::ProcessContext> &context,
-                 const std::shared_ptr<core::ProcessSession> &session) override;
+  void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context,
+                 const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) override;
 
   void notifyStop() override;
 
@@ -69,7 +69,7 @@ class CaptureRTSPFrame : public core::Processor {
     }
     ~CaptureRTSPFrameWriteCallback() override = default;
 
-    int64_t process(std::shared_ptr<io::BaseStream> stream) override {
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) override {
       int64_t ret = 0;
       imencode(image_encoding_, image_mat_, image_buf_);
       ret = stream->write(image_buf_.data(), image_buf_.size());
@@ -121,13 +121,13 @@ class CaptureRTSPFrame : public core::Processor {
 //
 //  uint16_t connection_attempt_limit_;
 //
-//  std::shared_ptr<GetTCPMetrics> metrics_;
+//  org::apache::nifi::minifi::utils::debug_shared_ptr<GetTCPMetrics> metrics_;
 //
 //  // Mutex for ensuring clients are running
 //
 //  std::mutex mutex_;
 //
-//  std::shared_ptr<minifi::controllers::SSLContextService> ssl_service_;
+//  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::controllers::SSLContextService> ssl_service_;
 
 };
 

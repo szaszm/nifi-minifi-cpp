@@ -43,16 +43,16 @@ class ControllerServiceProvider : public CoreComponent, public ConfigurableCompo
   explicit ControllerServiceProvider(const std::string &name)
       : CoreComponent(name),
         ConfigurableComponent() {
-    controller_map_ = std::make_shared<ControllerServiceMap>();
+    controller_map_ = org::apache::nifi::minifi::utils::debug_make_shared<ControllerServiceMap>();
   }
 
-  explicit ControllerServiceProvider(std::shared_ptr<ControllerServiceMap> services)
+  explicit ControllerServiceProvider(org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerServiceMap> services)
       : CoreComponent(core::getClassName<ControllerServiceProvider>()),
         ConfigurableComponent(),
         controller_map_(services) {
   }
 
-  explicit ControllerServiceProvider(const std::string &name, std::shared_ptr<ControllerServiceMap> services)
+  explicit ControllerServiceProvider(const std::string &name, org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerServiceMap> services)
       : CoreComponent(name),
         ConfigurableComponent(),
         controller_map_(services) {
@@ -73,7 +73,7 @@ class ControllerServiceProvider : public CoreComponent, public ConfigurableCompo
    * @param id controller service identifier.
    * @return shared pointer to the controller service node.
    */
-  virtual std::shared_ptr<ControllerServiceNode> createControllerService(const std::string &type, const std::string &longType, const std::string &id, bool firstTimeAdded) = 0;
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerServiceNode> createControllerService(const std::string &type, const std::string &longType, const std::string &id, bool firstTimeAdded) = 0;
 
   /**
    * Gets a controller service node wrapping the controller service
@@ -82,7 +82,7 @@ class ControllerServiceProvider : public CoreComponent, public ConfigurableCompo
    * @param id controller service identifier.
    * @return shared pointer to the controller service node.
    */
-  virtual std::shared_ptr<ControllerServiceNode> getControllerServiceNode(const std::string &id) const {
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerServiceNode> getControllerServiceNode(const std::string &id) const {
     return controller_map_->getControllerServiceNode(id);
   }
 
@@ -90,7 +90,7 @@ class ControllerServiceProvider : public CoreComponent, public ConfigurableCompo
    * Removes a controller service.
    * @param serviceNode controller service node.
    */
-  virtual void removeControllerService(const std::shared_ptr<ControllerServiceNode> &serviceNode) {
+  virtual void removeControllerService(const org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerServiceNode> &serviceNode) {
     controller_map_->removeControllerService(serviceNode);
   }
 
@@ -98,19 +98,19 @@ class ControllerServiceProvider : public CoreComponent, public ConfigurableCompo
    * Enables the provided controller service
    * @param serviceNode controller service node.
    */
-  virtual std::future<utils::TaskRescheduleInfo> enableControllerService(std::shared_ptr<ControllerServiceNode> &serviceNode) = 0;
+  virtual std::future<utils::TaskRescheduleInfo> enableControllerService(org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerServiceNode> &serviceNode) = 0;
 
   /**
    * Enables the provided controller service nodes
    * @param serviceNode controller service node.
    */
-  virtual void enableControllerServices(std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> serviceNodes) = 0;
+  virtual void enableControllerServices(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> serviceNodes) = 0;
 
   /**
    * Disables the provided controller service node
    * @param serviceNode controller service node.
    */
-  virtual std::future<utils::TaskRescheduleInfo> disableControllerService(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) = 0;
+  virtual std::future<utils::TaskRescheduleInfo> disableControllerService(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) = 0;
 
   /**
    * Removes all controller services.
@@ -120,40 +120,40 @@ class ControllerServiceProvider : public CoreComponent, public ConfigurableCompo
   /**
    * Gets a list of all controller services.
    */
-  virtual std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> getAllControllerServices() {
+  virtual std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> getAllControllerServices() {
     return controller_map_->getAllControllerServices();
   }
 
   /**
    * Verifies that referencing components can be stopped for the controller service
    */
-  virtual void verifyCanStopReferencingComponents(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) = 0;
+  virtual void verifyCanStopReferencingComponents(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) = 0;
 
   /**
    *  Unschedules referencing components.
    */
-  virtual std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> unscheduleReferencingComponents(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) = 0;
+  virtual std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> unscheduleReferencingComponents(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) = 0;
 
   /**
    * Verifies referencing components for <code>serviceNode</code> can be disabled.
    * @param serviceNode shared pointer to a controller service node.
    */
-  virtual void verifyCanDisableReferencingServices(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) = 0;
+  virtual void verifyCanDisableReferencingServices(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) = 0;
 
   /**
    * Disables referencing components for <code>serviceNode</code> can be disabled.
    * @param serviceNode shared pointer to a controller service node.
    */
-  virtual std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> disableReferencingServices(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
-    return std::vector<std::shared_ptr<core::controller::ControllerServiceNode>>();
+  virtual std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> disableReferencingServices(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
+    return std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>>();
   }
 
   /**
    * Verifies referencing components for <code>serviceNode</code> can be enabled.
    * @param serviceNode shared pointer to a controller service node.
    */
-  virtual void verifyCanEnableReferencingServices(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
-    std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> references = findLinkedComponents(serviceNode);
+  virtual void verifyCanEnableReferencingServices(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
+    std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> references = findLinkedComponents(serviceNode);
     for (auto ref : references) {
       ref->canEnable();
     }
@@ -163,20 +163,20 @@ class ControllerServiceProvider : public CoreComponent, public ConfigurableCompo
    * Enables referencing components for <code>serviceNode</code> can be Enabled.
    * @param serviceNode shared pointer to a controller service node.
    */
-  virtual std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> enableReferencingServices(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) = 0;
+  virtual std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> enableReferencingServices(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) = 0;
 
   /**
    * Schedules the service node and referencing components.
    * @param serviceNode shared pointer to a controller service node.
    */
-  virtual std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> scheduleReferencingComponents(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) = 0;
+  virtual std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> scheduleReferencingComponents(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) = 0;
 
   /**
    * Returns a controller service for the service identifier and componentID
    * @param service Identifier service identifier.
    */
-  virtual std::shared_ptr<ControllerService> getControllerServiceForComponent(const std::string &serviceIdentifier, const std::string &componentId) {
-    std::shared_ptr<ControllerService> node = getControllerService(serviceIdentifier);
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerService> getControllerServiceForComponent(const std::string &serviceIdentifier, const std::string &componentId) {
+    org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerService> node = getControllerService(serviceIdentifier);
     return node;
   }
 
@@ -184,14 +184,14 @@ class ControllerServiceProvider : public CoreComponent, public ConfigurableCompo
    * Gets the controller service for the provided identifier
    * @param identifier service identifier.
    */
-  virtual std::shared_ptr<ControllerService> getControllerService(const std::string &identifier);
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerService> getControllerService(const std::string &identifier);
 
   /**
    * Determines if Controller service is enabled.
    * @param identifier service identifier.
    */
   virtual bool isControllerServiceEnabled(const std::string &identifier) {
-    std::shared_ptr<ControllerServiceNode> node = getControllerServiceNode(identifier);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerServiceNode> node = getControllerServiceNode(identifier);
     if (nullptr != node) {
       return linkedServicesAre(ENABLED, node);
     } else {
@@ -204,7 +204,7 @@ class ControllerServiceProvider : public CoreComponent, public ConfigurableCompo
    * @param identifier service identifier.
    */
   virtual bool isControllerServiceEnabling(const std::string &identifier) {
-    std::shared_ptr<ControllerServiceNode> node = getControllerServiceNode(identifier);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerServiceNode> node = getControllerServiceNode(identifier);
     if (nullptr != node) {
       return linkedServicesAre(ENABLING, node);
     } else {
@@ -213,7 +213,7 @@ class ControllerServiceProvider : public CoreComponent, public ConfigurableCompo
   }
 
   virtual const std::string getControllerServiceName(const std::string &identifier) {
-    std::shared_ptr<ControllerService> node = getControllerService(identifier);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerService> node = getControllerService(identifier);
     if (nullptr != node) {
       return node->getName();
     } else {
@@ -233,7 +233,7 @@ class ControllerServiceProvider : public CoreComponent, public ConfigurableCompo
   /**
    * verifies that linked services match the provided state.
    */
-  inline bool linkedServicesAre(ControllerServiceState state, const std::shared_ptr<ControllerServiceNode> &node) {
+  inline bool linkedServicesAre(ControllerServiceState state, const org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerServiceNode> &node) {
     if (node->getControllerServiceImplementation()->getState() == state) {
       for (auto child_service : node->getLinkedControllerServices()) {
         if (child_service->getControllerServiceImplementation()->getState() != state) {
@@ -254,14 +254,14 @@ class ControllerServiceProvider : public CoreComponent, public ConfigurableCompo
    * Finds linked components
    * @param referenceNode reference node from whcih we will find linked references.
    */
-  std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> findLinkedComponents(std::shared_ptr<core::controller::ControllerServiceNode> &referenceNode) {
-    std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> references;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> findLinkedComponents(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &referenceNode) {
+    std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> references;
 
-    for (std::shared_ptr<core::controller::ControllerServiceNode> linked_node : referenceNode->getLinkedControllerServices()) {
+    for (org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> linked_node : referenceNode->getLinkedControllerServices()) {
       references.push_back(linked_node);
-      std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> linked_references = findLinkedComponents(linked_node);
+      std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> linked_references = findLinkedComponents(linked_node);
 
-      auto removal_predicate = [&linked_references](std::shared_ptr<core::controller::ControllerServiceNode> key) ->bool {
+      auto removal_predicate = [&linked_references](org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> key) ->bool {
         return std::find(linked_references.begin(), linked_references.end(), key) != linked_references.end();
       };
 
@@ -272,7 +272,7 @@ class ControllerServiceProvider : public CoreComponent, public ConfigurableCompo
     return references;
   }
 
-  std::shared_ptr<ControllerServiceMap> controller_map_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerServiceMap> controller_map_;
 };
 
 }  // namespace controller

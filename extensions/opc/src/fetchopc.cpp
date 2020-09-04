@@ -88,7 +88,7 @@ namespace processors {
     setSupportedRelationships({Success, Failure});
   }
 
-  void FetchOPCProcessor::onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &factory) {
+  void FetchOPCProcessor::onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &factory) {
     logger_->log_trace("FetchOPCProcessor::onSchedule");
 
     translatedNodeIDs_.clear();  // Path might has changed during restart
@@ -133,7 +133,7 @@ namespace processors {
     lazy_mode_ = value == "On" ? true : false;
   }
 
-  void FetchOPCProcessor::onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session){
+  void FetchOPCProcessor::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session){
     logger_->log_trace("FetchOPCProcessor::onTrigger");
 
     std::unique_lock<std::mutex> lock(onTriggerMutex_, std::try_to_lock);
@@ -186,7 +186,7 @@ namespace processors {
   }
 
   bool FetchOPCProcessor::nodeFoundCallBack(opc::Client& client, const UA_ReferenceDescription *ref, const std::string& path,
-      const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
+      const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
     nodesFound_++;
     if(ref->nodeClass == UA_NODECLASS_VARIABLE) {
       try {
@@ -215,8 +215,8 @@ namespace processors {
     return true;
   }
 
-  void FetchOPCProcessor::OPCData2FlowFile(const opc::NodeData& opcnode, const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
-    std::shared_ptr<FlowFileRecord> flowFile = std::static_pointer_cast<FlowFileRecord>(session->create());
+  void FetchOPCProcessor::OPCData2FlowFile(const opc::NodeData& opcnode, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
+    org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> flowFile = static_pointer_cast<FlowFileRecord>(session->create());
     if (flowFile == nullptr) {
       logger_->log_error("Failed to create flowfile!");
       return;

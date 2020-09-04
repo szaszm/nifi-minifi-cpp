@@ -55,7 +55,7 @@ void TailEventLog::initialize() {
   setSupportedRelationships(relationships);
 }
 
-void TailEventLog::onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
+void TailEventLog::onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
   std::string value;
 
   if (context->getProperty(LogSourceFileName.getName(), value)) {
@@ -71,7 +71,7 @@ void TailEventLog::onSchedule(const std::shared_ptr<core::ProcessContext> &conte
 
 }
 
-void TailEventLog::onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
+void TailEventLog::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   
   if (log_handle_ == nullptr) {
     logger_->log_debug("Handle could not be created for %s", log_source_);
@@ -96,7 +96,7 @@ void TailEventLog::onTrigger(const std::shared_ptr<core::ProcessContext> &contex
     }
     while (bytes_to_read > 0) {
 
-      std::shared_ptr<FlowFileRecord> flowFile = std::static_pointer_cast<FlowFileRecord>(session->create());
+      org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> flowFile = static_pointer_cast<FlowFileRecord>(session->create());
       if (flowFile == nullptr)
         return;
 

@@ -142,7 +142,7 @@ standalone_processor * create_processor(const char *name, nifi_instance * instan
     instance = create_instance("internal_standalone", &port);
   }
   auto flow = create_new_flow(instance);
-  std::shared_ptr<ExecutionPlan> plan(flow);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ExecutionPlan> plan(flow);
   plan->addProcessor(ptr, name);
   ExecutionPlan::addProcessorWithPlan(ptr->getUUIDStr(), plan);
   return static_cast<standalone_processor*>(ptr.get());
@@ -266,7 +266,7 @@ flow_file_record* create_ff_object_na(const char *file, const size_t len, const 
     new_ff->contentLocation = nullptr;
     new_ff->size = 0;
   }
-  new_ff->crp = static_cast<void*>(new std::shared_ptr<minifi::core::ContentRepository>);
+  new_ff->crp = static_cast<void*>(new org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::core::ContentRepository>);
   new_ff->ffp = nullptr;
   new_ff->keepContent = 0;
   return new_ff;
@@ -282,9 +282,9 @@ flow_file_record * generate_flow(processor_context * ctx) {
     flow_file_record * ffr = create_ff_object_nc();
 
     if (ffr->crp) {
-      delete static_cast<std::shared_ptr<minifi::core::ContentRepository>*>(ffr->crp);
+      delete static_cast<org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::core::ContentRepository>*>(ffr->crp);
     }
-    ffr->crp = static_cast<void*>(new std::shared_ptr<minifi::core::ContentRepository>(ctx->getContentRepository()));
+    ffr->crp = static_cast<void*>(new org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::core::ContentRepository>(ctx->getContentRepository()));
 
     auto plan = ExecutionPlan::getPlan(ctx->getProcessorNode()->getProcessor()->getUUIDStr());
 
@@ -293,8 +293,8 @@ flow_file_record * generate_flow(processor_context * ctx) {
     }
     ffr->ffp = NULL;
     ffr->keepContent = 0;
-    auto ff_content_repo_ptr = (static_cast<std::shared_ptr<minifi::core::ContentRepository>*>(ffr->crp));
-    auto claim = std::make_shared<minifi::ResourceClaim>(*ff_content_repo_ptr);
+    auto ff_content_repo_ptr = (static_cast<org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::core::ContentRepository>*>(ffr->crp));
+    auto claim = org::apache::nifi::minifi::utils::debug_make_shared<minifi::ResourceClaim>(*ff_content_repo_ptr);
 
     size_t len = strlen(claim->getContentFullPath().c_str());
     ffr->contentLocation = (char *) malloc((len + 1) * sizeof(char));
@@ -340,9 +340,9 @@ flow_file_record * write_to_flow(const char * buff, size_t count, processor_cont
 void free_flowfile(flow_file_record *ff) {
   NULL_CHECK(, ff);
   if (ff->crp){
-    auto content_repo_ptr = static_cast<std::shared_ptr<minifi::core::ContentRepository>*>(ff->crp);
+    auto content_repo_ptr = static_cast<org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::core::ContentRepository>*>(ff->crp);
     if((*content_repo_ptr) && (ff->keepContent == 0)) {
-      auto claim = std::make_shared<minifi::ResourceClaim>(ff->contentLocation, *content_repo_ptr);
+      auto claim = org::apache::nifi::minifi::utils::debug_make_shared<minifi::ResourceClaim>(ff->contentLocation, *content_repo_ptr);
       (*content_repo_ptr)->remove(claim);
     }
     delete content_repo_ptr;
@@ -351,7 +351,7 @@ void free_flowfile(flow_file_record *ff) {
     auto map = static_cast<string_map*>(ff->attributes);
     delete map;
   } else {
-    auto ff_sptr = reinterpret_cast<std::shared_ptr<core::FlowFile>*>(ff->ffp);
+    auto ff_sptr = reinterpret_cast<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>*>(ff->ffp);
     delete ff_sptr;
   }
   free(ff->contentLocation);
@@ -447,9 +447,9 @@ int8_t remove_attribute(flow_file_record *ff, const char *key) {
 
 int get_content(const flow_file_record* ff, uint8_t* target, int size) {
   NULL_CHECK(0, ff, target);
-  auto content_repo = static_cast<std::shared_ptr<minifi::core::ContentRepository>*>(ff->crp);
+  auto content_repo = static_cast<org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::core::ContentRepository>*>(ff->crp);
   if(ff->crp && (*content_repo)) {
-    std::shared_ptr<minifi::ResourceClaim> claim = std::make_shared<minifi::ResourceClaim>(ff->contentLocation,
+    org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> claim = org::apache::nifi::minifi::utils::debug_make_shared<minifi::ResourceClaim>(ff->contentLocation,
                                                                                            *content_repo);
     auto stream = (*content_repo)->read(claim);
     return stream->read(target, size);
@@ -486,28 +486,28 @@ int transmit_flowfile(flow_file_record *ff, nifi_instance *instance) {
 
   auto content_repo = minifi_instance_ref->getContentRepository();
 
-  std::shared_ptr<minifi::ResourceClaim> claim = nullptr;
-  std::shared_ptr<minifi::io::DataStream> stream = nullptr; //Used when content is not in content repo
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> claim = nullptr;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::io::DataStream> stream = nullptr; //Used when content is not in content repo
 
   if(ff->contentLocation) {
-    auto ff_content_repo_ptr = (static_cast<std::shared_ptr<minifi::core::ContentRepository>*>(ff->crp));
+    auto ff_content_repo_ptr = (static_cast<org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::core::ContentRepository>*>(ff->crp));
     if (ff->crp && (*ff_content_repo_ptr)) {
       content_repo = *ff_content_repo_ptr;
-      claim = std::make_shared<minifi::ResourceClaim>(ff->contentLocation, content_repo);
+      claim = org::apache::nifi::minifi::utils::debug_make_shared<minifi::ResourceClaim>(ff->contentLocation, content_repo);
       claim->increaseFlowFileRecordOwnedCount();
       claim->increaseFlowFileRecordOwnedCount();
     } else {
       file_buffer fb = file_to_buffer(ff->contentLocation);
-      stream = std::make_shared<minifi::io::DataStream>();
+      stream = org::apache::nifi::minifi::utils::debug_make_shared<minifi::io::DataStream>();
       stream->writeData(fb.buffer, gsl::narrow<int>(fb.file_len));
       free(fb.buffer);
     }
   } else {
     //The flowfile has no content - create an empty stream to create empty content
-    stream = std::make_shared<minifi::io::DataStream>();
+    stream = org::apache::nifi::minifi::utils::debug_make_shared<minifi::io::DataStream>();
   }
 
-  auto ffr = std::make_shared<minifi::FlowFileRecord>(no_op, content_repo, attribute_map, claim);
+  auto ffr = org::apache::nifi::minifi::utils::debug_make_shared<minifi::FlowFileRecord>(no_op, content_repo, attribute_map, claim);
   ffr->addAttribute("nanofi.version", API_VERSION);
   ffr->setSize(ff->size);
 
@@ -614,7 +614,7 @@ int free_flow(flow *flow) {
   return 0;
 }
 
-flow_file_record* flowfile_to_record(std::shared_ptr<core::FlowFile> ff, const std::shared_ptr<minifi::core::ContentRepository>& crp) {
+flow_file_record* flowfile_to_record(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> ff, const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::core::ContentRepository>& crp) {
   auto claim = ff->getResourceClaim();
   if(claim == nullptr) {
     return nullptr;
@@ -624,14 +624,14 @@ flow_file_record* flowfile_to_record(std::shared_ptr<core::FlowFile> ff, const s
   claim->increaseFlowFileRecordOwnedCount();
   auto path = claim->getContentFullPath();
   auto ffr = create_ff_object_na(path.c_str(), path.length(), ff->getSize());
-  ffr->ffp = static_cast<void*>(new std::shared_ptr<core::FlowFile>(ff));
+  ffr->ffp = static_cast<void*>(new org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>(ff));
   ffr->attributes = ff->getAttributesPtr();
-  auto content_repo_ptr = static_cast<std::shared_ptr<minifi::core::ContentRepository>*>(ffr->crp);
+  auto content_repo_ptr = static_cast<org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::core::ContentRepository>*>(ffr->crp);
   *content_repo_ptr = crp;
   return ffr;
 }
 
-flow_file_record* flowfile_to_record(std::shared_ptr<core::FlowFile> ff, ExecutionPlan* plan) {
+flow_file_record* flowfile_to_record(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> ff, ExecutionPlan* plan) {
   if (ff == nullptr) {
     return nullptr;
   }
@@ -693,15 +693,15 @@ flow_file_record *invoke_ff(standalone_processor* proc, const flow_file_record *
   plan->reset();
 
   if (input_ff) {
-    auto content_repo = static_cast<std::shared_ptr<minifi::core::ContentRepository> *>(input_ff->crp);
-    auto ff_data = std::make_shared<flowfile_input_params>();
+    auto content_repo = static_cast<org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::core::ContentRepository> *>(input_ff->crp);
+    auto ff_data = org::apache::nifi::minifi::utils::debug_make_shared<flowfile_input_params>();
 
     if(input_ff->crp && (*content_repo)) {
-      std::shared_ptr<minifi::ResourceClaim> claim = std::make_shared<minifi::ResourceClaim>(input_ff->contentLocation,
+      org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> claim = org::apache::nifi::minifi::utils::debug_make_shared<minifi::ResourceClaim>(input_ff->contentLocation,
                                                                                              *content_repo);
       ff_data->content_stream = (*content_repo)->read(claim);
     } else {
-      ff_data->content_stream = std::make_shared<minifi::io::DataStream>();
+      ff_data->content_stream = org::apache::nifi::minifi::utils::debug_make_shared<minifi::io::DataStream>();
       file_buffer fb = file_to_buffer(input_ff->contentLocation);
       ff_data->content_stream->writeData(fb.buffer, gsl::narrow<int>(fb.file_len));
       free(fb.buffer);
@@ -728,8 +728,8 @@ flow_file_record *invoke_chunk(standalone_processor* proc, uint8_t* buf, uint64_
 
   plan->reset();
 
-  auto ff_data = std::make_shared<flowfile_input_params>();
-  ff_data->content_stream = std::make_shared<minifi::io::DataStream>();
+  auto ff_data = org::apache::nifi::minifi::utils::debug_make_shared<flowfile_input_params>();
+  ff_data->content_stream = org::apache::nifi::minifi::utils::debug_make_shared<minifi::io::DataStream>();
   ff_data->content_stream->writeData(buf, gsl::narrow<int>(size));
 
   plan->runNextProcessor(nullptr, ff_data);
@@ -775,7 +775,7 @@ int transfer_to_relationship(flow_file_record * ffr, processor_session * ps, con
   if(ffr == nullptr || ffr->ffp == nullptr || ps == nullptr || relationship == nullptr || strlen(relationship) == 0) {
     return -1;
   }
-  auto ff_sptr = reinterpret_cast<std::shared_ptr<core::FlowFile>*>(ffr->ffp);
+  auto ff_sptr = reinterpret_cast<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>*>(ffr->ffp);
   ps->transfer(*ff_sptr, core::Relationship(relationship, "desc"));
   return 0;
 }

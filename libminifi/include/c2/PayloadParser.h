@@ -41,13 +41,13 @@ class PayloadParseException : public std::runtime_error {
 template<typename T, typename C>
 class convert_if_base {
  protected:
-  const std::shared_ptr<state::response::Value> node_;
-  explicit convert_if_base(const std::shared_ptr<state::response::Value> &node)
+  const org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::Value> node_;
+  explicit convert_if_base(const org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::Value> &node)
       : node_(node) {
   }
  public:
   T operator()() const {
-    if (auto sub_type = std::dynamic_pointer_cast<C>(node_))
+    if (auto sub_type = dynamic_pointer_cast<C>(node_))
       return sub_type->getValue();
     throw PayloadParseException("No known type");
   }
@@ -55,7 +55,7 @@ class convert_if_base {
 
 template<typename T>
 struct convert_if {
-  explicit convert_if(const std::shared_ptr<state::response::Value> &node) {
+  explicit convert_if(const org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::Value> &node) {
   }
 
 
@@ -66,7 +66,7 @@ struct convert_if {
 
 template<>
 struct convert_if<std::string> : public convert_if_base<std::string, state::response::Value> {
-  explicit convert_if(const std::shared_ptr<state::response::Value> &node)
+  explicit convert_if(const org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::Value> &node)
       : convert_if_base(node) {
   }
 
@@ -77,35 +77,35 @@ struct convert_if<std::string> : public convert_if_base<std::string, state::resp
 
 template<>
 struct convert_if<uint64_t> : public convert_if_base<uint64_t, state::response::UInt64Value> {
-  explicit convert_if(const std::shared_ptr<state::response::Value> &node)
+  explicit convert_if(const org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::Value> &node)
       : convert_if_base(node) {
   }
 };
 
 template<>
 struct convert_if<int64_t> : public convert_if_base<int64_t, state::response::Int64Value> {
-  explicit convert_if(const std::shared_ptr<state::response::Value> &node)
+  explicit convert_if(const org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::Value> &node)
       : convert_if_base(node) {
   }
 };
 
 template<>
 struct convert_if<uint32_t > : public convert_if_base<uint32_t, state::response::UInt32Value> {
-  explicit convert_if(const std::shared_ptr<state::response::Value> &node)
+  explicit convert_if(const org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::Value> &node)
       : convert_if_base(node) {
   }
 };
 
 template<>
 struct convert_if<int> : public convert_if_base<int, state::response::IntValue> {
-  explicit convert_if(const std::shared_ptr<state::response::Value> &node)
+  explicit convert_if(const org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::Value> &node)
       : convert_if_base(node) {
   }
 };
 
 template<>
 struct convert_if<bool> : public convert_if_base<bool, state::response::BoolValue> {
-  explicit convert_if(const std::shared_ptr<state::response::Value> &node)
+  explicit convert_if(const org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::Value> &node)
       : convert_if_base(node) {
   }
 };

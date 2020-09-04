@@ -115,9 +115,9 @@ class CapturePacket : public core::Processor {
   // Supported Relationships
   static core::Relationship Success;
 
-  virtual void onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) override;
+  virtual void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) override;
   virtual void initialize() override;
-  virtual void onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
+  virtual void onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
 
   static void packet_callback(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* dev, void* data);
 
@@ -162,7 +162,7 @@ class CapturePacket : public core::Processor {
   static std::atomic<int> num_;
   std::vector<pcpp::PcapLiveDevice*> device_list_;
   std::shared_ptr<logging::Logger> logger_;
-  static std::shared_ptr<utils::IdGenerator> id_generator_;
+  static org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> id_generator_;
 };
 
 REGISTER_RESOURCE(CapturePacket, "CapturePacket captures and writes one or more packets into a PCAP file that will be used as the content of a flow file."

@@ -32,27 +32,27 @@ namespace nifi {
 namespace minifi {
 namespace c2 {
 
-void ControllerSocketProtocol::initialize(core::controller::ControllerServiceProvider* controller, const std::shared_ptr<state::StateMonitor> &updateSink,
-                                          const std::shared_ptr<Configure> &configuration) {
+void ControllerSocketProtocol::initialize(core::controller::ControllerServiceProvider* controller, const org::apache::nifi::minifi::utils::debug_shared_ptr<state::StateMonitor> &updateSink,
+                                          const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configuration) {
   HeartBeatReporter::initialize(controller, updateSink, configuration);
   stream_factory_ = minifi::io::StreamFactory::getInstance(configuration);
 
   std::string host = "localhost", port, limitStr, context_name;
   bool anyInterface = false;
 
-  std::shared_ptr<minifi::controllers::SSLContextService> secure_context = nullptr;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::controllers::SSLContextService> secure_context = nullptr;
 
   if (configuration_->get("controller.ssl.context.service", context_name)) {
-    std::shared_ptr<core::controller::ControllerService> service = controller->getControllerService(context_name);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerService> service = controller->getControllerService(context_name);
     if (nullptr != service) {
-      secure_context = std::static_pointer_cast<minifi::controllers::SSLContextService>(service);
+      secure_context = static_pointer_cast<minifi::controllers::SSLContextService>(service);
     }
   }
   if (nullptr == secure_context) {
     std::string secureStr;
     bool is_secure = false;
     if (configuration->get(Configure::nifi_remote_input_secure, secureStr) && org::apache::nifi::minifi::utils::StringUtils::StringToBool(secureStr, is_secure)) {
-      secure_context = std::make_shared<minifi::controllers::SSLContextService>("ControllerSocketProtocolSSL", configuration);
+      secure_context = org::apache::nifi::minifi::utils::debug_make_shared<minifi::controllers::SSLContextService>("ControllerSocketProtocolSSL", configuration);
       secure_context->onEnable();
     }
   }
@@ -70,7 +70,7 @@ void ControllerSocketProtocol::initialize(core::controller::ControllerServicePro
     if (nullptr != secure_context) {
 #ifdef OPENSSL_SUPPORT
       // if there is no openssl support we won't be using SSL
-      auto tls_context = std::make_shared<io::TLSContext>(configuration, secure_context);
+      auto tls_context = org::apache::nifi::minifi::utils::debug_make_shared<io::TLSContext>(configuration, secure_context);
       server_socket_ = std::unique_ptr<io::BaseServerSocket>(new io::TLSServerSocket(tls_context, host, std::stoi(port), 2));
 #else
       server_socket_ = std::unique_ptr<io::BaseServerSocket>(new io::ServerSocket(nullptr, host, std::stoi(port), 2));

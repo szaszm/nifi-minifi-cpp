@@ -42,7 +42,7 @@ class UnorderedMapPersistableKeyValueStoreService : public AbstractAutoPersistin
  public:
   explicit UnorderedMapPersistableKeyValueStoreService(const std::string& name, const std::string& id);
   explicit UnorderedMapPersistableKeyValueStoreService(const std::string& name, utils::Identifier uuid = utils::Identifier());
-  explicit UnorderedMapPersistableKeyValueStoreService(const std::string& name, const std::shared_ptr<Configure>& configuration);
+  explicit UnorderedMapPersistableKeyValueStoreService(const std::string& name, const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure>& configuration);
 
   virtual ~UnorderedMapPersistableKeyValueStoreService();
 

@@ -50,11 +50,11 @@ void ConvertBase::initialize() {
   setSupportedRelationships(relationships);
 }
 
-void ConvertBase::onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
+void ConvertBase::onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
   std::string controller_service_name = "";
   if (context->getProperty(MQTTControllerService.getName(), controller_service_name) && !controller_service_name.empty()) {
     auto service = context->getControllerService(controller_service_name);
-    mqtt_service_ = std::static_pointer_cast<controllers::MQTTControllerService>(service);
+    mqtt_service_ = static_pointer_cast<controllers::MQTTControllerService>(service);
   }
   context->getProperty(ListeningTopic.getName(), listening_topic);
   if (!listening_topic.empty()) {

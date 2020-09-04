@@ -104,12 +104,12 @@ class MockProcessor : public core::Processor {
     getProperty("linkedService", linked_service);
     if (!IsNullOrEmpty(linked_service)) {
 
-      std::shared_ptr<core::controller::ControllerService> service = context->getControllerService(linked_service);
+      org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerService> service = context->getControllerService(linked_service);
       std::lock_guard<std::mutex> lock(control_mutex);
       if (!disabled.load()) {
         assert(true == context->isControllerServiceEnabled(linked_service));
         assert(nullptr != service);
-        assert("pushitrealgood" == std::static_pointer_cast<MockControllerService>(service)->doSomething());
+        assert("pushitrealgood" == static_pointer_cast<MockControllerService>(service)->doSomething());
       } else {
         assert(false == context->isControllerServiceEnabled(linked_service));
       }

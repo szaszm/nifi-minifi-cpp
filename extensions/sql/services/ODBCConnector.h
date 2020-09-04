@@ -103,7 +103,7 @@ class ODBCService : public DatabaseService {
     initialize();
   }
 
-  explicit ODBCService(const std::string &name, const std::shared_ptr<Configure> &configuration)
+  explicit ODBCService(const std::string &name, const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configuration)
       : DatabaseService(name),
         logger_(logging::LoggerFactory<ODBCService>::getLogger()) {
     setConfiguration(configuration);

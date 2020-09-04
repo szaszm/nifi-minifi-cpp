@@ -77,8 +77,8 @@ void TFApplyGraph::onSchedule(core::ProcessContext *context, core::ProcessSessio
   }
 }
 
-void TFApplyGraph::onTrigger(const std::shared_ptr<core::ProcessContext> &context,
-                             const std::shared_ptr<core::ProcessSession> &session) {
+void TFApplyGraph::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context,
+                             const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   auto flow_file = session->get();
 
   if (!flow_file) {
@@ -90,7 +90,7 @@ void TFApplyGraph::onTrigger(const std::shared_ptr<core::ProcessContext> &contex
     std::string tf_type;
     flow_file->getAttribute("tf.type", tf_type);
 
-    std::shared_ptr<tensorflow::GraphDef> graph_def;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<tensorflow::GraphDef> graph_def;
     uint32_t graph_version;
 
     {
@@ -98,7 +98,7 @@ void TFApplyGraph::onTrigger(const std::shared_ptr<core::ProcessContext> &contex
 
       if ("graph" == tf_type) {
         logger_->log_info("Reading new graph def");
-        graph_def_ = std::make_shared<tensorflow::GraphDef>();
+        graph_def_ = utils::debug_make_shared<tensorflow::GraphDef>();
         GraphReadCallback graph_cb(graph_def_);
         session->read(flow_file, &graph_cb);
         graph_version_++;
@@ -118,7 +118,7 @@ void TFApplyGraph::onTrigger(const std::shared_ptr<core::ProcessContext> &contex
     }
 
     // Use an existing context, if one is available
-    std::shared_ptr<TFContext> ctx;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<TFContext> ctx;
 
     if (tf_context_q_.try_dequeue(ctx)) {
       logger_->log_debug("Using available TensorFlow context");
@@ -132,7 +132,7 @@ void TFApplyGraph::onTrigger(const std::shared_ptr<core::ProcessContext> &contex
     if (!ctx) {
       logger_->log_info("Creating new TensorFlow context");
       tensorflow::SessionOptions options;
-      ctx = std::make_shared<TFContext>();
+      ctx = utils::debug_make_shared<TFContext>();
       ctx->tf_session.reset(tensorflow::NewSession(options));
       ctx->graph_version = graph_version;
       auto status = ctx->tf_session->Create(*graph_def);
@@ -146,7 +146,7 @@ void TFApplyGraph::onTrigger(const std::shared_ptr<core::ProcessContext> &contex
 
     // Apply graph
     // Read input tensor from flow file
-    auto input_tensor_proto = std::make_shared<tensorflow::TensorProto>();
+    auto input_tensor_proto = utils::debug_make_shared<tensorflow::TensorProto>();
     TensorReadCallback tensor_cb(input_tensor_proto);
     session->read(flow_file, &tensor_cb);
     tensorflow::Tensor input;
@@ -162,7 +162,7 @@ void TFApplyGraph::onTrigger(const std::shared_ptr<core::ProcessContext> &contex
 
     // Create output flow file for each output tensor
     for (const auto &output : outputs) {
-      auto tensor_proto = std::make_shared<tensorflow::TensorProto>();
+      auto tensor_proto = utils::debug_make_shared<tensorflow::TensorProto>();
       output.AsProtoTensorContent(tensor_proto.get());
       logger_->log_info("Writing output tensor flow file");
       TensorWriteCallback write_cb(tensor_proto);
@@ -188,7 +188,7 @@ void TFApplyGraph::onTrigger(const std::shared_ptr<core::ProcessContext> &contex
   }
 }
 
-int64_t TFApplyGraph::GraphReadCallback::process(std::shared_ptr<io::BaseStream> stream) {
+int64_t TFApplyGraph::GraphReadCallback::process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
   std::string graph_proto_buf;
   graph_proto_buf.resize(stream->getSize());
   auto num_read = stream->readData(reinterpret_cast<uint8_t *>(&graph_proto_buf[0]),
@@ -202,7 +202,7 @@ int64_t TFApplyGraph::GraphReadCallback::process(std::shared_ptr<io::BaseStream>
   return num_read;
 }
 
-int64_t TFApplyGraph::TensorReadCallback::process(std::shared_ptr<io::BaseStream> stream) {
+int64_t TFApplyGraph::TensorReadCallback::process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
   std::string tensor_proto_buf;
   tensor_proto_buf.resize(stream->getSize());
   auto num_read = stream->readData(reinterpret_cast<uint8_t *>(&tensor_proto_buf[0]),
@@ -216,7 +216,7 @@ int64_t TFApplyGraph::TensorReadCallback::process(std::shared_ptr<io::BaseStream
   return num_read;
 }
 
-int64_t TFApplyGraph::TensorWriteCallback::process(std::shared_ptr<io::BaseStream> stream) {
+int64_t TFApplyGraph::TensorWriteCallback::process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
   auto tensor_proto_buf = tensor_proto_->SerializeAsString();
   auto num_wrote = stream->writeData(reinterpret_cast<uint8_t *>(&tensor_proto_buf[0]),
                                      static_cast<int>(tensor_proto_buf.size()));

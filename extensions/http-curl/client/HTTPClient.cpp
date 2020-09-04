@@ -33,7 +33,7 @@ namespace nifi {
 namespace minifi {
 namespace utils {
 
-HTTPClient::HTTPClient(const std::string &url, const std::shared_ptr<minifi::controllers::SSLContextService> ssl_context_service)
+HTTPClient::HTTPClient(const std::string &url, const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::controllers::SSLContextService> ssl_context_service)
     : core::Connectable("HTTPClient"),
       ssl_context_service_(ssl_context_service),
       url_(url) {
@@ -77,7 +77,7 @@ void HTTPClient::forceClose() {
 }
 
 int HTTPClient::debug_callback(CURL *handle, curl_infotype type, char *data, size_t size, void *userptr) {
-  std::shared_ptr<logging::Logger>* logger = static_cast<std::shared_ptr<logging::Logger>*>(userptr);
+  auto* logger = static_cast<std::shared_ptr<logging::Logger>*>(userptr);
   if (logger == nullptr) {
     return 0;
   }
@@ -95,7 +95,7 @@ void HTTPClient::setVerbose(bool use_stderr /*= false*/) {
   }
 }
 
-void HTTPClient::initialize(const std::string &method, const std::string url, const std::shared_ptr<minifi::controllers::SSLContextService> ssl_context_service) {
+void HTTPClient::initialize(const std::string &method, const std::string url, const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::controllers::SSLContextService> ssl_context_service) {
   method_ = method;
   set_request_method(method_);
   if (ssl_context_service != nullptr) {

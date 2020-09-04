@@ -88,12 +88,12 @@ class InputStreamCallback {
   virtual ~InputStreamCallback() = default;
   // virtual void process(std::ifstream *stream) = 0;
 
-  virtual int64_t process(std::shared_ptr<io::BaseStream> stream) = 0;
+  virtual int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) = 0;
 };
 class OutputStreamCallback {
  public:
   virtual ~OutputStreamCallback() = default;
-  virtual int64_t process(std::shared_ptr<io::BaseStream> stream) = 0;
+  virtual int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) = 0;
 };
 
 class FlowFileRecord : public core::FlowFile, public io::Serializable {
@@ -102,15 +102,15 @@ class FlowFileRecord : public core::FlowFile, public io::Serializable {
   /*
    * Create a new flow record
    */
-  explicit FlowFileRecord(std::shared_ptr<core::Repository> flow_repository, const std::shared_ptr<core::ContentRepository> &content_repo, std::map<std::string, std::string> attributes,
-                          std::shared_ptr<ResourceClaim> claim = nullptr);
+  explicit FlowFileRecord(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_repository, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> &content_repo, std::map<std::string, std::string> attributes,
+                          org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim> claim = nullptr);
 
-  explicit FlowFileRecord(std::shared_ptr<core::Repository> flow_repository, const std::shared_ptr<core::ContentRepository> &content_repo, std::shared_ptr<core::FlowFile> &event);
+  explicit FlowFileRecord(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_repository, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> &content_repo, org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &event);
 
-  explicit FlowFileRecord(std::shared_ptr<core::Repository> flow_repository, const std::shared_ptr<core::ContentRepository> &content_repo, std::shared_ptr<core::FlowFile> &event,
+  explicit FlowFileRecord(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_repository, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> &content_repo, org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &event,
                           const std::string &uuidConnection);
 
-  explicit FlowFileRecord(std::shared_ptr<core::Repository> flow_repository, const std::shared_ptr<core::ContentRepository> &content_repo)
+  explicit FlowFileRecord(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_repository, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> &content_repo)
       : FlowFile(),
         flow_repository_(flow_repository),
         content_repo_(content_repo),
@@ -166,7 +166,7 @@ class FlowFileRecord : public core::FlowFile, public io::Serializable {
   /**
    * Cleanly relinquish a resource claim
    */
-  virtual void releaseClaim(std::shared_ptr<ResourceClaim> claim);
+  virtual void releaseClaim(org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim> claim);
 
   FlowFileRecord &operator=(const FlowFileRecord &);
 
@@ -180,10 +180,10 @@ class FlowFileRecord : public core::FlowFile, public io::Serializable {
   static std::atomic<uint64_t> local_flow_seq_number_;
 
   // repository reference.
-  std::shared_ptr<core::Repository> flow_repository_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_repository_;
 
   // content repo reference.
-  std::shared_ptr<core::ContentRepository> content_repo_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo_;
 
   // Snapshot flow record for session rollback
   bool snapshot_;

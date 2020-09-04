@@ -54,9 +54,9 @@ class RESTSender : public RESTProtocol, public C2Protocol {
 
   virtual C2Payload consumePayload(const C2Payload &payload, Direction direction, bool async) override;
 
-  virtual void update(const std::shared_ptr<Configure> &configure) override;
+  virtual void update(const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure) override;
 
-  virtual void initialize(core::controller::ControllerServiceProvider* controller, const std::shared_ptr<Configure> &configure) override;
+  virtual void initialize(core::controller::ControllerServiceProvider* controller, const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure) override;
 
  protected:
 
@@ -70,7 +70,7 @@ class RESTSender : public RESTProtocol, public C2Protocol {
    */
   void setSecurityContext(utils::HTTPClient &client,const std::string &type, const std::string &url);
 
-  std::shared_ptr<minifi::controllers::SSLContextService> ssl_context_service_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::controllers::SSLContextService> ssl_context_service_;
 
   std::string rest_uri_;
   std::string ack_uri_;

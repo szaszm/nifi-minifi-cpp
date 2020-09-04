@@ -69,11 +69,11 @@ class PcapTestHarness : public IntegrationBase {
     assert(verifyLogLinePresenceInPollTime(std::chrono::milliseconds(wait_time_), "Initializing EnvironmentalSensors"));
   }
 
-  void queryRootProcessGroup(std::shared_ptr<core::ProcessGroup> pg) {
-    std::shared_ptr<core::Processor> proc = pg->findProcessor("pcap");
+  void queryRootProcessGroup(org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessGroup> pg) {
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> proc = pg->findProcessor("pcap");
     assert(proc != nullptr);
 
-    auto inv = std::dynamic_pointer_cast<minifi::processors::GetEnvironmentalSensors>(proc);
+    auto inv = dynamic_pointer_cast<minifi::processors::GetEnvironmentalSensors>(proc);
     assert(inv != nullptr);
 
     configuration->set("nifi.c2.enable", "false");

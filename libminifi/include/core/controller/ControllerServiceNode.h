@@ -46,7 +46,7 @@ class ControllerServiceNode : public CoreComponent, public ConfigurableComponent
    * @param id identifier for this node.
    * @param configuration shared pointer configuration.
    */
-  explicit ControllerServiceNode(std::shared_ptr<ControllerService> service, const std::string &id, std::shared_ptr<Configure> configuration)
+  explicit ControllerServiceNode(org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerService> service, const std::string &id, org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configuration)
       : CoreComponent(id),
         ConfigurableComponent(),
         active(false),
@@ -84,9 +84,9 @@ class ControllerServiceNode : public CoreComponent, public ConfigurableComponent
    * maintains
    * @return the implementation of the Controller Service
    */
-  std::shared_ptr<ControllerService> &getControllerServiceImplementation();
-  std::vector<std::shared_ptr<ControllerServiceNode> > &getLinkedControllerServices();
-  std::vector<std::shared_ptr<ConfigurableComponent> > &getLinkedComponents();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerService> &getControllerServiceImplementation();
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerServiceNode> > &getLinkedControllerServices();
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<ConfigurableComponent> > &getLinkedComponents();
 
   /**
    * Returns true if we can be enabled.
@@ -121,12 +121,12 @@ class ControllerServiceNode : public CoreComponent, public ConfigurableComponent
   }
 
   std::atomic<bool> active;
-  std::shared_ptr<Configure> configuration_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configuration_;
   // controller service.
-  std::shared_ptr<ControllerService> controller_service_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerService> controller_service_;
   // linked controller services.
-  std::vector<std::shared_ptr<ControllerServiceNode> > linked_controller_services_;
-  std::vector<std::shared_ptr<ConfigurableComponent> > linked_components_;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerServiceNode> > linked_controller_services_;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<ConfigurableComponent> > linked_components_;
 };
 
 }  // namespace controller

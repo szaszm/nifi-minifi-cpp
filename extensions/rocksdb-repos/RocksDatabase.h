@@ -39,7 +39,7 @@ class RocksDatabase;
 class OpenRocksDB {
   friend class RocksDatabase;
 
-  OpenRocksDB(RocksDatabase& db, gsl::not_null<std::shared_ptr<rocksdb::DB>> impl);
+  OpenRocksDB(RocksDatabase& db, gsl::not_null<org::apache::nifi::minifi::utils::debug_shared_ptr<rocksdb::DB>> impl);
 
  public:
   OpenRocksDB(const OpenRocksDB&) = delete;
@@ -71,7 +71,7 @@ class OpenRocksDB {
 
  private:
   gsl::not_null<RocksDatabase*> db_;
-  gsl::not_null<std::shared_ptr<rocksdb::DB>> impl_;
+  gsl::not_null<org::apache::nifi::minifi::utils::debug_shared_ptr<rocksdb::DB>> impl_;
 };
 
 class RocksDatabase {
@@ -99,7 +99,7 @@ class RocksDatabase {
   const Mode mode_;
 
   std::mutex mtx_;
-  std::shared_ptr<rocksdb::DB> impl_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<rocksdb::DB> impl_;
 
   static std::shared_ptr<core::logging::Logger> logger_;
 };

@@ -80,11 +80,11 @@ class CoapProtocol : public minifi::c2::RESTSender {
       return serialize(payload);
   }
 
-  void update(const std::shared_ptr<Configure> &configure) override {
+  void update(const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure) override {
     // no op.
   }
 
-  void initialize(core::controller::ControllerServiceProvider* controller, const std::shared_ptr<Configure> &configure) override;
+  void initialize(core::controller::ControllerServiceProvider* controller, const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure) override;
 
   // Supported Properties
 
@@ -122,7 +122,7 @@ class CoapProtocol : public minifi::c2::RESTSender {
 
   minifi::c2::C2Payload serialize(const minifi::c2::C2Payload &payload);
 
-  std::shared_ptr<coap::controllers::CoapConnectorService> coap_service_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<coap::controllers::CoapConnectorService> coap_service_;
 
   std::mutex protocol_mutex_;
 

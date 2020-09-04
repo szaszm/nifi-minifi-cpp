@@ -62,7 +62,7 @@ class ReferenceContainer {
 
   ~ReferenceContainer() = default;
 
-  void addReference(std::shared_ptr<WeakReference> ref) {
+  void addReference(org::apache::nifi::minifi::utils::debug_shared_ptr<WeakReference> ref) {
     std::lock_guard<std::mutex> lock(mutex);
     references.emplace_back(ref);
   }
@@ -83,7 +83,7 @@ class ReferenceContainer {
  protected:
   std::mutex mutex;
 
-  std::vector<std::shared_ptr<WeakReference> > references;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<WeakReference> > references;
 };
 
 }  // namespace core

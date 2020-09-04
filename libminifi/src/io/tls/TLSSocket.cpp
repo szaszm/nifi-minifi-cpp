@@ -41,7 +41,7 @@ namespace nifi {
 namespace minifi {
 namespace io {
 
-TLSContext::TLSContext(const std::shared_ptr<Configure> &configure, std::shared_ptr<minifi::controllers::SSLContextService> ssl_service)
+TLSContext::TLSContext(const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure, org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::controllers::SSLContextService> ssl_service)
     : SocketContext(configure),
       error_value(TLS_GOOD),
       ctx(nullptr, deleteContext),
@@ -166,13 +166,13 @@ void TLSSocket::closeStream() {
  * @param port connecting port
  * @param listeners number of listeners in the queue
  */
-TLSSocket::TLSSocket(const std::shared_ptr<TLSContext> &context, const std::string &hostname, const uint16_t port, const uint16_t listeners)
+TLSSocket::TLSSocket(const org::apache::nifi::minifi::utils::debug_shared_ptr<TLSContext> &context, const std::string &hostname, const uint16_t port, const uint16_t listeners)
     : Socket(context, hostname, port, listeners) {
   logger_ = logging::LoggerFactory<TLSSocket>::getLogger();
   context_ = context;
 }
 
-TLSSocket::TLSSocket(const std::shared_ptr<TLSContext> &context, const std::string &hostname, const uint16_t port)
+TLSSocket::TLSSocket(const org::apache::nifi::minifi::utils::debug_shared_ptr<TLSContext> &context, const std::string &hostname, const uint16_t port)
     : Socket(context, hostname, port, 0) {
   logger_ = logging::LoggerFactory<TLSSocket>::getLogger();
   context_ = context;

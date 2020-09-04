@@ -45,8 +45,8 @@ struct JniProcessContext {
   jclass clazz_;
   jobject nifi_processor_;
   jobject cslookup_;
-  std::shared_ptr<core::Processor> processor_;
-  std::shared_ptr<core::ProcessContext> context_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> context_;
 };
 
 } /* namespace jni */

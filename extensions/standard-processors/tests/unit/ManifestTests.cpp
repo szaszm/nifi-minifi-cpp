@@ -64,7 +64,7 @@ TEST_CASE("Test Required", "[required]") {
   REQUIRE(prop_0.children.size() >= 3);
   const auto &prop_0_required = prop_0.children[3];
   REQUIRE("required" == prop_0_required.name);
-  REQUIRE(!std::dynamic_pointer_cast<minifi::state::response::BoolValue>(prop_0_required.value.getValue())->getValue());
+  REQUIRE(!dynamic_pointer_cast<minifi::state::response::BoolValue>(prop_0_required.value.getValue())->getValue());
 }
 
 TEST_CASE("Test Valid Regex", "[validRegex]") {

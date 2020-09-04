@@ -47,11 +47,11 @@ TEST_CASE("Test Repo Empty Value Attribute", "[TestFFR1]") {
   TestController testController;
   char format[] = "/var/tmp/testRepo.XXXXXX";
   auto dir = testController.createTempDirectory(format);
-  std::shared_ptr<core::repository::FlowFileRepository> repository = std::make_shared<core::repository::FlowFileRepository>("ff", dir, 0, 0, 1);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::repository::FlowFileRepository> repository = org::apache::nifi::minifi::utils::debug_make_shared<core::repository::FlowFileRepository>("ff", dir, 0, 0, 1);
 
-  repository->initialize(std::make_shared<minifi::Configure>());
+  repository->initialize(org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>());
 
-  std::shared_ptr<core::ContentRepository> content_repo = std::make_shared<core::repository::VolatileContentRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo = org::apache::nifi::minifi::utils::debug_make_shared<core::repository::VolatileContentRepository>();
   minifi::FlowFileRecord record(repository, content_repo);
 
   record.addAttribute("keyA", "");
@@ -70,10 +70,10 @@ TEST_CASE("Test Repo Empty Key Attribute ", "[TestFFR2]") {
   TestController testController;
   char format[] = "/var/tmp/testRepo.XXXXXX";
   auto dir = testController.createTempDirectory(format);
-  std::shared_ptr<core::repository::FlowFileRepository> repository = std::make_shared<core::repository::FlowFileRepository>("ff", dir, 0, 0, 1);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::repository::FlowFileRepository> repository = org::apache::nifi::minifi::utils::debug_make_shared<core::repository::FlowFileRepository>("ff", dir, 0, 0, 1);
 
-  repository->initialize(std::make_shared<minifi::Configure>());
-  std::shared_ptr<core::ContentRepository> content_repo = std::make_shared<core::repository::VolatileContentRepository>();
+  repository->initialize(org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>());
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo = org::apache::nifi::minifi::utils::debug_make_shared<core::repository::VolatileContentRepository>();
   minifi::FlowFileRecord record(repository, content_repo);
 
   record.addAttribute("keyA", "hasdgasdgjsdgasgdsgsadaskgasd");
@@ -94,11 +94,11 @@ TEST_CASE("Test Repo Key Attribute Verify ", "[TestFFR3]") {
   TestController testController;
   char format[] = "/var/tmp/testRepo.XXXXXX";
   auto dir = testController.createTempDirectory(format);
-  std::shared_ptr<core::repository::FlowFileRepository> repository = std::make_shared<core::repository::FlowFileRepository>("ff", dir, 0, 0, 1);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::repository::FlowFileRepository> repository = org::apache::nifi::minifi::utils::debug_make_shared<core::repository::FlowFileRepository>("ff", dir, 0, 0, 1);
 
-  repository->initialize(std::make_shared<org::apache::nifi::minifi::Configure>());
+  repository->initialize(org::apache::nifi::minifi::utils::debug_make_shared<org::apache::nifi::minifi::Configure>());
 
-  std::shared_ptr<core::ContentRepository> content_repo = std::make_shared<core::repository::VolatileContentRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo = org::apache::nifi::minifi::utils::debug_make_shared<core::repository::VolatileContentRepository>();
   minifi::FlowFileRecord record(repository, content_repo);
 
   minifi::FlowFileRecord record2(repository, content_repo);
@@ -145,7 +145,7 @@ TEST_CASE("Test Delete Content ", "[TestFFR4]") {
 
   auto dir = testController.createTempDirectory(format);
 
-  std::shared_ptr<core::repository::FlowFileRepository> repository = std::make_shared<core::repository::FlowFileRepository>("ff", dir, 0, 0, 1);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::repository::FlowFileRepository> repository = org::apache::nifi::minifi::utils::debug_make_shared<core::repository::FlowFileRepository>("ff", dir, 0, 0, 1);
 
   std::map<std::string, std::string> attributes;
 
@@ -156,13 +156,13 @@ TEST_CASE("Test Delete Content ", "[TestFFR4]") {
   file << "tempFile";
   file.close();
 
-  std::shared_ptr<core::ContentRepository> content_repo = std::make_shared<core::repository::FileSystemRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo = org::apache::nifi::minifi::utils::debug_make_shared<core::repository::FileSystemRepository>();
 
-  repository->initialize(std::make_shared<minifi::Configure>());
+  repository->initialize(org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>());
 
   repository->loadComponent(content_repo);
 
-  std::shared_ptr<minifi::ResourceClaim> claim = std::make_shared<minifi::ResourceClaim>(ss.str(), content_repo);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> claim = org::apache::nifi::minifi::utils::debug_make_shared<minifi::ResourceClaim>(ss.str(), content_repo);
 
   {
     minifi::FlowFileRecord record(repository, content_repo, attributes, claim);
@@ -200,7 +200,7 @@ TEST_CASE("Test Validate Checkpoint ", "[TestFFR5]") {
 
   auto dir = testController.createTempDirectory(format);
 
-  std::shared_ptr<core::repository::FlowFileRepository> repository = std::make_shared<core::repository::FlowFileRepository>("ff", dir, 0, 0, 1);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::repository::FlowFileRepository> repository = org::apache::nifi::minifi::utils::debug_make_shared<core::repository::FlowFileRepository>("ff", dir, 0, 0, 1);
 
   std::map<std::string, std::string> attributes;
 
@@ -211,13 +211,13 @@ TEST_CASE("Test Validate Checkpoint ", "[TestFFR5]") {
   file << "tempFile";
   file.close();
 
-  std::shared_ptr<core::ContentRepository> content_repo = std::make_shared<core::repository::FileSystemRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo = org::apache::nifi::minifi::utils::debug_make_shared<core::repository::FileSystemRepository>();
 
-  repository->initialize(std::make_shared<minifi::Configure>());
+  repository->initialize(org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>());
 
   repository->loadComponent(content_repo);
 
-  std::shared_ptr<minifi::ResourceClaim> claim = std::make_shared<minifi::ResourceClaim>(ss.str(), content_repo);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> claim = org::apache::nifi::minifi::utils::debug_make_shared<minifi::ResourceClaim>(ss.str(), content_repo);
   {
     minifi::FlowFileRecord record(repository, content_repo, attributes, claim);
 
@@ -261,25 +261,25 @@ TEST_CASE("Test FlowFile Restore", "[TestFFR6]") {
   char format[] = "/var/tmp/testRepo.XXXXXX";
   auto dir = testController.createTempDirectory(format);
 
-  auto config = std::make_shared<minifi::Configure>();
+  auto config = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>();
   config->set(minifi::Configure::nifi_dbcontent_repository_directory_default, utils::file::FileUtils::concat_path(dir, "content_repository"));
   config->set(minifi::Configure::nifi_flowfile_repository_directory_default, utils::file::FileUtils::concat_path(dir, "flowfile_repository"));
 
-  std::shared_ptr<core::Repository> prov_repo = std::make_shared<TestRepository>();
-  std::shared_ptr<core::repository::FlowFileRepository> ff_repository = std::make_shared<core::repository::FlowFileRepository>("flowFileRepository");
-  std::shared_ptr<core::ContentRepository> content_repo = std::make_shared<core::repository::FileSystemRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> prov_repo = org::apache::nifi::minifi::utils::debug_make_shared<TestRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::repository::FlowFileRepository> ff_repository = org::apache::nifi::minifi::utils::debug_make_shared<core::repository::FlowFileRepository>("flowFileRepository");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo = org::apache::nifi::minifi::utils::debug_make_shared<core::repository::FileSystemRepository>();
   ff_repository->initialize(config);
   content_repo->initialize(config);
 
   core::Relationship inputRel{"Input", "dummy"};
-  std::shared_ptr<minifi::Connection> input = std::make_shared<minifi::Connection>(ff_repository, content_repo, "Input");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> input = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Connection>(ff_repository, content_repo, "Input");
   input->setRelationship(inputRel);
 
-  auto root = std::make_shared<core::ProcessGroup>(core::ProcessGroupType::ROOT_PROCESS_GROUP, "root");
+  auto root = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessGroup>(core::ProcessGroupType::ROOT_PROCESS_GROUP, "root");
   root->addConnection(input);
 
   auto flowConfig = std::unique_ptr<core::FlowConfiguration>{new core::FlowConfiguration(prov_repo, ff_repository, content_repo, nullptr, config, "")};
-  auto flowController = std::make_shared<minifi::FlowController>(prov_repo, ff_repository, config, std::move(flowConfig), content_repo, "", true);
+  auto flowController = org::apache::nifi::minifi::utils::debug_make_shared<minifi::FlowController>(prov_repo, ff_repository, config, std::move(flowConfig), content_repo, "", true);
 
   std::string data = "banana";
   minifi::io::DataStream content(reinterpret_cast<const uint8_t*>(data.c_str()), data.length());
@@ -292,15 +292,15 @@ TEST_CASE("Test FlowFile Restore", "[TestFFR6]") {
    * which case the orphan FlowFiles are deleted.)
    */
   {
-    std::shared_ptr<core::Processor> processor = std::make_shared<core::Processor>("dummy");
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor = org::apache::nifi::minifi::utils::debug_make_shared<core::Processor>("dummy");
     utils::Identifier uuid;
     REQUIRE(processor->getUUID(uuid));
     input->setSourceUUID(uuid);
     processor->addConnection(input);
-    std::shared_ptr<core::ProcessorNode> node = std::make_shared<core::ProcessorNode>(processor);
-    auto context = std::make_shared<core::ProcessContext>(node, nullptr, prov_repo, ff_repository, content_repo);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessorNode> node = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessorNode>(processor);
+    auto context = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessContext>(node, nullptr, prov_repo, ff_repository, content_repo);
     core::ProcessSession sessionGenFlowFile(context);
-    std::shared_ptr<core::FlowFile> flow = std::static_pointer_cast<core::FlowFile>(sessionGenFlowFile.create());
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow = static_pointer_cast<core::FlowFile>(sessionGenFlowFile.create());
     sessionGenFlowFile.importFrom(content, flow);
     sessionGenFlowFile.transfer(flow, inputRel);
     sessionGenFlowFile.commit();
@@ -308,7 +308,7 @@ TEST_CASE("Test FlowFile Restore", "[TestFFR6]") {
 
   // remove flow from the connection but it is still present in the
   // flowFileRepo
-  std::set<std::shared_ptr<core::FlowFile>> expiredFiles;
+  std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> expiredFiles;
   auto oldFlow = input->poll(expiredFiles);
   REQUIRE(oldFlow);
   REQUIRE(expiredFiles.empty());
@@ -352,16 +352,16 @@ TEST_CASE("Flush deleted flowfiles before shutdown", "[TestFFR7]") {
   char format[] = "/var/tmp/testRepo.XXXXXX";
   auto dir = testController.createTempDirectory(format);
 
-  auto config = std::make_shared<minifi::Configure>();
+  auto config = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>();
   config->set(minifi::Configure::nifi_flowfile_repository_directory_default, utils::file::FileUtils::concat_path(dir, "flowfile_repository"));
 
-  auto content_repo = std::make_shared<core::repository::VolatileContentRepository>();
+  auto content_repo = org::apache::nifi::minifi::utils::debug_make_shared<core::repository::VolatileContentRepository>();
 
-  auto connection = std::make_shared<minifi::Connection>(nullptr, nullptr, "Connection");
-  std::map<std::string, std::shared_ptr<core::Connectable>> connectionMap{{connection->getUUIDStr(), connection}};
+  auto connection = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Connection>(nullptr, nullptr, "Connection");
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable>> connectionMap{{connection->getUUIDStr(), connection}};
   // initialize repository
   {
-    std::shared_ptr<TestFlowFileRepository> ff_repository = std::make_shared<TestFlowFileRepository>("flowFileRepository");
+    org::apache::nifi::minifi::utils::debug_shared_ptr<TestFlowFileRepository> ff_repository = org::apache::nifi::minifi::utils::debug_make_shared<TestFlowFileRepository>("flowFileRepository");
 
     std::atomic<int> flush_counter{0};
 
@@ -379,7 +379,7 @@ TEST_CASE("Flush deleted flowfiles before shutdown", "[TestFFR7]") {
       }
 
       for (int keyIdx = 0; keyIdx < 100; ++keyIdx) {
-        auto file = std::make_shared<minifi::FlowFileRecord>(ff_repository, nullptr);
+        auto file = org::apache::nifi::minifi::utils::debug_make_shared<minifi::FlowFileRecord>(ff_repository, nullptr);
         file->setUuidConnection(connection->getUUIDStr());
         // Serialize is sync
         REQUIRE(file->Serialize());
@@ -403,7 +403,7 @@ TEST_CASE("Flush deleted flowfiles before shutdown", "[TestFFR7]") {
 
   // check if the deleted flowfiles are indeed deleted
   {
-    std::shared_ptr<TestFlowFileRepository> ff_repository = std::make_shared<TestFlowFileRepository>("flowFileRepository");
+    org::apache::nifi::minifi::utils::debug_shared_ptr<TestFlowFileRepository> ff_repository = org::apache::nifi::minifi::utils::debug_make_shared<TestFlowFileRepository>("flowFileRepository");
     ff_repository->setConnectionMap(connectionMap);
     REQUIRE(ff_repository->initialize(config));
     ff_repository->loadComponent(content_repo);

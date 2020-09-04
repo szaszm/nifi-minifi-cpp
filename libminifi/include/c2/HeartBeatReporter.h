@@ -45,8 +45,8 @@ class HeartBeatReporter : public core::Connectable {
         configuration_(nullptr) {
   }
 
-  virtual void initialize(core::controller::ControllerServiceProvider* controller, const std::shared_ptr<state::StateMonitor> &updateSink,
-                          const std::shared_ptr<Configure> &configure) {
+  virtual void initialize(core::controller::ControllerServiceProvider* controller, const org::apache::nifi::minifi::utils::debug_shared_ptr<state::StateMonitor> &updateSink,
+                          const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure) {
     controller_ = controller;
     update_sink_ = updateSink;
     configuration_ = configure;
@@ -91,9 +91,9 @@ class HeartBeatReporter : public core::Connectable {
  protected:
   core::controller::ControllerServiceProvider* controller_;
 
-  std::shared_ptr<state::StateMonitor> update_sink_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<state::StateMonitor> update_sink_;
 
-  std::shared_ptr<Configure> configuration_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configuration_;
 };
 
 }  // namespace c2

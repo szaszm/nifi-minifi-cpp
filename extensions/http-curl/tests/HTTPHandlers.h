@@ -168,7 +168,7 @@ class TransactionResponder : public ServerAwareHandler {
     return true;
   }
 
-  void setFeed(moodycamel::ConcurrentQueue<std::shared_ptr<FlowObj>> *feed) {
+  void setFeed(moodycamel::ConcurrentQueue<org::apache::nifi::minifi::utils::debug_shared_ptr<FlowObj>> *feed) {
     flow_files_feed_ = feed;
   }
 
@@ -182,7 +182,7 @@ class TransactionResponder : public ServerAwareHandler {
   bool empty_transaction_uri;
   bool input_port;
   std::string port_id;
-  moodycamel::ConcurrentQueue<std::shared_ptr<FlowObj>> *flow_files_feed_;
+  moodycamel::ConcurrentQueue<org::apache::nifi::minifi::utils::debug_shared_ptr<FlowObj>> *flow_files_feed_;
 };
 
 class FlowFileResponder : public ServerAwareHandler {
@@ -195,11 +195,11 @@ class FlowFileResponder : public ServerAwareHandler {
         flow_files_feed_(nullptr) {
   }
 
-  moodycamel::ConcurrentQueue<std::shared_ptr<FlowObj>> *getFlows() {
+  moodycamel::ConcurrentQueue<org::apache::nifi::minifi::utils::debug_shared_ptr<FlowObj>> *getFlows() {
     return &flow_files_;
   }
 
-  void setFeed(moodycamel::ConcurrentQueue<std::shared_ptr<FlowObj>> *feed) {
+  void setFeed(moodycamel::ConcurrentQueue<org::apache::nifi::minifi::utils::debug_shared_ptr<FlowObj>> *feed) {
     flow_files_feed_ = feed;
   }
 
@@ -217,7 +217,7 @@ class FlowFileResponder : public ServerAwareHandler {
       if(!isServerRunning())return false;
       assert(read > 0); total_size += read;
 
-      auto flow = std::make_shared<FlowObj>();
+      auto flow = utils::debug_make_shared<FlowObj>();
 
       for (uint32_t i = 0; i < num_attributes; i++) {
         std::string name, value;
@@ -266,8 +266,8 @@ class FlowFileResponder : public ServerAwareHandler {
   bool handleGet(CivetServer *server, struct mg_connection *conn) override {
 
     if (flow_files_feed_->size_approx() > 0) {
-      std::shared_ptr<FlowObj> flowobj;
-      std::vector<std::shared_ptr<FlowObj>> flows;
+      org::apache::nifi::minifi::utils::debug_shared_ptr<FlowObj> flowobj;
+      std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<FlowObj>> flows;
       uint64_t total = 0;
 
       while (flow_files_feed_->try_dequeue(flowobj)) {
@@ -315,8 +315,8 @@ class FlowFileResponder : public ServerAwareHandler {
   bool input_port;
   // invalid checksum is returned.
   bool invalid_checksum;
-  moodycamel::ConcurrentQueue<std::shared_ptr<FlowObj>> flow_files_;
-  moodycamel::ConcurrentQueue<std::shared_ptr<FlowObj>> *flow_files_feed_;
+  moodycamel::ConcurrentQueue<org::apache::nifi::minifi::utils::debug_shared_ptr<FlowObj>> flow_files_;
+  moodycamel::ConcurrentQueue<org::apache::nifi::minifi::utils::debug_shared_ptr<FlowObj>> *flow_files_feed_;
 };
 
 class DeleteTransactionResponder : public ServerAwareHandler {
@@ -329,7 +329,7 @@ class DeleteTransactionResponder : public ServerAwareHandler {
     expected_resp_code_str = std::to_string(expected_resp_code);
   }
 
-  explicit DeleteTransactionResponder(std::string base_url, std::string response_code, moodycamel::ConcurrentQueue<std::shared_ptr<FlowObj>> *feed)
+  explicit DeleteTransactionResponder(std::string base_url, std::string response_code, moodycamel::ConcurrentQueue<org::apache::nifi::minifi::utils::debug_shared_ptr<FlowObj>> *feed)
       : flow_files_feed_(feed),
         base_url(std::move(base_url)),
         response_code(std::move(response_code)) {
@@ -347,12 +347,12 @@ class DeleteTransactionResponder : public ServerAwareHandler {
     return true;
   }
 
-  void setFeed(moodycamel::ConcurrentQueue<std::shared_ptr<FlowObj>> *feed) {
+  void setFeed(moodycamel::ConcurrentQueue<org::apache::nifi::minifi::utils::debug_shared_ptr<FlowObj>> *feed) {
     flow_files_feed_ = feed;
   }
 
  protected:
-  moodycamel::ConcurrentQueue<std::shared_ptr<FlowObj>> *flow_files_feed_;
+  moodycamel::ConcurrentQueue<org::apache::nifi::minifi::utils::debug_shared_ptr<FlowObj>> *flow_files_feed_;
   std::string base_url;
   std::string expected_resp_code_str;
   std::string response_code;

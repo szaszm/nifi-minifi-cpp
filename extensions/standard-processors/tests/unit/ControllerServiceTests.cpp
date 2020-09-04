@@ -38,8 +38,8 @@ TEST_CASE("Test ControllerServicesMap", "[cs1]") {
   core::controller::ControllerServiceMap map;
   REQUIRE(0 == map.getAllControllerServices().size());
 
-  std::shared_ptr<core::controller::ControllerService> service = std::make_shared<MockControllerService>();
-  std::shared_ptr<core::controller::StandardControllerServiceNode> testNode = std::make_shared<core::controller::StandardControllerServiceNode>(service, "ID", std::make_shared<minifi::Configure>());
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerService> service = utils::debug_make_shared<MockControllerService>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::StandardControllerServiceNode> testNode = utils::debug_make_shared<core::controller::StandardControllerServiceNode>(service, "ID", utils::debug_make_shared<minifi::Configure>());
 
   map.put("ID", testNode);
   REQUIRE(1 == map.getAllControllerServices().size());
@@ -58,7 +58,7 @@ TEST_CASE("Test StandardControllerServiceNode nullPtr", "[cs1]") {
   core::controller::ControllerServiceMap map;
 
   try {
-    std::shared_ptr<core::controller::StandardControllerServiceNode> testNode = std::make_shared<core::controller::StandardControllerServiceNode>(nullptr, "ID", std::make_shared<minifi::Configure>());
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::StandardControllerServiceNode> testNode = utils::debug_make_shared<core::controller::StandardControllerServiceNode>(nullptr, "ID", utils::debug_make_shared<minifi::Configure>());
   } catch (const minifi::Exception &) {
     return;
   }
@@ -66,9 +66,9 @@ TEST_CASE("Test StandardControllerServiceNode nullPtr", "[cs1]") {
   FAIL("Should have encountered exception");
 }
 
-std::shared_ptr<core::controller::StandardControllerServiceNode> newCsNode(const std::string id) {
-  std::shared_ptr<core::controller::ControllerService> service = std::make_shared<MockControllerService>();
-  std::shared_ptr<core::controller::StandardControllerServiceNode> testNode = std::make_shared<core::controller::StandardControllerServiceNode>(service, id, std::make_shared<minifi::Configure>());
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::StandardControllerServiceNode> newCsNode(const std::string id) {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerService> service = utils::debug_make_shared<MockControllerService>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::StandardControllerServiceNode> testNode = utils::debug_make_shared<core::controller::StandardControllerServiceNode>(service, id, utils::debug_make_shared<minifi::Configure>());
 
   return testNode;
 }

@@ -38,27 +38,27 @@ using Connection = minifi::Connection;
 using MergeContent = minifi::processors::MergeContent;
 
 struct TestFlow{
-  TestFlow(const std::shared_ptr<core::repository::FlowFileRepository>& ff_repository, const std::shared_ptr<core::ContentRepository>& content_repo, const std::shared_ptr<core::Repository>& prov_repo,
-        const std::function<std::shared_ptr<core::Processor>(utils::Identifier&)>& processorGenerator, const core::Relationship& relationshipToOutput)
+  TestFlow(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::repository::FlowFileRepository>& ff_repository, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository>& content_repo, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository>& prov_repo,
+        const std::function<org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor>(utils::Identifier&)>& processorGenerator, const core::Relationship& relationshipToOutput)
       : ff_repository(ff_repository), content_repo(content_repo), prov_repo(prov_repo) {
     // setup processor
     {
       processor = processorGenerator(mainProcUUID());
-      std::shared_ptr<core::ProcessorNode> node = std::make_shared<core::ProcessorNode>(processor);
-      processorContext = std::make_shared<core::ProcessContext>(node, nullptr, prov_repo, ff_repository, content_repo);
+      org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessorNode> node = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessorNode>(processor);
+      processorContext = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessContext>(node, nullptr, prov_repo, ff_repository, content_repo);
     }
 
     // setup INPUT processor
     {
-      inputProcessor = std::make_shared<core::Processor>("source", inputProcUUID());
-      std::shared_ptr<core::ProcessorNode> node = std::make_shared<core::ProcessorNode>(inputProcessor);
-      inputContext = std::make_shared<core::ProcessContext>(node, nullptr, prov_repo,
+      inputProcessor = org::apache::nifi::minifi::utils::debug_make_shared<core::Processor>("source", inputProcUUID());
+      org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessorNode> node = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessorNode>(inputProcessor);
+      inputContext = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessContext>(node, nullptr, prov_repo,
                                                             ff_repository, content_repo);
     }
 
     // setup Input Connection
     {
-      input = std::make_shared<Connection>(ff_repository, content_repo, "Input", inputConnUUID());
+      input = org::apache::nifi::minifi::utils::debug_make_shared<Connection>(ff_repository, content_repo, "Input", inputConnUUID());
       input->setRelationship({"input", "d"});
       input->setDestinationUUID(mainProcUUID());
       input->setSourceUUID(inputProcUUID());
@@ -67,14 +67,14 @@ struct TestFlow{
 
     // setup Output Connection
     {
-      output = std::make_shared<Connection>(ff_repository, content_repo, "Output", outputConnUUID());
+      output = org::apache::nifi::minifi::utils::debug_make_shared<Connection>(ff_repository, content_repo, "Output", outputConnUUID());
       output->setRelationship(relationshipToOutput);
       output->setSourceUUID(mainProcUUID());
     }
 
     // setup ProcessGroup
     {
-      root = std::make_shared<core::ProcessGroup>(core::ProcessGroupType::ROOT_PROCESS_GROUP, "root");
+      root = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessGroup>(core::ProcessGroupType::ROOT_PROCESS_GROUP, "root");
       root->addProcessor(processor);
       root->addConnection(input);
       root->addConnection(output);
@@ -84,17 +84,17 @@ struct TestFlow{
     processor->setScheduledState(core::ScheduledState::RUNNING);
     processor->onSchedule(processorContext.get(), new core::ProcessSessionFactory(processorContext));
   }
-  std::shared_ptr<core::FlowFile> write(const std::string& data) {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> write(const std::string& data) {
     minifi::io::DataStream stream(reinterpret_cast<const uint8_t*>(data.c_str()), data.length());
     core::ProcessSession sessionGenFlowFile(inputContext);
-    std::shared_ptr<core::FlowFile> flow = std::static_pointer_cast<core::FlowFile>(sessionGenFlowFile.create());
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow = static_pointer_cast<core::FlowFile>(sessionGenFlowFile.create());
     sessionGenFlowFile.importFrom(stream, flow);
     assert(flow->getResourceClaim()->getFlowFileRecordOwnedCount() == 1);
     sessionGenFlowFile.transfer(flow, {"input", "d"});
     sessionGenFlowFile.commit();
     return flow;
   }
-  std::string read(const std::shared_ptr<core::FlowFile>& file) {
+  std::string read(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>& file) {
     core::ProcessSession session(processorContext);
     std::vector<uint8_t> buffer;
     BufferReader reader(buffer);
@@ -102,14 +102,14 @@ struct TestFlow{
     return {buffer.data(), buffer.data() + buffer.size()};
   }
   void trigger() {
-    auto session = std::make_shared<core::ProcessSession>(processorContext);
+    auto session = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessSession>(processorContext);
     processor->onTrigger(processorContext, session);
     session->commit();
   }
 
-  std::shared_ptr<Connection> input;
-  std::shared_ptr<Connection> output;
-  std::shared_ptr<core::ProcessGroup> root;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Connection> input;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Connection> output;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessGroup> root;
 
  private:
   static utils::Identifier& mainProcUUID() {static auto id = utils::IdGenerator::getIdGenerator()->generate(); return id;}
@@ -117,17 +117,17 @@ struct TestFlow{
   static utils::Identifier& inputConnUUID() {static auto id = utils::IdGenerator::getIdGenerator()->generate(); return id;}
   static utils::Identifier& outputConnUUID() {static auto id = utils::IdGenerator::getIdGenerator()->generate(); return id;}
 
-  std::shared_ptr<core::Processor> inputProcessor;
-  std::shared_ptr<core::Processor> processor;
-  std::shared_ptr<core::repository::FlowFileRepository> ff_repository;
-  std::shared_ptr<core::ContentRepository> content_repo;
-  std::shared_ptr<core::Repository> prov_repo;
-  std::shared_ptr<core::ProcessContext> inputContext;
-  std::shared_ptr<core::ProcessContext> processorContext;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> inputProcessor;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::repository::FlowFileRepository> ff_repository;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> prov_repo;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> inputContext;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> processorContext;
 };
 
-std::shared_ptr<MergeContent> setupMergeProcessor(const utils::Identifier& id) {
-  auto processor = std::make_shared<MergeContent>("MergeContent", id);
+org::apache::nifi::minifi::utils::debug_shared_ptr<MergeContent> setupMergeProcessor(const utils::Identifier& id) {
+  auto processor = org::apache::nifi::minifi::utils::debug_make_shared<MergeContent>("MergeContent", id);
   processor->initialize();
   processor->setAutoTerminatedRelationships({{"original", "d"}});
 
@@ -153,18 +153,18 @@ TEST_CASE("Processors Can Store FlowFiles", "[TestP1]") {
   char format[] = "/var/tmp/test.XXXXXX";
   auto dir = testController.createTempDirectory(format);
 
-  auto config = std::make_shared<minifi::Configure>();
+  auto config = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>();
   config->set(minifi::Configure::nifi_dbcontent_repository_directory_default, utils::file::FileUtils::concat_path(dir, "content_repository"));
   config->set(minifi::Configure::nifi_flowfile_repository_directory_default, utils::file::FileUtils::concat_path(dir, "flowfile_repository"));
 
-  std::shared_ptr<core::Repository> prov_repo = std::make_shared<TestRepository>();
-  std::shared_ptr<core::repository::FlowFileRepository> ff_repository = std::make_shared<core::repository::FlowFileRepository>("flowFileRepository");
-  std::shared_ptr<core::ContentRepository> content_repo = std::make_shared<core::repository::FileSystemRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> prov_repo = org::apache::nifi::minifi::utils::debug_make_shared<TestRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::repository::FlowFileRepository> ff_repository = org::apache::nifi::minifi::utils::debug_make_shared<core::repository::FlowFileRepository>("flowFileRepository");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo = org::apache::nifi::minifi::utils::debug_make_shared<core::repository::FileSystemRepository>();
   ff_repository->initialize(config);
   content_repo->initialize(config);
 
   auto flowConfig = std::unique_ptr<core::FlowConfiguration>{new core::FlowConfiguration(prov_repo, ff_repository, content_repo, nullptr, config, "")};
-  auto flowController = std::make_shared<minifi::FlowController>(prov_repo, ff_repository, config, std::move(flowConfig), content_repo, "", true);
+  auto flowController = org::apache::nifi::minifi::utils::debug_make_shared<minifi::FlowController>(prov_repo, ff_repository, config, std::move(flowConfig), content_repo, "", true);
 
   {
     TestFlow flow(ff_repository, content_repo, prov_repo, setupMergeProcessor, MergeContent::Merge);
@@ -183,7 +183,7 @@ TEST_CASE("Processors Can Store FlowFiles", "[TestP1]") {
     flowController->unload();
 
     // check if the processor has taken ownership
-    std::set<std::shared_ptr<core::FlowFile>> expired;
+    std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> expired;
     auto file = flow.input->poll(expired);
     REQUIRE(!file);
     REQUIRE(expired.empty());
@@ -210,7 +210,7 @@ TEST_CASE("Processors Can Store FlowFiles", "[TestP1]") {
     ff_repository->stop();
     flowController->unload();
 
-    std::set<std::shared_ptr<core::FlowFile>> expired;
+    std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> expired;
     auto file = flow.output->poll(expired);
     REQUIRE(file);
     REQUIRE(expired.empty());
@@ -236,8 +236,8 @@ class ContentUpdaterProcessor : public core::Processor{
   }
 };
 
-std::shared_ptr<core::Processor> setupContentUpdaterProcessor(utils::Identifier& id) {
-  return std::make_shared<ContentUpdaterProcessor>("Updater", id);
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> setupContentUpdaterProcessor(utils::Identifier& id) {
+  return org::apache::nifi::minifi::utils::debug_make_shared<ContentUpdaterProcessor>("Updater", id);
 }
 
 TEST_CASE("Persisted flowFiles are updated on modification", "[TestP1]") {
@@ -250,18 +250,18 @@ TEST_CASE("Persisted flowFiles are updated on modification", "[TestP1]") {
   char format[] = "/var/tmp/test.XXXXXX";
   auto dir = testController.createTempDirectory(format);
 
-  auto config = std::make_shared<minifi::Configure>();
+  auto config = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>();
   config->set(minifi::Configure::nifi_dbcontent_repository_directory_default, utils::file::FileUtils::concat_path(dir, "content_repository"));
   config->set(minifi::Configure::nifi_flowfile_repository_directory_default, utils::file::FileUtils::concat_path(dir, "flowfile_repository"));
 
-  std::shared_ptr<core::Repository> prov_repo = std::make_shared<TestRepository>();
-  std::shared_ptr<core::repository::FlowFileRepository> ff_repository = std::make_shared<core::repository::FlowFileRepository>("flowFileRepository");
-  std::shared_ptr<core::ContentRepository> content_repo = std::make_shared<core::repository::FileSystemRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> prov_repo = org::apache::nifi::minifi::utils::debug_make_shared<TestRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::repository::FlowFileRepository> ff_repository = org::apache::nifi::minifi::utils::debug_make_shared<core::repository::FlowFileRepository>("flowFileRepository");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo = org::apache::nifi::minifi::utils::debug_make_shared<core::repository::FileSystemRepository>();
   ff_repository->initialize(config);
   content_repo->initialize(config);
 
   auto flowConfig = std::unique_ptr<core::FlowConfiguration>{new core::FlowConfiguration(prov_repo, ff_repository, content_repo, nullptr, config, "")};
-  auto flowController = std::make_shared<minifi::FlowController>(prov_repo, ff_repository, config, std::move(flowConfig), content_repo, "", true);
+  auto flowController = org::apache::nifi::minifi::utils::debug_make_shared<minifi::FlowController>(prov_repo, ff_repository, config, std::move(flowConfig), content_repo, "", true);
 
   {
     TestFlow flow(ff_repository, content_repo, prov_repo, setupContentUpdaterProcessor, {"success", "d"});
@@ -301,7 +301,7 @@ TEST_CASE("Persisted flowFiles are updated on modification", "[TestP1]") {
     // the resurrected FlowFiles
     std::this_thread::sleep_for(std::chrono::milliseconds{100});
 
-    std::set<std::shared_ptr<core::FlowFile>> expired;
+    std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> expired;
     auto file = flow.output->poll(expired);
     REQUIRE(file);
     REQUIRE(expired.empty());

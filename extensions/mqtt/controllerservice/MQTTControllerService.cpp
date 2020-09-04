@@ -58,7 +58,7 @@ void MQTTControllerService::initialize() {
 
 void MQTTControllerService::onEnable() {
   for (auto &linked_service : linked_services_) {
-    std::shared_ptr<controllers::SSLContextService> ssl_service = std::dynamic_pointer_cast<controllers::SSLContextService>(linked_service);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<controllers::SSLContextService> ssl_service = dynamic_pointer_cast<controllers::SSLContextService>(linked_service);
     if (nullptr != ssl_service) {
       // security is enabled.
       ssl_context_service_ = ssl_service;

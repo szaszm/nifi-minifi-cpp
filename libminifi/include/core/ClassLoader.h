@@ -96,7 +96,7 @@ class ObjectFactory {
   /**
    * Create a shared pointer to a new processor.
    */
-  virtual std::shared_ptr<CoreComponent> create(const std::string &name) {
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<CoreComponent> create(const std::string &name) {
     return nullptr;
   }
 
@@ -110,7 +110,7 @@ class ObjectFactory {
   /**
    * Create a shared pointer to a new processor.
    */
-  virtual std::shared_ptr<CoreComponent> create(const std::string &name, utils::Identifier & uuid) {
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<CoreComponent> create(const std::string &name, utils::Identifier & uuid) {
     return nullptr;
   }
 
@@ -173,17 +173,17 @@ class DefautObjectFactory : public ObjectFactory {
   /**
    * Create a shared pointer to a new processor.
    */
-  virtual std::shared_ptr<CoreComponent> create(const std::string &name) {
-    std::shared_ptr<T> ptr = std::make_shared<T>(name);
-    return std::static_pointer_cast<CoreComponent>(ptr);
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<CoreComponent> create(const std::string &name) {
+    org::apache::nifi::minifi::utils::debug_shared_ptr<T> ptr = org::apache::nifi::minifi::utils::debug_make_shared<T>(name);
+    return static_pointer_cast<CoreComponent>(ptr);
   }
 
   /**
    * Create a shared pointer to a new processor.
    */
-  virtual std::shared_ptr<CoreComponent> create(const std::string &name, utils::Identifier & uuid) {
-    std::shared_ptr<T> ptr = std::make_shared<T>(name, uuid);
-    return std::static_pointer_cast<CoreComponent>(ptr);
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<CoreComponent> create(const std::string &name, utils::Identifier & uuid) {
+    org::apache::nifi::minifi::utils::debug_shared_ptr<T> ptr = org::apache::nifi::minifi::utils::debug_make_shared<T>(name, uuid);
+    return static_pointer_cast<CoreComponent>(ptr);
   }
 
   /**
@@ -369,7 +369,7 @@ class ClassLoader {
    * @return nullptr, object created from class_name definition, or make_shared of T
    */
   template<class T>
-  std::shared_ptr<T> instantiate(const std::string &class_name, bool make_shared_ptr = true);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<T> instantiate(const std::string &class_name, bool make_shared_ptr = true);
 
   /**
    * Instantiate object based on class_name
@@ -378,7 +378,7 @@ class ClassLoader {
    * @return nullptr or object created from class_name definition.
    */
   template<class T = CoreComponent>
-  std::shared_ptr<T> instantiate(const std::string &class_name, const std::string &name);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<T> instantiate(const std::string &class_name, const std::string &name);
 
   /**
    * Instantiate object based on class_name
@@ -387,7 +387,7 @@ class ClassLoader {
    * @return nullptr or object created from class_name definition.
    */
   template<class T = CoreComponent>
-  std::shared_ptr<T> instantiate(const std::string &class_name, utils::Identifier & uuid);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<T> instantiate(const std::string &class_name, utils::Identifier & uuid);
 
   /**
    * Instantiate object based on class_name
@@ -547,33 +547,33 @@ class ClassLoader {
 };
 
 template<class T>
-std::shared_ptr<T> ClassLoader::instantiate(const std::string &class_name, bool make_shared_ptr) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<T> ClassLoader::instantiate(const std::string &class_name, bool make_shared_ptr) {
   const auto ret = instantiate<T>(class_name, class_name);
   if (nullptr == ret && make_shared_ptr) {
-    return std::make_shared<T>(class_name);
+    return org::apache::nifi::minifi::utils::debug_make_shared<T>(class_name);
   }
   return ret;
 }
 
 template<class T>
-std::shared_ptr<T> ClassLoader::instantiate(const std::string &class_name, const std::string &name) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<T> ClassLoader::instantiate(const std::string &class_name, const std::string &name) {
   std::lock_guard<std::mutex> lock(internal_mutex_);
   auto factory_entry = loaded_factories_.find(class_name);
   if (factory_entry != loaded_factories_.end()) {
     auto obj = factory_entry->second->create(name);
-    return std::dynamic_pointer_cast<T>(obj);
+    return dynamic_pointer_cast<T>(obj);
   } else {
     return nullptr;
   }
 }
 
 template<class T>
-std::shared_ptr<T> ClassLoader::instantiate(const std::string &class_name, utils::Identifier &uuid) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<T> ClassLoader::instantiate(const std::string &class_name, utils::Identifier &uuid) {
   std::lock_guard<std::mutex> lock(internal_mutex_);
   auto factory_entry = loaded_factories_.find(class_name);
   if (factory_entry != loaded_factories_.end()) {
     auto obj = factory_entry->second->create(class_name, uuid);
-    return std::dynamic_pointer_cast<T>(obj);
+    return dynamic_pointer_cast<T>(obj);
   } else {
     return nullptr;
   }

@@ -66,7 +66,7 @@ class ControllerService : public ConfigurableComponent, public Connectable {
    */
   ControllerService()
       : Connectable(core::getClassName<ControllerService>()),
-        configuration_(std::make_shared<Configure>()) {
+        configuration_(org::apache::nifi::minifi::utils::debug_make_shared<Configure>()) {
     current_state_ = DISABLED;
   }
 
@@ -75,7 +75,7 @@ class ControllerService : public ConfigurableComponent, public Connectable {
    */
   explicit ControllerService(const std::string &name, const std::string &id)
       : Connectable(name),
-        configuration_(std::make_shared<Configure>()) {
+        configuration_(org::apache::nifi::minifi::utils::debug_make_shared<Configure>()) {
     current_state_ = DISABLED;
     uuid_ = id;
     uuidStr_ = id;
@@ -86,7 +86,7 @@ class ControllerService : public ConfigurableComponent, public Connectable {
    */
   explicit ControllerService(const std::string &name, utils::Identifier uuid)
       : Connectable(name, uuid),
-        configuration_(std::make_shared<Configure>()) {
+        configuration_(org::apache::nifi::minifi::utils::debug_make_shared<Configure>()) {
     current_state_ = DISABLED;
   }
 
@@ -95,7 +95,7 @@ class ControllerService : public ConfigurableComponent, public Connectable {
      */
     explicit ControllerService(const std::string &name)
         : Connectable(name),
-          configuration_(std::make_shared<Configure>()) {
+          configuration_(org::apache::nifi::minifi::utils::debug_make_shared<Configure>()) {
       current_state_ = DISABLED;
     }
 
@@ -115,7 +115,7 @@ class ControllerService : public ConfigurableComponent, public Connectable {
   /**
    * Replaces the configuration object within the controller service.
    */
-  void setConfiguration(const std::shared_ptr<Configure> &configuration) {
+  void setConfiguration(const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configuration) {
     configuration_ = configuration;
   }
 
@@ -146,13 +146,13 @@ class ControllerService : public ConfigurableComponent, public Connectable {
     return false;
   }
 
-  void setLinkedControllerServices(const std::vector<std::shared_ptr<controller::ControllerService>> &services) {
+  void setLinkedControllerServices(const std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<controller::ControllerService>> &services) {
     linked_services_ = services;
   }
 
  protected:
-  std::vector<std::shared_ptr<controller::ControllerService> > linked_services_;
-  std::shared_ptr<Configure> configuration_;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<controller::ControllerService> > linked_services_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configuration_;
   std::atomic<ControllerServiceState> current_state_;
   virtual bool canEdit() {
     return true;

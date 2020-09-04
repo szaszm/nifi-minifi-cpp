@@ -38,7 +38,7 @@ namespace core {
  */
 class ProcessorNode : public ConfigurableComponent, public Connectable {
  public:
-  explicit ProcessorNode(const std::shared_ptr<Connectable> &processor);
+  explicit ProcessorNode(const org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable> &processor);
 
   explicit ProcessorNode(const ProcessorNode &other);
 
@@ -50,7 +50,7 @@ class ProcessorNode : public ConfigurableComponent, public Connectable {
    * @param value value passed in by reference
    * @return result of getting property.
    */
-  std::shared_ptr<Connectable> getProcessor() const {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable> getProcessor() const {
     return processor_;
   }
 
@@ -66,7 +66,7 @@ class ProcessorNode : public ConfigurableComponent, public Connectable {
    */
   template<typename T>
   bool getProperty(const std::string &name, T &value) {
-    const std::shared_ptr<ConfigurableComponent> processor_cast = std::dynamic_pointer_cast<ConfigurableComponent>(processor_);
+    const org::apache::nifi::minifi::utils::debug_shared_ptr<ConfigurableComponent> processor_cast = dynamic_pointer_cast<ConfigurableComponent>(processor_);
     if (nullptr != processor_cast) {
       return processor_cast->getProperty<T>(name, value);
     } else {
@@ -80,7 +80,7 @@ class ProcessorNode : public ConfigurableComponent, public Connectable {
    * @return result of setting property.
    */
   bool setProperty(const std::string &name, std::string value) {
-    const std::shared_ptr<ConfigurableComponent> processor_cast = std::dynamic_pointer_cast<ConfigurableComponent>(processor_);
+    const org::apache::nifi::minifi::utils::debug_shared_ptr<ConfigurableComponent> processor_cast = dynamic_pointer_cast<ConfigurableComponent>(processor_);
     bool ret = ConfigurableComponent::setProperty(name, value);
     if (nullptr != processor_cast)
       ret = processor_cast->setProperty(name, value);
@@ -95,7 +95,7 @@ class ProcessorNode : public ConfigurableComponent, public Connectable {
    * @return result of getting property.
    */
   bool getDynamicProperty(const std::string name, std::string &value) const {
-    const auto &processor_cast = std::dynamic_pointer_cast<ConfigurableComponent>(processor_);
+    const auto &processor_cast = dynamic_pointer_cast<ConfigurableComponent>(processor_);
     if (processor_cast) {
       return processor_cast->getDynamicProperty(name, value);
     } else {
@@ -107,7 +107,7 @@ class ProcessorNode : public ConfigurableComponent, public Connectable {
    * Returns theflow version
    * @returns flow version. can be null if a flow version is not tracked.
    */
-  std::shared_ptr<state::FlowIdentifier> getFlowIdentifier() const override {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<state::FlowIdentifier> getFlowIdentifier() const override {
     if (processor_ != nullptr) {
       return processor_->getFlowIdentifier();
     } else {
@@ -122,7 +122,7 @@ class ProcessorNode : public ConfigurableComponent, public Connectable {
    * @return result of setting property.
    */
   bool setDynamicProperty(const std::string name, std::string value) {
-    const auto &processor_cast = std::dynamic_pointer_cast<ConfigurableComponent>(processor_);
+    const auto &processor_cast = dynamic_pointer_cast<ConfigurableComponent>(processor_);
     auto ret = ConfigurableComponent::setDynamicProperty(name, value);
 
     if (processor_cast) {
@@ -139,7 +139,7 @@ class ProcessorNode : public ConfigurableComponent, public Connectable {
    * @return result of getting property.
    */
   std::vector<std::string> getDynamicPropertyKeys() const {
-    const auto &processor_cast = std::dynamic_pointer_cast<ConfigurableComponent>(processor_);
+    const auto &processor_cast = dynamic_pointer_cast<ConfigurableComponent>(processor_);
     if (processor_cast) {
       return processor_cast->getDynamicPropertyKeys();
     } else {
@@ -154,7 +154,7 @@ class ProcessorNode : public ConfigurableComponent, public Connectable {
    * @return whether property was set or not
    */
   bool setProperty(Property &prop, std::string value) {
-    const std::shared_ptr<ConfigurableComponent> processor_cast = std::dynamic_pointer_cast<ConfigurableComponent>(processor_);
+    const org::apache::nifi::minifi::utils::debug_shared_ptr<ConfigurableComponent> processor_cast = dynamic_pointer_cast<ConfigurableComponent>(processor_);
     bool ret = ConfigurableComponent::setProperty(prop, value);
     if (nullptr != processor_cast)
       ret = processor_cast->setProperty(prop, value);
@@ -168,7 +168,7 @@ class ProcessorNode : public ConfigurableComponent, public Connectable {
    * @return result of set operation.
    */
   bool setSupportedProperties(std::set<Property> properties) {
-    const std::shared_ptr<ConfigurableComponent> processor_cast = std::dynamic_pointer_cast<ConfigurableComponent>(processor_);
+    const org::apache::nifi::minifi::utils::debug_shared_ptr<ConfigurableComponent> processor_cast = dynamic_pointer_cast<ConfigurableComponent>(processor_);
     bool ret = ConfigurableComponent::setSupportedProperties(properties);
     if (nullptr != processor_cast)
       ret = processor_cast->setSupportedProperties(properties);
@@ -224,7 +224,7 @@ class ProcessorNode : public ConfigurableComponent, public Connectable {
    * Get outgoing connection based on relationship
    * @return set of outgoing connections.
    */
-  std::set<std::shared_ptr<Connectable>> getOutGoingConnections(const std::string& relationship) const override {
+  std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable>> getOutGoingConnections(const std::string& relationship) const override {
     return processor_->getOutGoingConnections(relationship);
   }
 
@@ -232,11 +232,11 @@ class ProcessorNode : public ConfigurableComponent, public Connectable {
    * Get next incoming connection
    * @return next incoming connection
    */
-  std::shared_ptr<Connectable> getNextIncomingConnection() {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable> getNextIncomingConnection() {
     return processor_->getNextIncomingConnection();
   }
 
-  std::shared_ptr<Connectable> pickIncomingConnection() override {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable> pickIncomingConnection() override {
     return processor_->pickIncomingConnection();
   }
 
@@ -299,7 +299,7 @@ class ProcessorNode : public ConfigurableComponent, public Connectable {
   /**
    * internal connectable.
    */
-  std::shared_ptr<Connectable> processor_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable> processor_;
 };
 
 }  // namespace core

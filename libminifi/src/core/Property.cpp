@@ -58,7 +58,7 @@ std::string Property::getValidRegex() const {
   return valid_regex_;
 }
 
-std::shared_ptr<PropertyValidator> Property::getValidator() const {
+org::apache::nifi::minifi::utils::debug_shared_ptr<PropertyValidator> Property::getValidator() const {
   return validator_;
 }
 

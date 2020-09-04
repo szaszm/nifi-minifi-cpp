@@ -52,7 +52,7 @@ class TestRepository : public core::Repository {
         Repository("repo_name", "./dir", 1000, 100, 0) {
   }
 
-  bool initialize(const std::shared_ptr<minifi::Configure> &) override {
+  bool initialize(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> &) override {
     return true;
   }
 
@@ -110,18 +110,18 @@ class TestRepository : public core::Repository {
     }
   }
 
-  bool Serialize(std::vector<std::shared_ptr<core::SerializableComponent>> &store, size_t max_size) override {
+  bool Serialize(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent>> &store, size_t max_size) override {
     return false;
   }
 
-  bool DeSerialize(std::vector<std::shared_ptr<core::SerializableComponent>> &store, size_t &max_size) override {
+  bool DeSerialize(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent>> &store, size_t &max_size) override {
     std::lock_guard<std::mutex> lock{repository_results_mutex_};
     max_size = 0;
     for (const auto &entry : repository_results_) {
       if (max_size >= store.size()) {
         break;
       }
-      std::shared_ptr<core::SerializableComponent> eventRead = store.at(max_size);
+      org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent> eventRead = store.at(max_size);
       if (eventRead->DeSerialize((uint8_t*) entry.second.data(), entry.second.length())) {
       }
       ++max_size;
@@ -129,11 +129,11 @@ class TestRepository : public core::Repository {
     return true;
   }
 
-  bool Serialize(const std::shared_ptr<core::SerializableComponent> &store) override {
+  bool Serialize(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent> &store) override {
     return false;
   }
 
-  bool DeSerialize(const std::shared_ptr<core::SerializableComponent> &store) override {
+  bool DeSerialize(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent> &store) override {
     std::string value;
     Get(store->getUUIDStr(), value);
     store->DeSerialize(reinterpret_cast<const uint8_t*>(value.c_str()), value.size());
@@ -149,12 +149,12 @@ class TestRepository : public core::Repository {
     return repository_results_;
   }
 
-  void getProvenanceRecord(std::vector<std::shared_ptr<provenance::ProvenanceEventRecord>> &records, int maxSize) {
+  void getProvenanceRecord(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<provenance::ProvenanceEventRecord>> &records, int maxSize) {
     std::lock_guard<std::mutex> lock{repository_results_mutex_};
     for (const auto &entry : repository_results_) {
       if (records.size() >= static_cast<uint64_t>(maxSize))
         break;
-      std::shared_ptr<provenance::ProvenanceEventRecord> eventRead = std::make_shared<provenance::ProvenanceEventRecord>();
+      org::apache::nifi::minifi::utils::debug_shared_ptr<provenance::ProvenanceEventRecord> eventRead = org::apache::nifi::minifi::utils::debug_make_shared<provenance::ProvenanceEventRecord>();
 
       if (eventRead->DeSerialize(reinterpret_cast<const uint8_t*>(entry.second.data()), entry.second.length())) {
         records.push_back(eventRead);
@@ -178,7 +178,7 @@ class TestFlowRepository : public core::Repository {
         core::Repository("ff", "./dir", 1000, 100, 0) {
   }
 
-  bool initialize(const std::shared_ptr<org::apache::nifi::minifi::Configure> &) override {
+  bool initialize(const org::apache::nifi::minifi::utils::debug_shared_ptr<org::apache::nifi::minifi::Configure> &) override {
     return true;
   }
 
@@ -212,12 +212,12 @@ class TestFlowRepository : public core::Repository {
     return repository_results_;
   }
 
-  void getProvenanceRecord(std::vector<std::shared_ptr<provenance::ProvenanceEventRecord>> &records, int maxSize) {
+  void getProvenanceRecord(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<provenance::ProvenanceEventRecord>> &records, int maxSize) {
     std::lock_guard<std::mutex> lock{repository_results_mutex_};
     for (const auto &entry : repository_results_) {
       if (records.size() >= static_cast<uint64_t>(maxSize))
         break;
-      std::shared_ptr<provenance::ProvenanceEventRecord> eventRead = std::make_shared<provenance::ProvenanceEventRecord>();
+      org::apache::nifi::minifi::utils::debug_shared_ptr<provenance::ProvenanceEventRecord> eventRead = org::apache::nifi::minifi::utils::debug_make_shared<provenance::ProvenanceEventRecord>();
 
       if (eventRead->DeSerialize(reinterpret_cast<const uint8_t*>(entry.second.data()), entry.second.length())) {
         records.push_back(eventRead);
@@ -225,7 +225,7 @@ class TestFlowRepository : public core::Repository {
     }
   }
 
-  void loadComponent(const std::shared_ptr<core::ContentRepository> &content_repo) override {
+  void loadComponent(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> &content_repo) override {
   }
 
   void run() override {
@@ -240,13 +240,13 @@ class TestFlowRepository : public core::Repository {
 class TestFlowController : public minifi::FlowController {
 
  public:
-  TestFlowController(std::shared_ptr<core::Repository> repo, std::shared_ptr<core::Repository> flow_file_repo, std::shared_ptr<core::ContentRepository> content_repo)
-      : minifi::FlowController(repo, flow_file_repo, std::make_shared<minifi::Configure>(), nullptr, std::make_shared<core::repository::VolatileContentRepository>(), "", true) {
+  TestFlowController(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> repo, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_file_repo, org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo)
+      : minifi::FlowController(repo, flow_file_repo, org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>(), nullptr, org::apache::nifi::minifi::utils::debug_make_shared<core::repository::VolatileContentRepository>(), "", true) {
   }
 
   ~TestFlowController() override = default;
 
-  void load(const std::shared_ptr<core::ProcessGroup> &root = nullptr, bool reload = false) override {
+  void load(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessGroup> &root = nullptr, bool reload = false) override {
   }
 
   int16_t start() override {
@@ -274,7 +274,7 @@ class TestFlowController : public minifi::FlowController {
     return true;
   }
 
-  std::shared_ptr<core::Processor> createProcessor(std::string name, utils::Identifier &  uuid) {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> createProcessor(std::string name, utils::Identifier &  uuid) {
     return 0;
   }
 
@@ -286,7 +286,7 @@ class TestFlowController : public minifi::FlowController {
     return 0;
   }
 
-  std::shared_ptr<minifi::Connection> createConnection(std::string name, utils::Identifier &  uuid) {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> createConnection(std::string name, utils::Identifier &  uuid) {
     return 0;
   }
 

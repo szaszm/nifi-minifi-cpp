@@ -53,7 +53,7 @@ namespace repository {
  * Flow File repository
  * Design: Extends Repository and implements the run function, using rocksdb as the primary substrate.
  */
-class FlowFileRepository : public core::Repository, public std::enable_shared_from_this<FlowFileRepository> {
+class FlowFileRepository : public core::Repository, public org::apache::nifi::minifi::utils::enable_debug_shared_from_this<FlowFileRepository> {
  public:
   // Constructor
 
@@ -80,7 +80,7 @@ class FlowFileRepository : public core::Repository, public std::enable_shared_fr
   virtual void printStats();
 
   // initialize
-  virtual bool initialize(const std::shared_ptr<Configure> &configure) {
+  virtual bool initialize(const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure) {
     std::string value;
 
     if (configure->get(Configure::nifi_flowfile_repository_directory_default, value)) {
@@ -173,7 +173,7 @@ class FlowFileRepository : public core::Repository, public std::enable_shared_fr
     return opendb->Get(rocksdb::ReadOptions(), key, &value).ok();
   }
 
-  virtual void loadComponent(const std::shared_ptr<core::ContentRepository> &content_repo);
+  virtual void loadComponent(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> &content_repo);
 
   void start() {
     if (this->purge_period_ <= 0) {
@@ -208,7 +208,7 @@ class FlowFileRepository : public core::Repository, public std::enable_shared_fr
   void prune_stored_flowfiles();
 
   moodycamel::ConcurrentQueue<std::string> keys_to_delete;
-  std::shared_ptr<core::ContentRepository> content_repo_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo_;
   std::unique_ptr<minifi::internal::RocksDatabase> db_;
   std::unique_ptr<rocksdb::Checkpoint> checkpoint_;
   std::shared_ptr<logging::Logger> logger_;

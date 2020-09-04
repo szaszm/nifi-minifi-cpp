@@ -82,7 +82,7 @@ class TestClass2 {
 };
 
 TEST_CASE("Test ShortenNames", "[ttl6]") {
-  std::shared_ptr<logging::LoggerProperties> props = std::make_shared<logging::LoggerProperties>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<logging::LoggerProperties> props = org::apache::nifi::minifi::utils::debug_make_shared<logging::LoggerProperties>();
 
   props->set("spdlog.shorten_names", "true");
 

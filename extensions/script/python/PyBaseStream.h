@@ -22,6 +22,7 @@
 #include <pybind11/embed.h>
 
 #include <io/BaseStream.h>
+#include "utils/PointerUtils.h"
 
 namespace org {
 namespace apache {
@@ -33,14 +34,14 @@ namespace py = pybind11;
 
 class PyBaseStream {
  public:
-  explicit PyBaseStream(std::shared_ptr<io::BaseStream> stream);
+  explicit PyBaseStream(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream);
 
   py::bytes read();
   py::bytes read(size_t len = 0);
   size_t write(py::bytes buf);
 
  private:
-  std::shared_ptr<io::BaseStream> stream_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream_;
 };
 
 } /* namespace python */

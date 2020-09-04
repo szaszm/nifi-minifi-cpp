@@ -43,7 +43,7 @@ class ExpressionContextBuilder : public core::ProcessContextBuilder {
 
   virtual ~ExpressionContextBuilder();
 
-  virtual std::shared_ptr<core::ProcessContext> build(const std::shared_ptr<ProcessorNode> &processor) override;
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> build(const org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessorNode> &processor) override;
 };
 
 } /* namespace expressions */

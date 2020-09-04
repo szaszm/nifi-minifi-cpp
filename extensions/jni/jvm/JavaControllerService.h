@@ -44,7 +44,7 @@ namespace controllers {
  * based on a static load in JVM Creator. The static load simply loads via minifi properties.
  *
  */
-class JavaControllerService : public core::controller::ControllerService, public std::enable_shared_from_this<JavaControllerService>, public JavaServicer {
+class JavaControllerService : public core::controller::ControllerService, public org::apache::nifi::minifi::utils::enable_debug_shared_from_this<JavaControllerService>, public JavaServicer {
  public:
   explicit JavaControllerService(const std::string &name, const std::string &id)
       : ControllerService(name, id),
@@ -60,7 +60,7 @@ class JavaControllerService : public core::controller::ControllerService, public
     initialized_ = false;
   }
 
-  explicit JavaControllerService(const std::string &name, const std::shared_ptr<Configure> &configuration)
+  explicit JavaControllerService(const std::string &name, const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configuration)
       : ControllerService(name),
         loader(nullptr),
         logger_(logging::LoggerFactory<JavaControllerService>::getLogger()) {

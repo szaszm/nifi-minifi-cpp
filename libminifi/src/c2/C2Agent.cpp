@@ -48,8 +48,8 @@ namespace minifi {
 namespace c2 {
 
 C2Agent::C2Agent(core::controller::ControllerServiceProvider* controller,
-                 const std::shared_ptr<state::StateMonitor> &updateSink,
-                 const std::shared_ptr<Configure> &configuration)
+                 const org::apache::nifi::minifi::utils::debug_shared_ptr<state::StateMonitor> &updateSink,
+                 const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configuration)
     : heart_beat_period_(3000),
       max_c2_responses(5),
       update_sink_(updateSink),
@@ -63,12 +63,12 @@ C2Agent::C2Agent(core::controller::ControllerServiceProvider* controller,
 
   manifest_sent_ = false;
 
-  running_c2_configuration = std::make_shared<Configure>();
+  running_c2_configuration = org::apache::nifi::minifi::utils::debug_make_shared<Configure>();
 
   last_run_ = std::chrono::steady_clock::now();
 
   if (nullptr != controller_) {
-    update_service_ = std::static_pointer_cast<controllers::UpdatePolicyControllerService>(controller_->getControllerService(C2_AGENT_UPDATE_NAME));
+    update_service_ = static_pointer_cast<controllers::UpdatePolicyControllerService>(controller_->getControllerService(C2_AGENT_UPDATE_NAME));
   }
 
   if (update_service_ == nullptr) {
@@ -184,7 +184,7 @@ void C2Agent::checkTriggers() {
     }
   }
 }
-void C2Agent::configure(const std::shared_ptr<Configure> &configure, bool reconfigure) {
+void C2Agent::configure(const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure, bool reconfigure) {
   std::string clazz, heartbeat_period, device;
 
   if (!reconfigure) {
@@ -269,7 +269,7 @@ void C2Agent::configure(const std::shared_ptr<Configure> &configure, bool reconf
       if (heartbeat_reporter_obj == nullptr) {
         logger_->log_debug("Could not instantiate %s", reporter);
       } else {
-        std::shared_ptr<HeartBeatReporter> shp_reporter = std::static_pointer_cast<HeartBeatReporter>(heartbeat_reporter_obj);
+        org::apache::nifi::minifi::utils::debug_shared_ptr<HeartBeatReporter> shp_reporter = static_pointer_cast<HeartBeatReporter>(heartbeat_reporter_obj);
         shp_reporter->initialize(controller_, update_sink_, configuration_);
         heartbeat_protocols_.push_back(shp_reporter);
       }
@@ -285,7 +285,7 @@ void C2Agent::configure(const std::shared_ptr<Configure> &configure, bool reconf
       if (trigger_obj == nullptr) {
         logger_->log_debug("Could not instantiate %s", trigger);
       } else {
-        std::shared_ptr<C2Trigger> trg_impl = std::static_pointer_cast<C2Trigger>(trigger_obj);
+        org::apache::nifi::minifi::utils::debug_shared_ptr<C2Trigger> trg_impl = static_pointer_cast<C2Trigger>(trigger_obj);
         trg_impl->initialize(configuration_);
         triggers_.push_back(trg_impl);
       }
@@ -297,7 +297,7 @@ void C2Agent::configure(const std::shared_ptr<Configure> &configure, bool reconf
   if (heartbeat_reporter_obj == nullptr) {
     logger_->log_debug("Could not instantiate %s", base_reporter);
   } else {
-    std::shared_ptr<HeartBeatReporter> shp_reporter = std::static_pointer_cast<HeartBeatReporter>(heartbeat_reporter_obj);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<HeartBeatReporter> shp_reporter = static_pointer_cast<HeartBeatReporter>(heartbeat_reporter_obj);
     shp_reporter->initialize(controller_, update_sink_, configuration_);
     heartbeat_protocols_.push_back(shp_reporter);
   }
@@ -306,8 +306,8 @@ void C2Agent::configure(const std::shared_ptr<Configure> &configure, bool reconf
 void C2Agent::performHeartBeat() {
   C2Payload payload(Operation::HEARTBEAT);
   logger_->log_trace("Performing heartbeat");
-  std::shared_ptr<state::response::NodeReporter> reporter = std::dynamic_pointer_cast<state::response::NodeReporter>(update_sink_);
-  std::vector<std::shared_ptr<state::response::ResponseNode>> metrics;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::NodeReporter> reporter = dynamic_pointer_cast<state::response::NodeReporter>(update_sink_);
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode>> metrics;
   if (reporter) {
     if (!manifest_sent_) {
       // include agent manifest for the first heartbeat
@@ -439,7 +439,7 @@ void C2Agent::handle_c2_server_response(const C2ContentResponse &resp) {
         enqueue_c2_response(std::move(response));
       } else if (resp.name == "corecomponentstate") {
         // TODO(bakaid): untested
-        std::vector<std::shared_ptr<state::StateController>> components = update_sink_->getComponents(resp.name);
+        std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<state::StateController>> components = update_sink_->getComponents(resp.name);
         auto state_manager_provider = core::ProcessContext::getStateManagerProvider(logger_, controller_, configuration_);
         if (state_manager_provider != nullptr) {
           for (auto &component : components) {
@@ -485,7 +485,7 @@ void C2Agent::handle_c2_server_response(const C2ContentResponse &resp) {
         raise(SIGTERM);
       }
 
-      std::vector<std::shared_ptr<state::StateController>> components = update_sink_->getComponents(resp.name);
+      std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<state::StateController>> components = update_sink_->getComponents(resp.name);
       // stop all referenced components.
       for (auto &component : components) {
         logger_->log_debug("Stopping component %s", component->getComponentName());
@@ -535,7 +535,7 @@ C2Payload C2Agent::prepareConfigurationOptions(const C2ContentResponse &resp) co
  * to be put into the acknowledgement
  */
 void C2Agent::handle_describe(const C2ContentResponse &resp) {
-  auto reporter = std::dynamic_pointer_cast<state::response::NodeReporter>(update_sink_);
+  auto reporter = dynamic_pointer_cast<state::response::NodeReporter>(update_sink_);
   if (resp.name == "metrics") {
     C2Payload response(Operation::ACKNOWLEDGE, resp.ident, false, true);
     if (reporter != nullptr) {

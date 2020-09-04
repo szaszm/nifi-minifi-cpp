@@ -76,7 +76,7 @@ void HashContent::onSchedule(core::ProcessContext *context, core::ProcessSession
 }
 
 void HashContent::onTrigger(core::ProcessContext *, core::ProcessSession *session) {
-  std::shared_ptr<core::FlowFile> flowFile = session->get();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flowFile = session->get();
 
   if (!flowFile) {
     logger_->log_trace("No flow file");
@@ -93,7 +93,7 @@ void HashContent::onTrigger(core::ProcessContext *, core::ProcessSession *sessio
   session->transfer(flowFile, Success);
 }
 
-int64_t HashContent::ReadCallback::process(std::shared_ptr<io::BaseStream> stream) {
+int64_t HashContent::ReadCallback::process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
   // This throws in case algo is not found, but that's fine
   parent_.logger_->log_trace("Searching for %s", parent_.algoName_);
   auto algo = HashAlgos.at(parent_.algoName_);
@@ -105,7 +105,7 @@ int64_t HashContent::ReadCallback::process(std::shared_ptr<io::BaseStream> strea
   return ret_val.second;
 }
 
-HashContent::ReadCallback::ReadCallback(std::shared_ptr<core::FlowFile> flowFile, const HashContent& parent)
+HashContent::ReadCallback::ReadCallback(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flowFile, const HashContent& parent)
   : flowFile_(flowFile),
     parent_(parent)
   {}

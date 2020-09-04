@@ -40,7 +40,7 @@ void setDefaultDirectory(std::string path) {
   default_directory_path = path;
 }
 
-ResourceClaim::ResourceClaim(std::shared_ptr<core::StreamManager<ResourceClaim>> claim_manager)
+ResourceClaim::ResourceClaim(org::apache::nifi::minifi::utils::debug_shared_ptr<core::StreamManager<ResourceClaim>> claim_manager)
     : claim_manager_(claim_manager),
       deleted_(false),
       logger_(logging::LoggerFactory<ResourceClaim>::getLogger()) {
@@ -53,7 +53,7 @@ ResourceClaim::ResourceClaim(std::shared_ptr<core::StreamManager<ResourceClaim>>
   logger_->log_debug("Resource Claim created %s", _contentFullPath);
 }
 
-ResourceClaim::ResourceClaim(const std::string path, std::shared_ptr<core::StreamManager<ResourceClaim>> claim_manager, bool deleted)
+ResourceClaim::ResourceClaim(const std::string path, org::apache::nifi::minifi::utils::debug_shared_ptr<core::StreamManager<ResourceClaim>> claim_manager, bool deleted)
     : claim_manager_(claim_manager),
       deleted_(deleted) {
   _contentFullPath = path;

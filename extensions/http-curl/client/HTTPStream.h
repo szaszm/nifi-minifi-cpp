@@ -40,7 +40,7 @@ class HttpStream : public io::BaseStream {
    * File Stream constructor that accepts an fstream shared pointer.
    * It must already be initialized for read and write.
    */
-  explicit HttpStream(std::shared_ptr<utils::HTTPClient> http_client_);
+  explicit HttpStream(org::apache::nifi::minifi::utils::debug_shared_ptr<utils::HTTPClient> http_client_);
 
   virtual ~HttpStream() {
     forceClose();
@@ -48,11 +48,11 @@ class HttpStream : public io::BaseStream {
 
   virtual void closeStream() override;
 
-  const std::shared_ptr<utils::HTTPClient> &getClientRef() {
+  const org::apache::nifi::minifi::utils::debug_shared_ptr<utils::HTTPClient> &getClientRef() {
     return http_client_;
   }
 
-  const std::shared_ptr<utils::HTTPClient> &getClient() {
+  const org::apache::nifi::minifi::utils::debug_shared_ptr<utils::HTTPClient> &getClient() {
     http_client_future_.get();
     return http_client_;
   }
@@ -120,14 +120,14 @@ class HttpStream : public io::BaseStream {
     throw std::runtime_error("Stream does not support this operation");
   }
 
-  static bool submit_client(std::shared_ptr<utils::HTTPClient> client) {
+  static bool submit_client(org::apache::nifi::minifi::utils::debug_shared_ptr<utils::HTTPClient> client) {
     if (client == nullptr)
       return false;
     bool submit_status = client->submit();
     return submit_status;
   }
 
-  static bool submit_read_client(std::shared_ptr<utils::HTTPClient> client, utils::ByteOutputCallback *callback) {
+  static bool submit_read_client(org::apache::nifi::minifi::utils::debug_shared_ptr<utils::HTTPClient> client, utils::ByteOutputCallback *callback) {
     if (client == nullptr)
       return false;
     bool submit_status = client->submit();
@@ -167,7 +167,7 @@ class HttpStream : public io::BaseStream {
 
   std::vector<uint8_t> array;
 
-  std::shared_ptr<utils::HTTPClient> http_client_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<utils::HTTPClient> http_client_;
   std::future<bool> http_client_future_;
 
   size_t written;

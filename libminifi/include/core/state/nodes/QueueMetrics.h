@@ -57,7 +57,7 @@ class QueueMetrics : public ResponseNode {
     return "QueueMetrics";
   }
 
-  void addConnection(const std::shared_ptr<minifi::Connection> &connection) {
+  void addConnection(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> &connection) {
     if (nullptr != connection) {
       connections.insert(std::make_pair(connection->getName(), connection));
     }
@@ -96,7 +96,7 @@ class QueueMetrics : public ResponseNode {
   }
 
  protected:
-  std::map<std::string, std::shared_ptr<minifi::Connection>> connections;
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection>> connections;
 };
 
 }  // namespace response

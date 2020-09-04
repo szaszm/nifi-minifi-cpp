@@ -45,13 +45,13 @@ const char* FOCUSED_CONTENT = FILE_CONTENT[0];
 
 TEST_CASE("Test Creation of FocusArchiveEntry", "[getfileCreate]") {
   TestController testController;
-  std::shared_ptr<core::Processor> processor = std::make_shared<org::apache::nifi::minifi::processors::FocusArchiveEntry>("processorname");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor = org::apache::nifi::minifi::utils::debug_make_shared<org::apache::nifi::minifi::processors::FocusArchiveEntry>("processorname");
   REQUIRE(processor->getName() == "processorname");
 }
 
 TEST_CASE("Test Creation of UnfocusArchiveEntry", "[getfileCreate]") {
     TestController testController;
-    std::shared_ptr<core::Processor> processor = std::make_shared<org::apache::nifi::minifi::processors::UnfocusArchiveEntry>("processorname");
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor = org::apache::nifi::minifi::utils::debug_make_shared<org::apache::nifi::minifi::processors::UnfocusArchiveEntry>("processorname");
     REQUIRE(processor->getName() == "processorname");
     utils::Identifier processoruuid;
     REQUIRE(true == processor->getUUID(processoruuid));
@@ -70,8 +70,8 @@ TEST_CASE("FocusArchive", "[testFocusArchive]") {
     LogTestController::getInstance().setTrace<org::apache::nifi::minifi::core::Connectable>();
     LogTestController::getInstance().setTrace<org::apache::nifi::minifi::core::FlowFile>();
 
-    std::shared_ptr<TestPlan> plan = testController.createPlan();
-    std::shared_ptr<TestRepository> repo = std::make_shared<TestRepository>();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<TestRepository> repo = org::apache::nifi::minifi::utils::debug_make_shared<TestRepository>();
 
     std::string dir1 = [&] {char format[] = "/tmp/gt.XXXXXX"; return testController.createTempDirectory(format); }();
     std::string dir2 = [&] {char format[] = "/tmp/gt.XXXXXX"; return testController.createTempDirectory(format); }();
@@ -80,21 +80,21 @@ TEST_CASE("FocusArchive", "[testFocusArchive]") {
     REQUIRE(!dir1.empty());
     REQUIRE(!dir2.empty());
     REQUIRE(!dir3.empty());
-    std::shared_ptr<core::Processor> getfile = plan->addProcessor("GetFile", "getfileCreate2");
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> getfile = plan->addProcessor("GetFile", "getfileCreate2");
     plan->setProperty(getfile, org::apache::nifi::minifi::processors::GetFile::Directory.getName(), dir1);
     plan->setProperty(getfile, org::apache::nifi::minifi::processors::GetFile::KeepSourceFile.getName(), "true");
 
-    std::shared_ptr<core::Processor> fprocessor = plan->addProcessor("FocusArchiveEntry", "focusarchiveCreate", core::Relationship("success", "description"), true);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> fprocessor = plan->addProcessor("FocusArchiveEntry", "focusarchiveCreate", core::Relationship("success", "description"), true);
     plan->setProperty(fprocessor, org::apache::nifi::minifi::processors::FocusArchiveEntry::Path.getName(), FOCUSED_FILE);
 
-    std::shared_ptr<core::Processor> putfile1 = plan->addProcessor("PutFile", "PutFile1", core::Relationship("success", "description"), true);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> putfile1 = plan->addProcessor("PutFile", "PutFile1", core::Relationship("success", "description"), true);
     plan->setProperty(putfile1, org::apache::nifi::minifi::processors::PutFile::Directory.getName(), dir2);
     plan->setProperty(putfile1, org::apache::nifi::minifi::processors::PutFile::ConflictResolution.getName(),
                       org::apache::nifi::minifi::processors::PutFile::CONFLICT_RESOLUTION_STRATEGY_REPLACE);
 
-    std::shared_ptr<core::Processor> ufprocessor = plan->addProcessor("UnfocusArchiveEntry", "unfocusarchiveCreate", core::Relationship("success", "description"), true);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> ufprocessor = plan->addProcessor("UnfocusArchiveEntry", "unfocusarchiveCreate", core::Relationship("success", "description"), true);
 
-    std::shared_ptr<core::Processor> putfile2 = plan->addProcessor("PutFile", "PutFile2", core::Relationship("success", "description"), true);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> putfile2 = plan->addProcessor("PutFile", "PutFile2", core::Relationship("success", "description"), true);
     plan->setProperty(putfile2, org::apache::nifi::minifi::processors::PutFile::Directory.getName(), dir3);
     plan->setProperty(putfile2, org::apache::nifi::minifi::processors::PutFile::ConflictResolution.getName(),
                       org::apache::nifi::minifi::processors::PutFile::CONFLICT_RESOLUTION_STRATEGY_REPLACE);

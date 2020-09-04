@@ -29,7 +29,7 @@ namespace nifi {
 namespace minifi {
 namespace lua {
 
-LuaBaseStream::LuaBaseStream(std::shared_ptr<io::BaseStream> stream)
+LuaBaseStream::LuaBaseStream(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream)
     : stream_(std::move(stream)) {
 }
 

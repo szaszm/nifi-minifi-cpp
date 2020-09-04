@@ -74,35 +74,35 @@ int main(int argc, char **argv) {
   LogTestController::getInstance().setDebug<minifi::processors::InvokeHTTP>();
   LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
 
-  std::shared_ptr<minifi::Configure> configuration = std::make_shared<minifi::Configure>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> configuration = utils::debug_make_shared<minifi::Configure>();
   configuration->set(minifi::Configure::nifi_default_directory, args.key_dir);
 
-  std::shared_ptr<core::Repository> test_repo = std::make_shared<TestRepository>();
-  std::shared_ptr<core::Repository> test_flow_repo = std::make_shared<TestFlowRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> test_repo = utils::debug_make_shared<TestRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> test_flow_repo = utils::debug_make_shared<TestFlowRepository>();
 
   configuration->set(minifi::Configure::nifi_flow_configuration_file, args.test_file);
 
-  std::shared_ptr<minifi::io::StreamFactory> stream_factory = minifi::io::StreamFactory::getInstance(configuration);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::io::StreamFactory> stream_factory = minifi::io::StreamFactory::getInstance(configuration);
 
-  std::shared_ptr<core::ContentRepository> content_repo = std::make_shared<core::repository::VolatileContentRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo = utils::debug_make_shared<core::repository::VolatileContentRepository>();
 
   content_repo->initialize(configuration);
 
   std::unique_ptr<core::FlowConfiguration> yaml_ptr = std::unique_ptr<core::YamlConfiguration>(
       new core::YamlConfiguration(test_repo, test_repo, content_repo, stream_factory, configuration, args.test_file));
-  std::shared_ptr<TestRepository> repo = std::static_pointer_cast<TestRepository>(test_repo);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestRepository> repo = static_pointer_cast<TestRepository>(test_repo);
 
-  std::shared_ptr<minifi::FlowController> controller = std::make_shared<minifi::FlowController>(test_repo, test_flow_repo, configuration, std::move(yaml_ptr),
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::FlowController> controller = utils::debug_make_shared<minifi::FlowController>(test_repo, test_flow_repo, configuration, std::move(yaml_ptr),
                                                                                                 content_repo,
                                                                                                 DEFAULT_ROOT_GROUP_NAME,
                                                                                                 true);
 
   core::YamlConfiguration yaml_config(test_repo, test_repo, content_repo, stream_factory, configuration, args.test_file);
 
-  std::shared_ptr<core::Processor> proc = yaml_config.getRoot(args.test_file)->findProcessor("invoke");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> proc = yaml_config.getRoot(args.test_file)->findProcessor("invoke");
   assert(proc != nullptr);
 
-  const auto inv = std::dynamic_pointer_cast<minifi::processors::InvokeHTTP>(proc);
+  const auto inv = dynamic_pointer_cast<minifi::processors::InvokeHTTP>(proc);
   assert(inv != nullptr);
 
   std::string url;

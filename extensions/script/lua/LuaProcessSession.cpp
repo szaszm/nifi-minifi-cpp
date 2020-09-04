@@ -25,11 +25,11 @@ namespace nifi {
 namespace minifi {
 namespace lua {
 
-LuaProcessSession::LuaProcessSession(std::shared_ptr<core::ProcessSession> session)
+LuaProcessSession::LuaProcessSession(org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> session)
     : session_(std::move(session)) {
 }
 
-std::shared_ptr<script::ScriptFlowFile> LuaProcessSession::get() {
+org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptFlowFile> LuaProcessSession::get() {
   if (!session_) {
     throw std::runtime_error("Access of ProcessSession after it has been released");
   }
@@ -40,13 +40,13 @@ std::shared_ptr<script::ScriptFlowFile> LuaProcessSession::get() {
     return nullptr;
   }
 
-  auto result = std::make_shared<script::ScriptFlowFile>(flow_file);
+  auto result = utils::debug_make_shared<script::ScriptFlowFile>(flow_file);
   flow_files_.push_back(result);
 
   return result;
 }
 
-void LuaProcessSession::transfer(const std::shared_ptr<script::ScriptFlowFile> &script_flow_file,
+void LuaProcessSession::transfer(const org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptFlowFile> &script_flow_file,
                                  core::Relationship relationship) {
   if (!session_) {
     throw std::runtime_error("Access of ProcessSession after it has been released");
@@ -61,7 +61,7 @@ void LuaProcessSession::transfer(const std::shared_ptr<script::ScriptFlowFile> &
   session_->transfer(flow_file, relationship);
 }
 
-void LuaProcessSession::read(const std::shared_ptr<script::ScriptFlowFile> &script_flow_file,
+void LuaProcessSession::read(const org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptFlowFile> &script_flow_file,
                              sol::table input_stream_callback) {
   if (!session_) {
     throw std::runtime_error("Access of ProcessSession after it has been released");
@@ -77,7 +77,7 @@ void LuaProcessSession::read(const std::shared_ptr<script::ScriptFlowFile> &scri
   session_->read(flow_file, &lua_callback);
 }
 
-void LuaProcessSession::write(const std::shared_ptr<script::ScriptFlowFile> &script_flow_file,
+void LuaProcessSession::write(const org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptFlowFile> &script_flow_file,
                               sol::table output_stream_callback) {
   if (!session_) {
     throw std::runtime_error("Access of ProcessSession after it has been released");
@@ -93,27 +93,27 @@ void LuaProcessSession::write(const std::shared_ptr<script::ScriptFlowFile> &scr
   session_->write(flow_file, &lua_callback);
 }
 
-std::shared_ptr<script::ScriptFlowFile> LuaProcessSession::create() {
+org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptFlowFile> LuaProcessSession::create() {
   if (!session_) {
     throw std::runtime_error("Access of ProcessSession after it has been released");
   }
 
-  auto result = std::make_shared<script::ScriptFlowFile>(session_->create());
+  auto result = utils::debug_make_shared<script::ScriptFlowFile>(session_->create());
   flow_files_.push_back(result);
   return result;
 }
 
-std::shared_ptr<script::ScriptFlowFile> LuaProcessSession::create(const std::shared_ptr<script::ScriptFlowFile> &flow_file) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptFlowFile> LuaProcessSession::create(const org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptFlowFile> &flow_file) {
   if (!session_) {
     throw std::runtime_error("Access of ProcessSession after it has been released");
   }
 
-  std::shared_ptr<script::ScriptFlowFile> result;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptFlowFile> result;
 
   if (flow_file == nullptr) {
-    result = std::make_shared<script::ScriptFlowFile>(session_->create());
+    result = utils::debug_make_shared<script::ScriptFlowFile>(session_->create());
   } else {
-    result = std::make_shared<script::ScriptFlowFile>(session_->create(flow_file->getFlowFile()));
+    result = utils::debug_make_shared<script::ScriptFlowFile>(session_->create(flow_file->getFlowFile()));
   }
 
   flow_files_.push_back(result);

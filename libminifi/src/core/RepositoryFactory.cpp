@@ -33,12 +33,12 @@ namespace nifi {
 namespace minifi {
 namespace core {
 
-std::shared_ptr<core::Repository> createRepository(const std::string configuration_class_name, bool fail_safe, const std::string repo_name) {
-  std::shared_ptr<core::Repository> return_obj = nullptr;
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> createRepository(const std::string configuration_class_name, bool fail_safe, const std::string repo_name) {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> return_obj = nullptr;
   std::string class_name_lc = configuration_class_name;
   std::transform(class_name_lc.begin(), class_name_lc.end(), class_name_lc.begin(), ::tolower);
   try {
-    std::shared_ptr<core::Repository> return_obj = nullptr;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> return_obj = nullptr;
 
     auto ptr = core::ClassLoader::getDefaultClassLoader().instantiate<core::Repository>(class_name_lc, class_name_lc);
     if (nullptr != ptr) {
@@ -61,25 +61,25 @@ std::shared_ptr<core::Repository> createRepository(const std::string configurati
       return return_obj;
     }
     if (fail_safe) {
-      return std::make_shared<core::Repository>("fail_safe", "fail_safe", 1, 1, 1);
+      return org::apache::nifi::minifi::utils::debug_make_shared<core::Repository>("fail_safe", "fail_safe", 1, 1, 1);
     } else {
       throw std::runtime_error("Support for the provided configuration class could not be found");
     }
   } catch (const std::runtime_error &) {
     if (fail_safe) {
-      return std::make_shared<core::Repository>("fail_safe", "fail_safe", 1, 1, 1);
+      return org::apache::nifi::minifi::utils::debug_make_shared<core::Repository>("fail_safe", "fail_safe", 1, 1, 1);
     }
   }
 
   throw std::runtime_error("Support for the provided configuration class could not be found");
 }
 
-std::shared_ptr<core::ContentRepository> createContentRepository(const std::string configuration_class_name, bool fail_safe, const std::string repo_name) {
-  std::shared_ptr<core::ContentRepository> return_obj = nullptr;
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> createContentRepository(const std::string configuration_class_name, bool fail_safe, const std::string repo_name) {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> return_obj = nullptr;
   std::string class_name_lc = configuration_class_name;
   std::transform(class_name_lc.begin(), class_name_lc.end(), class_name_lc.begin(), ::tolower);
   try {
-    std::shared_ptr<core::ContentRepository> return_obj = nullptr;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> return_obj = nullptr;
 
     auto ptr = core::ClassLoader::getDefaultClassLoader().instantiate<core::ContentRepository>(class_name_lc, class_name_lc);
     if (nullptr != ptr) {
@@ -89,18 +89,18 @@ std::shared_ptr<core::ContentRepository> createContentRepository(const std::stri
       return return_obj;
     }
     if (class_name_lc == "volatilecontentrepository") {
-      return std::make_shared<core::repository::VolatileContentRepository>(repo_name);
+      return org::apache::nifi::minifi::utils::debug_make_shared<core::repository::VolatileContentRepository>(repo_name);
     } else if (class_name_lc == "filesystemrepository") {
-      return std::make_shared<core::repository::FileSystemRepository>(repo_name);
+      return org::apache::nifi::minifi::utils::debug_make_shared<core::repository::FileSystemRepository>(repo_name);
     }
     if (fail_safe) {
-      return std::make_shared<core::repository::VolatileContentRepository>("fail_safe");
+      return org::apache::nifi::minifi::utils::debug_make_shared<core::repository::VolatileContentRepository>("fail_safe");
     } else {
       throw std::runtime_error("Support for the provided configuration class could not be found");
     }
   } catch (const std::runtime_error &) {
     if (fail_safe) {
-      return std::make_shared<core::repository::VolatileContentRepository>("fail_safe");
+      return org::apache::nifi::minifi::utils::debug_make_shared<core::repository::VolatileContentRepository>("fail_safe");
     }
   }
 

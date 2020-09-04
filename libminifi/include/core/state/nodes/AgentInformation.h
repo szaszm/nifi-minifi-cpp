@@ -417,7 +417,7 @@ class AgentStatus : public StateMonitorNode {
     return "status";
   }
 
-  void setRepositories(const std::map<std::string, std::shared_ptr<core::Repository>> &repositories) {
+  void setRepositories(const std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository>> &repositories) {
     repositories_ = repositories;
   }
 
@@ -493,7 +493,7 @@ class AgentStatus : public StateMonitorNode {
   }
 
  protected:
-  std::map<std::string, std::shared_ptr<core::Repository>> repositories_;
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository>> repositories_;
 };
 
 class AgentIdentifier {
@@ -525,19 +525,19 @@ class AgentMonitor {
   AgentMonitor()
       : monitor_(nullptr) {
   }
-  void addRepository(const std::shared_ptr<core::Repository> &repo) {
+  void addRepository(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> &repo) {
     if (nullptr != repo) {
       repositories_.insert(std::make_pair(repo->getName(), repo));
     }
   }
 
-  void setStateMonitor(const std::shared_ptr<state::StateMonitor> &monitor) {
+  void setStateMonitor(const org::apache::nifi::minifi::utils::debug_shared_ptr<state::StateMonitor> &monitor) {
     monitor_ = monitor;
   }
 
  protected:
-  std::map<std::string, std::shared_ptr<core::Repository>> repositories_;
-  std::shared_ptr<state::StateMonitor> monitor_;
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository>> repositories_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<state::StateMonitor> monitor_;
 };
 
 /**

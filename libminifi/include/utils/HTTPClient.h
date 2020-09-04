@@ -271,7 +271,7 @@ class HTTPRequestResponse {
 
 class BaseHTTPClient {
  public:
-  explicit BaseHTTPClient(const std::string &url, const std::shared_ptr<minifi::controllers::SSLContextService> ssl_context_service = nullptr) : response_code(-1) {
+  explicit BaseHTTPClient(const std::string &url, const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::controllers::SSLContextService> ssl_context_service = nullptr) : response_code(-1) {
   }
 
   BaseHTTPClient() : response_code(-1) {
@@ -282,7 +282,7 @@ class BaseHTTPClient {
   virtual void setVerbose(bool use_stderr = false) {
   }
 
-  virtual void initialize(const std::string &method, const std::string url = "", const std::shared_ptr<minifi::controllers::SSLContextService> ssl_context_service = nullptr) {
+  virtual void initialize(const std::string &method, const std::string url = "", const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::controllers::SSLContextService> ssl_context_service = nullptr) {
   }
 
   DEPRECATED(/*deprecated in*/ 0.8.0, /*will remove in */ 2.0) virtual void setConnectionTimeout(int64_t timeout) {

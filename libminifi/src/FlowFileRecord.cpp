@@ -40,8 +40,8 @@ namespace minifi {
 std::shared_ptr<logging::Logger> FlowFileRecord::logger_ = logging::LoggerFactory<FlowFileRecord>::getLogger();
 std::atomic<uint64_t> FlowFileRecord::local_flow_seq_number_(0);
 
-FlowFileRecord::FlowFileRecord(std::shared_ptr<core::Repository> flow_repository, const std::shared_ptr<core::ContentRepository> &content_repo, std::map<std::string, std::string> attributes,
-                               std::shared_ptr<ResourceClaim> claim)
+FlowFileRecord::FlowFileRecord(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_repository, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> &content_repo, std::map<std::string, std::string> attributes,
+                               org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim> claim)
     : FlowFile(),
       content_repo_(content_repo),
       flow_repository_(flow_repository) {
@@ -62,7 +62,7 @@ FlowFileRecord::FlowFileRecord(std::shared_ptr<core::Repository> flow_repository
   snapshot_ = false;
 }
 
-FlowFileRecord::FlowFileRecord(std::shared_ptr<core::Repository> flow_repository, const std::shared_ptr<core::ContentRepository> &content_repo, std::shared_ptr<core::FlowFile> &event,
+FlowFileRecord::FlowFileRecord(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_repository, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> &content_repo, org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &event,
                                const std::string &uuidConnection)
     : FlowFile(),
       snapshot_(""),
@@ -88,7 +88,7 @@ FlowFileRecord::FlowFileRecord(std::shared_ptr<core::Repository> flow_repository
   }
 }
 
-FlowFileRecord::FlowFileRecord(std::shared_ptr<core::Repository> flow_repository, const std::shared_ptr<core::ContentRepository> &content_repo, std::shared_ptr<core::FlowFile> &event)
+FlowFileRecord::FlowFileRecord(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_repository, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> &content_repo, org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &event)
     : FlowFile(),
       uuid_connection_(""),
       snapshot_(""),
@@ -125,7 +125,7 @@ FlowFileRecord::~FlowFileRecord() {
   }
 }
 
-void FlowFileRecord::releaseClaim(std::shared_ptr<ResourceClaim> claim) {
+void FlowFileRecord::releaseClaim(org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim> claim) {
   // Decrease the flow file record owned count for the resource claim
   claim->decreaseFlowFileRecordOwnedCount();
   logger_->log_debug("Detaching Resource Claim %s, %s, attempt " "%" PRIu64, getUUIDStr(), claim->getContentFullPath(), claim->getFlowFileRecordOwnedCount());
@@ -358,7 +358,7 @@ bool FlowFileRecord::DeSerialize(const uint8_t *buffer, const int bufferSize) {
     return false;
   }
 
-  claim_.set(*this, std::make_shared<ResourceClaim>(content_full_path, content_repo_, true));
+  claim_.set(*this, org::apache::nifi::minifi::utils::debug_make_shared<ResourceClaim>(content_full_path, content_repo_, true));
   return true;
 }
 

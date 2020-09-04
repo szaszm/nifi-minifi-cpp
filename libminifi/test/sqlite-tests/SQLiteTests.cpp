@@ -35,8 +35,8 @@
 
 TEST_CASE("Test Creation of PutSQL", "[PutSQLCreate]") {  // NOLINT
   TestController testController;
-  std::shared_ptr<core::Processor>
-      processor = std::make_shared<org::apache::nifi::minifi::processors::PutSQL>("processorname");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor>
+      processor = org::apache::nifi::minifi::utils::debug_make_shared<org::apache::nifi::minifi::processors::PutSQL>("processorname");
   REQUIRE(processor->getName() == "processorname");
 }
 
@@ -50,7 +50,7 @@ TEST_CASE("Test Put", "[PutSQLPut]") {  // NOLINT
   LogTestController::getInstance().setTrace<processors::PutSQL>();
 
   auto plan = testController.createPlan();
-  auto repo = std::make_shared<TestRepository>();
+  auto repo = org::apache::nifi::minifi::utils::debug_make_shared<TestRepository>();
 
   // Define directory for test db
   std::string test_dir("/tmp/gt.XXXXXX");
@@ -132,7 +132,7 @@ TEST_CASE("Test Put Content", "[PutSQLPutContent]") {  // NOLINT
   LogTestController::getInstance().setTrace<processors::PutSQL>();
 
   auto plan = testController.createPlan();
-  auto repo = std::make_shared<TestRepository>();
+  auto repo = org::apache::nifi::minifi::utils::debug_make_shared<TestRepository>();
 
   // Define directory for test db
   std::string test_dir("/tmp/gt.XXXXXX");
@@ -225,7 +225,7 @@ TEST_CASE("Test Exec", "[ExecuteSQL]") {  // NOLINT
   LogTestController::getInstance().setTrace<processors::ExecuteSQL>();
 
   auto plan = testController.createPlan();
-  auto repo = std::make_shared<TestRepository>();
+  auto repo = org::apache::nifi::minifi::utils::debug_make_shared<TestRepository>();
 
   // Define directory for test db
   std::string test_dir("/tmp/gt.XXXXXX");
@@ -284,7 +284,7 @@ TEST_CASE("Test Exec 2", "[ExecuteSQL2]") {  // NOLINT
   LogTestController::getInstance().setTrace<processors::ExecuteSQL>();
 
   auto plan = testController.createPlan();
-  auto repo = std::make_shared<TestRepository>();
+  auto repo = org::apache::nifi::minifi::utils::debug_make_shared<TestRepository>();
 
   // Define directory for test db
   std::string test_dir("/tmp/gt.XXXXXX");
@@ -377,7 +377,7 @@ TEST_CASE("Test Exec 3", "[ExecuteSQL3]") {  // NOLINT
   LogTestController::getInstance().setTrace<processors::ExecuteSQL>();
 
   auto plan = testController.createPlan();
-  auto repo = std::make_shared<TestRepository>();
+  auto repo = org::apache::nifi::minifi::utils::debug_make_shared<TestRepository>();
 
   // Define directory for test db
   std::string test_dir("/tmp/gt.XXXXXX");

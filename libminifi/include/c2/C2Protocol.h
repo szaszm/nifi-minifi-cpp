@@ -41,7 +41,7 @@ class C2Protocol : public core::Connectable {
         running_(true) {
   }
 
-  virtual void initialize(core::controller::ControllerServiceProvider* controller, const std::shared_ptr<Configure> &configure) {
+  virtual void initialize(core::controller::ControllerServiceProvider* controller, const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure) {
     controller_ = controller;
     configuration_ = configure;
   }
@@ -50,7 +50,7 @@ class C2Protocol : public core::Connectable {
   /**
    * Update the configuration.
    */
-  virtual void update(const std::shared_ptr<Configure> &configure) = 0;
+  virtual void update(const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure) = 0;
 
   /**
    * Send a C2 payload to the provided URI. The direction indicates to the protocol whether or not this a transmit or receive operation.
@@ -104,7 +104,7 @@ class C2Protocol : public core::Connectable {
 
   core::controller::ControllerServiceProvider* controller_;
 
-  std::shared_ptr<Configure> configuration_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configuration_;
 };
 
 }  // namespace c2

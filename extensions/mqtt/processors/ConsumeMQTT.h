@@ -79,7 +79,7 @@ class ConsumeMQTT : public processors::AbstractMQTTProcessor {
       status_ = 0;
     }
     MQTTClient_message *message_;
-    int64_t process(std::shared_ptr<io::BaseStream> stream) {
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
       int64_t len = stream->write(reinterpret_cast<uint8_t*>(message_->payload), message_->payloadlen);
       if (len < 0)
         status_ = -1;
@@ -95,9 +95,9 @@ class ConsumeMQTT : public processors::AbstractMQTTProcessor {
    * @param sessionFactory process session factory that is used when creating
    * ProcessSession objects.
    */
-  void onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &factory) override;
+  void onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &factory) override;
   // OnTrigger method, implemented by NiFi ConsumeMQTT
-  void onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) override;
+  void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) override;
   // Initialize, over write by NiFi ConsumeMQTT
   void initialize(void) override;
   bool enqueueReceiveMQTTMsg(MQTTClient_message *message) override;

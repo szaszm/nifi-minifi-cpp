@@ -43,22 +43,22 @@ TEST_CASE("GetTCPWithoutEOM", "[GetTCP1]") {
   for (auto c : "Hello World\nHello Warld\nGoodByte Cruel world") {
     buffer.push_back(c);
   }
-  std::shared_ptr<core::ContentRepository> content_repo = std::make_shared<core::repository::VolatileContentRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo = utils::debug_make_shared<core::repository::VolatileContentRepository>();
 
-  content_repo->initialize(std::make_shared<minifi::Configure>());
+  content_repo->initialize(utils::debug_make_shared<minifi::Configure>());
 
-  std::shared_ptr<org::apache::nifi::minifi::io::StreamFactory> stream_factory = minifi::io::StreamFactory::getInstance(std::make_shared<minifi::Configure>());
+  org::apache::nifi::minifi::utils::debug_shared_ptr<org::apache::nifi::minifi::io::StreamFactory> stream_factory = minifi::io::StreamFactory::getInstance(utils::debug_make_shared<minifi::Configure>());
   org::apache::nifi::minifi::io::RandomServerSocket server(org::apache::nifi::minifi::io::Socket::getMyHostName());
 
   LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
   LogTestController::getInstance().setDebug<minifi::processors::GetTCP>();
   LogTestController::getInstance().setTrace<minifi::io::Socket>();
 
-  std::shared_ptr<core::Repository> repo = std::make_shared<TestRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> repo = utils::debug_make_shared<TestRepository>();
 
-  std::shared_ptr<core::Processor> processor = std::make_shared<org::apache::nifi::minifi::processors::GetTCP>("gettcpexample");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor = utils::debug_make_shared<org::apache::nifi::minifi::processors::GetTCP>("gettcpexample");
 
-  std::shared_ptr<core::Processor> logAttribute = std::make_shared<org::apache::nifi::minifi::processors::LogAttribute>("logattribute");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> logAttribute = utils::debug_make_shared<org::apache::nifi::minifi::processors::LogAttribute>("logattribute");
 
   processor->setStreamFactory(stream_factory);
   processor->initialize();
@@ -71,10 +71,10 @@ TEST_CASE("GetTCPWithoutEOM", "[GetTCP1]") {
 
   REQUIRE(processoruuid.to_string() != logattribute_uuid.to_string());
 
-  std::shared_ptr<minifi::Connection> connection = std::make_shared<minifi::Connection>(repo, content_repo, "gettcpexampleConnection");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> connection = utils::debug_make_shared<minifi::Connection>(repo, content_repo, "gettcpexampleConnection");
   connection->addRelationship(core::Relationship("success", "description"));
 
-  std::shared_ptr<minifi::Connection> connection2 = std::make_shared<minifi::Connection>(repo, content_repo, "logattribute");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> connection2 = utils::debug_make_shared<minifi::Connection>(repo, content_repo, "logattribute");
   connection2->addRelationship(core::Relationship("success", "description"));
 
   // link the connections so that we can test results at the end for this
@@ -93,21 +93,21 @@ TEST_CASE("GetTCPWithoutEOM", "[GetTCP1]") {
   logAttribute->addConnection(connection);
   logAttribute->addConnection(connection2);
 
-  std::shared_ptr<core::ProcessorNode> node = std::make_shared<core::ProcessorNode>(processor);
-    std::shared_ptr<core::ProcessorNode> node2 = std::make_shared<core::ProcessorNode>(logAttribute);
-    std::shared_ptr<core::ProcessContext> context = std::make_shared<core::ProcessContext>(node, nullptr, repo, repo, content_repo);
-    std::shared_ptr<core::ProcessContext> context2 = std::make_shared<core::ProcessContext>(node2, nullptr, repo, repo, content_repo);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessorNode> node = utils::debug_make_shared<core::ProcessorNode>(processor);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessorNode> node2 = utils::debug_make_shared<core::ProcessorNode>(logAttribute);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> context = utils::debug_make_shared<core::ProcessContext>(node, nullptr, repo, repo, content_repo);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> context2 = utils::debug_make_shared<core::ProcessContext>(node2, nullptr, repo, repo, content_repo);
   context->setProperty(org::apache::nifi::minifi::processors::GetTCP::EndpointList, org::apache::nifi::minifi::io::Socket::getMyHostName() + ":" + std::to_string(server.getPort()));
   context->setProperty(org::apache::nifi::minifi::processors::GetTCP::ReconnectInterval, "100 msec");
-  auto session = std::make_shared<core::ProcessSession>(context);
-    auto session2 = std::make_shared<core::ProcessSession>(context2);
+  auto session = utils::debug_make_shared<core::ProcessSession>(context);
+    auto session2 = utils::debug_make_shared<core::ProcessSession>(context2);
 
   REQUIRE(processor->getName() == "gettcpexample");
 
-  std::shared_ptr<core::FlowFile> record;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> record;
   processor->setScheduledState(core::ScheduledState::RUNNING);
 
-  std::shared_ptr<core::ProcessSessionFactory> factory = std::make_shared<core::ProcessSessionFactory>(context);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> factory = utils::debug_make_shared<core::ProcessSessionFactory>(context);
   processor->onSchedule(context, factory);
   processor->onTrigger(context, session);
   server.writeData(buffer, buffer.size());
@@ -116,7 +116,7 @@ TEST_CASE("GetTCPWithoutEOM", "[GetTCP1]") {
   logAttribute->initialize();
   logAttribute->incrementActiveTasks();
   logAttribute->setScheduledState(core::ScheduledState::RUNNING);
-  std::shared_ptr<core::ProcessSessionFactory> factory2 = std::make_shared<core::ProcessSessionFactory>(context2);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> factory2 = utils::debug_make_shared<core::ProcessSessionFactory>(context2);
   logAttribute->onSchedule(context2, factory2);
   logAttribute->onTrigger(context2, session2);
 
@@ -150,11 +150,11 @@ TEST_CASE("GetTCPWithOEM", "[GetTCP2]") {
   for (auto c : "Hello World\nHello Warld\nGoodByte Cruel world") {
     buffer.push_back(c);
   }
-  std::shared_ptr<core::ContentRepository> content_repo = std::make_shared<core::repository::VolatileContentRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo = utils::debug_make_shared<core::repository::VolatileContentRepository>();
 
-  content_repo->initialize(std::make_shared<minifi::Configure>());
+  content_repo->initialize(utils::debug_make_shared<minifi::Configure>());
 
-  std::shared_ptr<org::apache::nifi::minifi::io::StreamFactory> stream_factory = minifi::io::StreamFactory::getInstance(std::make_shared<minifi::Configure>());
+  org::apache::nifi::minifi::utils::debug_shared_ptr<org::apache::nifi::minifi::io::StreamFactory> stream_factory = minifi::io::StreamFactory::getInstance(utils::debug_make_shared<minifi::Configure>());
 
   TestController testController;
 
@@ -166,11 +166,11 @@ TEST_CASE("GetTCPWithOEM", "[GetTCP2]") {
   LogTestController::getInstance().setTrace<core::ConfigurableComponent>();
   LogTestController::getInstance().setTrace<minifi::io::Socket>();
 
-  std::shared_ptr<core::Repository> repo = std::make_shared<TestRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> repo = utils::debug_make_shared<TestRepository>();
 
-  std::shared_ptr<core::Processor> processor = std::make_shared<org::apache::nifi::minifi::processors::GetTCP>("gettcpexample");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor = utils::debug_make_shared<org::apache::nifi::minifi::processors::GetTCP>("gettcpexample");
 
-  std::shared_ptr<core::Processor> logAttribute = std::make_shared<org::apache::nifi::minifi::processors::LogAttribute>("logattribute");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> logAttribute = utils::debug_make_shared<org::apache::nifi::minifi::processors::LogAttribute>("logattribute");
 
   processor->setStreamFactory(stream_factory);
   processor->initialize();
@@ -181,10 +181,10 @@ TEST_CASE("GetTCPWithOEM", "[GetTCP2]") {
   utils::Identifier logattribute_uuid;
   REQUIRE(true == logAttribute->getUUID(logattribute_uuid));
 
-  std::shared_ptr<minifi::Connection> connection = std::make_shared<minifi::Connection>(repo, content_repo, "gettcpexampleConnection");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> connection = utils::debug_make_shared<minifi::Connection>(repo, content_repo, "gettcpexampleConnection");
   connection->addRelationship(core::Relationship("partial", "description"));
 
-  std::shared_ptr<minifi::Connection> connection2 = std::make_shared<minifi::Connection>(repo, content_repo, "logattribute");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> connection2 = utils::debug_make_shared<minifi::Connection>(repo, content_repo, "logattribute");
   connection2->addRelationship(core::Relationship("partial", "description"));
 
   // link the connections so that we can test results at the end for this
@@ -203,24 +203,24 @@ TEST_CASE("GetTCPWithOEM", "[GetTCP2]") {
   logAttribute->addConnection(connection);
   logAttribute->addConnection(connection2);
 
-  std::shared_ptr<core::ProcessorNode> node = std::make_shared<core::ProcessorNode>(processor);
-    std::shared_ptr<core::ProcessorNode> node2 = std::make_shared<core::ProcessorNode>(logAttribute);
-    std::shared_ptr<core::ProcessContext> context = std::make_shared<core::ProcessContext>(node, nullptr, repo, repo, content_repo);
-    std::shared_ptr<core::ProcessContext> context2 = std::make_shared<core::ProcessContext>(node2, nullptr, repo, repo, content_repo);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessorNode> node = utils::debug_make_shared<core::ProcessorNode>(processor);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessorNode> node2 = utils::debug_make_shared<core::ProcessorNode>(logAttribute);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> context = utils::debug_make_shared<core::ProcessContext>(node, nullptr, repo, repo, content_repo);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> context2 = utils::debug_make_shared<core::ProcessContext>(node2, nullptr, repo, repo, content_repo);
   context->setProperty(org::apache::nifi::minifi::processors::GetTCP::EndpointList, org::apache::nifi::minifi::io::Socket::getMyHostName() + ":" + std::to_string(server.getPort()));
   context->setProperty(org::apache::nifi::minifi::processors::GetTCP::ReconnectInterval, "100 msec");
   // we're using new lines above
   context->setProperty(org::apache::nifi::minifi::processors::GetTCP::EndOfMessageByte, "10");
-  auto session = std::make_shared<core::ProcessSession>(context);
-  auto session2 = std::make_shared<core::ProcessSession>(context2);
+  auto session = utils::debug_make_shared<core::ProcessSession>(context);
+  auto session2 = utils::debug_make_shared<core::ProcessSession>(context2);
 
 
   REQUIRE(processor->getName() == "gettcpexample");
 
-  std::shared_ptr<core::FlowFile> record;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> record;
   processor->setScheduledState(core::ScheduledState::RUNNING);
 
-  std::shared_ptr<core::ProcessSessionFactory> factory = std::make_shared<core::ProcessSessionFactory>(context);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> factory = utils::debug_make_shared<core::ProcessSessionFactory>(context);
   processor->onSchedule(context, factory);
   processor->onTrigger(context, session);
   server.writeData(buffer, buffer.size());
@@ -229,7 +229,7 @@ TEST_CASE("GetTCPWithOEM", "[GetTCP2]") {
   logAttribute->initialize();
   logAttribute->incrementActiveTasks();
   logAttribute->setScheduledState(core::ScheduledState::RUNNING);
-  std::shared_ptr<core::ProcessSessionFactory> factory2 = std::make_shared<core::ProcessSessionFactory>(context2);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> factory2 = utils::debug_make_shared<core::ProcessSessionFactory>(context2);
   logAttribute->onSchedule(context2, factory2);
   logAttribute->onTrigger(context2, session2);
 
@@ -272,11 +272,11 @@ TEST_CASE("GetTCPWithOnlyOEM", "[GetTCP3]") {
     buffer.push_back(c);
   }
 
-  std::shared_ptr<core::ContentRepository> content_repo = std::make_shared<core::repository::VolatileContentRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo = utils::debug_make_shared<core::repository::VolatileContentRepository>();
 
-  content_repo->initialize(std::make_shared<minifi::Configure>());
+  content_repo->initialize(utils::debug_make_shared<minifi::Configure>());
 
-  std::shared_ptr<org::apache::nifi::minifi::io::StreamFactory> stream_factory = minifi::io::StreamFactory::getInstance(std::make_shared<minifi::Configure>());
+  org::apache::nifi::minifi::utils::debug_shared_ptr<org::apache::nifi::minifi::io::StreamFactory> stream_factory = minifi::io::StreamFactory::getInstance(utils::debug_make_shared<minifi::Configure>());
 
   TestController testController;
 
@@ -288,11 +288,11 @@ TEST_CASE("GetTCPWithOnlyOEM", "[GetTCP3]") {
 
   LogTestController::getInstance().setDebug<minifi::processors::GetTCP>();
 
-  std::shared_ptr<core::Repository> repo = std::make_shared<TestRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> repo = utils::debug_make_shared<TestRepository>();
 
-  std::shared_ptr<core::Processor> processor = std::make_shared<org::apache::nifi::minifi::processors::GetTCP>("gettcpexample");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor = utils::debug_make_shared<org::apache::nifi::minifi::processors::GetTCP>("gettcpexample");
 
-  std::shared_ptr<core::Processor> logAttribute = std::make_shared<org::apache::nifi::minifi::processors::LogAttribute>("logattribute");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> logAttribute = utils::debug_make_shared<org::apache::nifi::minifi::processors::LogAttribute>("logattribute");
 
   processor->setStreamFactory(stream_factory);
   processor->initialize();
@@ -303,10 +303,10 @@ TEST_CASE("GetTCPWithOnlyOEM", "[GetTCP3]") {
   utils::Identifier logattribute_uuid;
   REQUIRE(true == logAttribute->getUUID(logattribute_uuid));
 
-  std::shared_ptr<minifi::Connection> connection = std::make_shared<minifi::Connection>(repo, content_repo, "gettcpexampleConnection");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> connection = utils::debug_make_shared<minifi::Connection>(repo, content_repo, "gettcpexampleConnection");
   connection->addRelationship(core::Relationship("success", "description"));
 
-  std::shared_ptr<minifi::Connection> connection2 = std::make_shared<minifi::Connection>(repo, content_repo, "logattribute");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> connection2 = utils::debug_make_shared<minifi::Connection>(repo, content_repo, "logattribute");
   connection2->addRelationship(core::Relationship("success", "description"));
 
   // link the connections so that we can test results at the end for this
@@ -325,24 +325,24 @@ TEST_CASE("GetTCPWithOnlyOEM", "[GetTCP3]") {
   logAttribute->addConnection(connection);
   logAttribute->addConnection(connection2);
 
-  std::shared_ptr<core::ProcessorNode> node = std::make_shared<core::ProcessorNode>(processor);
-    std::shared_ptr<core::ProcessorNode> node2 = std::make_shared<core::ProcessorNode>(logAttribute);
-    std::shared_ptr<core::ProcessContext> context = std::make_shared<core::ProcessContext>(node, nullptr, repo, repo, content_repo);
-    std::shared_ptr<core::ProcessContext> context2 = std::make_shared<core::ProcessContext>(node2, nullptr, repo, repo, content_repo);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessorNode> node = utils::debug_make_shared<core::ProcessorNode>(processor);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessorNode> node2 = utils::debug_make_shared<core::ProcessorNode>(logAttribute);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> context = utils::debug_make_shared<core::ProcessContext>(node, nullptr, repo, repo, content_repo);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> context2 = utils::debug_make_shared<core::ProcessContext>(node2, nullptr, repo, repo, content_repo);
   context->setProperty(org::apache::nifi::minifi::processors::GetTCP::EndpointList, org::apache::nifi::minifi::io::Socket::getMyHostName() + ":" + std::to_string(server.getPort()));
   context->setProperty(org::apache::nifi::minifi::processors::GetTCP::ReconnectInterval, "100 msec");
   // we're using new lines above
   context->setProperty(org::apache::nifi::minifi::processors::GetTCP::EndOfMessageByte, "10");
-  auto session = std::make_shared<core::ProcessSession>(context);
-    auto session2 = std::make_shared<core::ProcessSession>(context2);
+  auto session = utils::debug_make_shared<core::ProcessSession>(context);
+    auto session2 = utils::debug_make_shared<core::ProcessSession>(context2);
 
 
   REQUIRE(processor->getName() == "gettcpexample");
 
-  std::shared_ptr<core::FlowFile> record;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> record;
   processor->setScheduledState(core::ScheduledState::RUNNING);
 
-  std::shared_ptr<core::ProcessSessionFactory> factory = std::make_shared<core::ProcessSessionFactory>(context);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> factory = utils::debug_make_shared<core::ProcessSessionFactory>(context);
   processor->onSchedule(context, factory);
   processor->onTrigger(context, session);
   server.writeData(buffer, buffer.size());
@@ -351,7 +351,7 @@ TEST_CASE("GetTCPWithOnlyOEM", "[GetTCP3]") {
   logAttribute->initialize();
   logAttribute->incrementActiveTasks();
   logAttribute->setScheduledState(core::ScheduledState::RUNNING);
-  std::shared_ptr<core::ProcessSessionFactory> factory2 = std::make_shared<core::ProcessSessionFactory>(context2);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> factory2 = utils::debug_make_shared<core::ProcessSessionFactory>(context2);
   logAttribute->onSchedule(context2, factory2);
   logAttribute->onTrigger(context2, session2);
 
@@ -391,8 +391,8 @@ TEST_CASE("GetTCPEmptyNoConnect", "[GetTCP3]") {
   LogTestController::getInstance().setDebug<minifi::processors::GetTCP>();
   LogTestController::getInstance().setTrace<minifi::io::Socket>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
-  std::shared_ptr<core::Processor> getfile = plan->addProcessor("GetTCP", "gettcpexample");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> getfile = plan->addProcessor("GetTCP", "gettcpexample");
 
   plan->addProcessor("LogAttribute", "logattribute", core::Relationship("success", "description"), true);
 
@@ -403,7 +403,7 @@ TEST_CASE("GetTCPEmptyNoConnect", "[GetTCP3]") {
 
   testController.runSession(plan, false);
   auto records = plan->getProvenanceRecords();
-  std::shared_ptr<core::FlowFile> record = plan->getCurrentFlowFile();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> record = plan->getCurrentFlowFile();
   REQUIRE(record == nullptr);
   REQUIRE(records.size() == 0);
 

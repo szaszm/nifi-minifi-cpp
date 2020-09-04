@@ -49,7 +49,7 @@ class BaseOPCProcessor : public core::Processor {
   : Processor(name, uuid) {
   }
 
-  virtual void onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &factory) override;
+  virtual void onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &factory) override;
 
  protected:
   virtual bool reconnect();

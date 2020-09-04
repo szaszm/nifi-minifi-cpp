@@ -38,7 +38,7 @@ namespace apache {
 namespace nifi {
 namespace minifi {
 
-Connection::Connection(const std::shared_ptr<core::Repository> &flow_repository, const std::shared_ptr<core::ContentRepository> &content_repo, std::string name)
+Connection::Connection(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> &flow_repository, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> &content_repo, std::string name)
     : core::Connectable(name),
       flow_repository_(flow_repository),
       content_repo_(content_repo),
@@ -54,7 +54,7 @@ Connection::Connection(const std::shared_ptr<core::Repository> &flow_repository,
   logger_->log_debug("Connection %s created", name_);
 }
 
-Connection::Connection(const std::shared_ptr<core::Repository> &flow_repository, const std::shared_ptr<core::ContentRepository> &content_repo, std::string name, utils::Identifier & uuid)
+Connection::Connection(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> &flow_repository, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> &content_repo, std::string name, utils::Identifier & uuid)
     : core::Connectable(name, uuid),
       flow_repository_(flow_repository),
       content_repo_(content_repo),
@@ -70,7 +70,7 @@ Connection::Connection(const std::shared_ptr<core::Repository> &flow_repository,
   logger_->log_debug("Connection %s created", name_);
 }
 
-Connection::Connection(const std::shared_ptr<core::Repository> &flow_repository, const std::shared_ptr<core::ContentRepository> &content_repo, std::string name, utils::Identifier & uuid,
+Connection::Connection(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> &flow_repository, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> &content_repo, std::string name, utils::Identifier & uuid,
                        utils::Identifier & srcUUID)
     : core::Connectable(name, uuid),
       flow_repository_(flow_repository),
@@ -90,7 +90,7 @@ Connection::Connection(const std::shared_ptr<core::Repository> &flow_repository,
   logger_->log_debug("Connection %s created", name_);
 }
 
-Connection::Connection(const std::shared_ptr<core::Repository> &flow_repository, const std::shared_ptr<core::ContentRepository> &content_repo, std::string name, utils::Identifier & uuid,
+Connection::Connection(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> &flow_repository, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> &content_repo, std::string name, utils::Identifier & uuid,
                        utils::Identifier & srcUUID, utils::Identifier & destUUID)
     : core::Connectable(name, uuid),
       flow_repository_(flow_repository),
@@ -133,7 +133,7 @@ bool Connection::isFull() {
   return false;
 }
 
-void Connection::put(std::shared_ptr<core::FlowFile> flow) {
+void Connection::put(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow) {
   if (drop_empty_ && flow->getSize() == 0) {
     logger_->log_info("Dropping empty flow file: %s", flow->getUUIDStr());
     return;
@@ -155,7 +155,7 @@ void Connection::put(std::shared_ptr<core::FlowFile> flow) {
   }
 }
 
-void Connection::multiPut(std::vector<std::shared_ptr<core::FlowFile>>& flows) {
+void Connection::multiPut(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>>& flows) {
   {
     std::lock_guard<std::mutex> lock(mutex_);
 
@@ -178,11 +178,11 @@ void Connection::multiPut(std::vector<std::shared_ptr<core::FlowFile>>& flows) {
   }
 }
 
-std::shared_ptr<core::FlowFile> Connection::poll(std::set<std::shared_ptr<core::FlowFile>> &expiredFlowRecords) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> Connection::poll(std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> &expiredFlowRecords) {
   std::lock_guard<std::mutex> lock(mutex_);
 
   while (!queue_.empty()) {
-    std::shared_ptr<core::FlowFile> item = queue_.front();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> item = queue_.front();
     queue_.pop();
     queued_data_size_ -= item->getSize();
 
@@ -200,7 +200,7 @@ std::shared_ptr<core::FlowFile> Connection::poll(std::set<std::shared_ptr<core::
           queued_data_size_ += item->getSize();
           break;
         }
-        std::shared_ptr<Connectable> connectable = std::static_pointer_cast<Connectable>(shared_from_this());
+        org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable> connectable = static_pointer_cast<Connectable>(shared_from_this());
         item->setOriginalConnection(connectable);
         logger_->log_debug("Dequeue flow file UUID %s from connection %s", item->getUUIDStr(), name_);
         return item;
@@ -213,7 +213,7 @@ std::shared_ptr<core::FlowFile> Connection::poll(std::set<std::shared_ptr<core::
         queued_data_size_ += item->getSize();
         break;
       }
-      std::shared_ptr<Connectable> connectable = std::static_pointer_cast<Connectable>(shared_from_this());
+      org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable> connectable = static_pointer_cast<Connectable>(shared_from_this());
       item->setOriginalConnection(connectable);
       logger_->log_debug("Dequeue flow file UUID %s from connection %s", item->getUUIDStr(), name_);
       return item;
@@ -227,7 +227,7 @@ void Connection::drain(bool delete_permanently) {
   std::lock_guard<std::mutex> lock(mutex_);
 
   while (!queue_.empty()) {
-    std::shared_ptr<core::FlowFile> item = queue_.front();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> item = queue_.front();
     queue_.pop();
     logger_->log_debug("Delete flow file UUID %s from connection %s, because it expired", item->getUUIDStr(), name_);
     if (delete_permanently) {

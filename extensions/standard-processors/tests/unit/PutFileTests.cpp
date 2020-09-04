@@ -42,7 +42,7 @@
 
 TEST_CASE("Test Creation of PutFile", "[getfileCreate]") {
   TestController testController;
-  std::shared_ptr<core::Processor> processor = std::make_shared<org::apache::nifi::minifi::processors::PutFile>("processorname");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor = utils::debug_make_shared<org::apache::nifi::minifi::processors::PutFile>("processorname");
   REQUIRE(processor->getName() == "processorname");
 }
 
@@ -55,11 +55,11 @@ TEST_CASE("PutFileTest", "[getfileputpfile]") {
   LogTestController::getInstance().setDebug<minifi::processors::PutFile::ReadCallback>();
   LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
 
-  std::shared_ptr<core::Processor> getfile = plan->addProcessor("GetFile", "getfileCreate2");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> getfile = plan->addProcessor("GetFile", "getfileCreate2");
 
-  std::shared_ptr<core::Processor> putfile = plan->addProcessor("PutFile", "putfile", core::Relationship("success", "description"), true);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> putfile = plan->addProcessor("PutFile", "putfile", core::Relationship("success", "description"), true);
 
   plan->addProcessor("LogAttribute", "logattribute", core::Relationship("success", "description"), true);
 
@@ -73,7 +73,7 @@ TEST_CASE("PutFileTest", "[getfileputpfile]") {
   testController.runSession(plan, false);
 
   auto records = plan->getProvenanceRecords();
-  std::shared_ptr<core::FlowFile> record = plan->getCurrentFlowFile();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> record = plan->getCurrentFlowFile();
   REQUIRE(record == nullptr);
   REQUIRE(records.size() == 0);
 
@@ -120,11 +120,11 @@ TEST_CASE("PutFileTestFileExists", "[getfileputpfile]") {
   LogTestController::getInstance().setDebug<minifi::processors::PutFile>();
   LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
 
-  std::shared_ptr<core::Processor> getfile = plan->addProcessor("GetFile", "getfileCreate2");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> getfile = plan->addProcessor("GetFile", "getfileCreate2");
 
-  std::shared_ptr<core::Processor> putfile = plan->addProcessor("PutFile", "putfile", core::Relationship("success", "description"), true);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> putfile = plan->addProcessor("PutFile", "putfile", core::Relationship("success", "description"), true);
 
   plan->addProcessor("LogAttribute", "logattribute", core::Relationship("failure", "description"), true);
 
@@ -138,7 +138,7 @@ TEST_CASE("PutFileTestFileExists", "[getfileputpfile]") {
   testController.runSession(plan, false);
 
   auto records = plan->getProvenanceRecords();
-  std::shared_ptr<core::FlowFile> record = plan->getCurrentFlowFile();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> record = plan->getCurrentFlowFile();
   REQUIRE(record == nullptr);
   REQUIRE(records.size() == 0);
 
@@ -185,11 +185,11 @@ TEST_CASE("PutFileTestFileExistsIgnore", "[getfileputpfile]") {
   LogTestController::getInstance().setDebug<minifi::processors::PutFile>();
   LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
 
-  std::shared_ptr<core::Processor> getfile = plan->addProcessor("GetFile", "getfileCreate2");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> getfile = plan->addProcessor("GetFile", "getfileCreate2");
 
-  std::shared_ptr<core::Processor> putfile = plan->addProcessor("PutFile", "putfile", core::Relationship("success", "description"), true);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> putfile = plan->addProcessor("PutFile", "putfile", core::Relationship("success", "description"), true);
 
   plan->addProcessor("LogAttribute", "logattribute", core::Relationship("success", "description"), true);
 
@@ -204,7 +204,7 @@ TEST_CASE("PutFileTestFileExistsIgnore", "[getfileputpfile]") {
   testController.runSession(plan, false);
 
   auto records = plan->getProvenanceRecords();
-  std::shared_ptr<core::FlowFile> record = plan->getCurrentFlowFile();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> record = plan->getCurrentFlowFile();
   REQUIRE(record == nullptr);
   REQUIRE(records.size() == 0);
 
@@ -253,11 +253,11 @@ TEST_CASE("PutFileTestFileExistsReplace", "[getfileputpfile]") {
   LogTestController::getInstance().setDebug<minifi::processors::PutFile>();
   LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
 
-  std::shared_ptr<core::Processor> getfile = plan->addProcessor("GetFile", "getfileCreate2");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> getfile = plan->addProcessor("GetFile", "getfileCreate2");
 
-  std::shared_ptr<core::Processor> putfile = plan->addProcessor("PutFile", "putfile", core::Relationship("success", "description"), true);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> putfile = plan->addProcessor("PutFile", "putfile", core::Relationship("success", "description"), true);
 
   plan->addProcessor("LogAttribute", "logattribute", { core::Relationship("success", "d"), core::Relationship("failure", "d") }, true);
 
@@ -272,7 +272,7 @@ TEST_CASE("PutFileTestFileExistsReplace", "[getfileputpfile]") {
   testController.runSession(plan, false);
 
   auto records = plan->getProvenanceRecords();
-  std::shared_ptr<core::FlowFile> record = plan->getCurrentFlowFile();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> record = plan->getCurrentFlowFile();
   REQUIRE(record == nullptr);
   REQUIRE(records.size() == 0);
 
@@ -316,7 +316,7 @@ TEST_CASE("PutFileTestFileExistsReplace", "[getfileputpfile]") {
 }
 
 TEST_CASE("Test generation of temporary write path", "[putfileTmpWritePath]") {
-  auto processor = std::make_shared<org::apache::nifi::minifi::processors::PutFile>("processorname");
+  auto processor = utils::debug_make_shared<org::apache::nifi::minifi::processors::PutFile>("processorname");
   std::stringstream prefix;
   prefix << "a" << utils::file::FileUtils::get_separator() << "b" << utils::file::FileUtils::get_separator();
   std::string path = prefix.str() + "c";
@@ -332,11 +332,11 @@ TEST_CASE("PutFileMaxFileCountTest", "[getfileputpfilemaxcount]") {
   LogTestController::getInstance().setDebug<minifi::processors::PutFile>();
   LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
 
-  std::shared_ptr<core::Processor> getfile = plan->addProcessor("GetFile", "getfileCreate");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> getfile = plan->addProcessor("GetFile", "getfileCreate");
 
-  std::shared_ptr<core::Processor> putfile = plan->addProcessor("PutFile", "putfile", core::Relationship("success", "description"), true);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> putfile = plan->addProcessor("PutFile", "putfile", core::Relationship("success", "description"), true);
 
   plan->addProcessor("LogAttribute", "logattribute", { core::Relationship("success", "d"), core::Relationship("failure", "d") }, true);
 
@@ -401,11 +401,11 @@ TEST_CASE("PutFileEmptyTest", "[EmptyFilePutTest]") {
   LogTestController::getInstance().setDebug<TestPlan>();
   LogTestController::getInstance().setDebug<minifi::processors::PutFile>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
 
-  std::shared_ptr<core::Processor> getfile = plan->addProcessor("GetFile", "getfileCreate2");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> getfile = plan->addProcessor("GetFile", "getfileCreate2");
 
-  std::shared_ptr<core::Processor> putfile = plan->addProcessor("PutFile", "putfile", core::Relationship("success", "description"), true);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> putfile = plan->addProcessor("PutFile", "putfile", core::Relationship("success", "description"), true);
 
   char format[] = "/tmp/gt.XXXXXX";
   auto dir = testController.createTempDirectory(format);

@@ -43,7 +43,7 @@ namespace sitetosite {
  */
 class DataPacket {
  public:
-  DataPacket(const std::shared_ptr<logging::Logger> &logger, const std::shared_ptr<Transaction> &transaction, std::map<std::string, std::string> attributes, const std::string &payload)
+  DataPacket(const std::shared_ptr<logging::Logger> &logger, const org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> &transaction, std::map<std::string, std::string> attributes, const std::string &payload)
       : payload_(payload),
         logger_reference_(logger) {
     _size = 0;
@@ -52,7 +52,7 @@ class DataPacket {
   }
   std::map<std::string, std::string> _attributes;
   uint64_t _size;
-  std::shared_ptr<Transaction> transaction_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> transaction_;
   const std::string & payload_;
   std::shared_ptr<logging::Logger> logger_reference_;
 };
@@ -79,7 +79,7 @@ class SiteToSiteClient : public core::Connectable {
 
   virtual ~SiteToSiteClient() = default;
 
-  void setSSLContextService(const std::shared_ptr<minifi::controllers::SSLContextService> &context_service) {
+  void setSSLContextService(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::controllers::SSLContextService> &context_service) {
     ssl_context_service_ = context_service;
   }
 
@@ -88,7 +88,7 @@ class SiteToSiteClient : public core::Connectable {
    * @param transactionID transaction identifier
    * @param direction direction of transfer
    */
-  virtual std::shared_ptr<Transaction> createTransaction(std::string &transactionID, TransferDirection direction) = 0;
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> createTransaction(std::string &transactionID, TransferDirection direction) = 0;
 
   /**
    * Transfers flow files
@@ -97,7 +97,7 @@ class SiteToSiteClient : public core::Connectable {
    * @param session process session
    * @returns true if the process succeeded, failure OR exception thrown otherwise
    */
-  virtual bool transfer(TransferDirection direction, const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
+  virtual bool transfer(TransferDirection direction, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
 #ifndef WIN32
     if (__builtin_expect(direction == SEND, 1)) {
       return transferFlowFiles(context, session);
@@ -119,7 +119,7 @@ class SiteToSiteClient : public core::Connectable {
    * @param session process session
    * @returns true if the process succeeded, failure OR exception thrown otherwise
    */
-  virtual bool transferFlowFiles(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session);
+  virtual bool transferFlowFiles(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session);
 
   /**
    * Receive flow files from server
@@ -130,7 +130,7 @@ class SiteToSiteClient : public core::Connectable {
 
   // Confirm the data that was sent or received by comparing CRC32's of the data sent and the data received.
   // Receive flow files for the process session
-  bool receiveFlowFiles(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session);
+  bool receiveFlowFiles(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session);
 
   // Receive the data packet from the transaction
   // Return false when any error occurs
@@ -143,7 +143,7 @@ class SiteToSiteClient : public core::Connectable {
    * @param attributes
    * @returns true if the process succeeded, failure OR exception thrown otherwise
    */
-  virtual bool transmitPayload(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session, const std::string &payload,
+  virtual bool transmitPayload(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session, const std::string &payload,
                                std::map<std::string, std::string> attributes) = 0;
 
   void setPortId(utils::Identifier &id) {
@@ -213,7 +213,7 @@ class SiteToSiteClient : public core::Connectable {
   }
 
   // Return -1 when any error occurs
-  virtual int16_t send(std::string transactionID, DataPacket *packet, const std::shared_ptr<FlowFileRecord> &flowFile, const std::shared_ptr<core::ProcessSession> &session);
+  virtual int16_t send(std::string transactionID, DataPacket *packet, const org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> &flowFile, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session);
 
  protected:
   // Cancel the transaction
@@ -230,9 +230,9 @@ class SiteToSiteClient : public core::Connectable {
   virtual void tearDown() = 0;
 
   // read Respond
-  virtual int readResponse(const std::shared_ptr<Transaction> &transaction, RespondCode &code, std::string &message);
+  virtual int readResponse(const org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> &transaction, RespondCode &code, std::string &message);
   // write respond
-  virtual int writeResponse(const std::shared_ptr<Transaction> &transaction, RespondCode code, std::string message);
+  virtual int writeResponse(const org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> &transaction, RespondCode code, std::string message);
   // getRespondCodeContext
   virtual RespondCodeContext *getRespondCodeContext(RespondCode code) {
     for (unsigned int i = 0; i < sizeof(SiteToSiteRequest::respondCodeContext) / sizeof(RespondCodeContext); i++) {
@@ -261,7 +261,7 @@ class SiteToSiteClient : public core::Connectable {
   std::atomic<bool> running_;
 
   // transaction map
-  std::map<std::string, std::shared_ptr<Transaction>> known_transactions_;
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction>> known_transactions_;
 
   // BATCH_SEND_NANOS
   uint64_t _batchSendNanos;
@@ -276,7 +276,7 @@ class SiteToSiteClient : public core::Connectable {
   uint32_t _currentCodecVersion;
   int _currentCodecVersionIndex;
 
-  std::shared_ptr<minifi::controllers::SSLContextService> ssl_context_service_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::controllers::SSLContextService> ssl_context_service_;
 
  private:
   std::shared_ptr<logging::Logger> logger_;
@@ -290,7 +290,7 @@ class WriteCallback : public OutputStreamCallback {
   }
   DataPacket *_packet;
   // void process(std::ofstream *stream) {
-  int64_t process(std::shared_ptr<io::BaseStream> stream) {
+  int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
     uint8_t buffer[16384];
     uint64_t len = _packet->_size;
     uint64_t total = 0;
@@ -316,7 +316,7 @@ class ReadCallback : public InputStreamCallback {
       : _packet(packet) {
   }
   DataPacket *_packet;
-  int64_t process(std::shared_ptr<io::BaseStream> stream) {
+  int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
     _packet->_size = 0;
     uint8_t buffer[8192] = { 0 };
     int readSize;

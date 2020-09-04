@@ -98,13 +98,13 @@ class ListSFTP : public SFTPProcessorBase {
 
   static const std::map<std::string, uint64_t> LISTING_LAG_MAP;
 
-  virtual void onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) override;
+  virtual void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) override;
   virtual void initialize() override;
-  virtual void onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
+  virtual void onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
 
  private:
 
-  std::shared_ptr<core::CoreComponentStateManager> state_manager_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::CoreComponentStateManager> state_manager_;
   std::string listing_strategy_;
   bool search_recursively_;
   bool follow_symlink_;
@@ -162,21 +162,21 @@ class ListSFTP : public SFTPProcessorBase {
   bool filterDirectory(const std::string& parent_path, const std::string& filename, const LIBSSH2_SFTP_ATTRIBUTES& attrs);
 
   bool createAndTransferFlowFileFromChild(
-      const std::shared_ptr<core::ProcessSession>& session,
+      const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession>& session,
       const std::string& hostname,
       uint16_t port,
       const std::string& username,
       const Child& child);
 
-  bool persistTrackingTimestampsCache(const std::shared_ptr<core::ProcessContext>& context, const std::string& hostname, const std::string& username, const std::string& remote_path);
-  bool updateFromTrackingTimestampsCache(const std::shared_ptr<core::ProcessContext>& context, const std::string& hostname, const std::string& username, const std::string& remote_path);
+  bool persistTrackingTimestampsCache(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>& context, const std::string& hostname, const std::string& username, const std::string& remote_path);
+  bool updateFromTrackingTimestampsCache(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>& context, const std::string& hostname, const std::string& username, const std::string& remote_path);
 
-  bool persistTrackingEntitiesCache(const std::shared_ptr<core::ProcessContext>& context, const std::string& hostname, const std::string& username, const std::string& remote_path);
-  bool updateFromTrackingEntitiesCache(const std::shared_ptr<core::ProcessContext>& context, const std::string& hostname, const std::string& username, const std::string& remote_path);
+  bool persistTrackingEntitiesCache(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>& context, const std::string& hostname, const std::string& username, const std::string& remote_path);
+  bool updateFromTrackingEntitiesCache(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>& context, const std::string& hostname, const std::string& username, const std::string& remote_path);
 
   void listByTrackingTimestamps(
-      const std::shared_ptr<core::ProcessContext>& context,
-      const std::shared_ptr<core::ProcessSession>& session,
+      const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>& context,
+      const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession>& session,
       const std::string& hostname,
       uint16_t port,
       const std::string& username,
@@ -184,8 +184,8 @@ class ListSFTP : public SFTPProcessorBase {
       std::vector<Child>&& files);
 
   void listByTrackingEntities(
-      const std::shared_ptr<core::ProcessContext>& context,
-      const std::shared_ptr<core::ProcessSession>& session,
+      const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>& context,
+      const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession>& session,
       const std::string& hostname,
       uint16_t port,
       const std::string& username,

@@ -27,7 +27,7 @@ namespace nifi {
 namespace minifi {
 namespace script {
 
-ScriptProcessContext::ScriptProcessContext(std::shared_ptr<core::ProcessContext> context)
+ScriptProcessContext::ScriptProcessContext(org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> context)
     : context_(std::move(context)) {
 }
 

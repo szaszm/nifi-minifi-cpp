@@ -34,26 +34,26 @@ namespace nifi {
 namespace minifi {
 namespace core {
 
-static inline std::shared_ptr<state::response::Value> convert(const std::shared_ptr<state::response::Value> &prior, const std::string &ref) {
+static inline org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::Value> convert(const org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::Value> &prior, const std::string &ref) {
   if (prior->getTypeIndex() == state::response::Value::UINT64_TYPE) {
     // there are specializations, so check them first
-    if (std::dynamic_pointer_cast<TimePeriodValue>(prior)) {
-      return std::make_shared<TimePeriodValue>(ref);
-    } else if (std::dynamic_pointer_cast<DataSizeValue>(prior)) {
-      return std::make_shared<DataSizeValue>(ref);
+    if (dynamic_pointer_cast<TimePeriodValue>(prior)) {
+      return org::apache::nifi::minifi::utils::debug_make_shared<TimePeriodValue>(ref);
+    } else if (dynamic_pointer_cast<DataSizeValue>(prior)) {
+      return org::apache::nifi::minifi::utils::debug_make_shared<DataSizeValue>(ref);
     } else {
-      return std::make_shared<state::response::UInt64Value>(ref);
+      return org::apache::nifi::minifi::utils::debug_make_shared<state::response::UInt64Value>(ref);
     }
   } else if (prior->getTypeIndex() == state::response::Value::INT64_TYPE) {
-    return std::make_shared<state::response::Int64Value>(ref);
+    return org::apache::nifi::minifi::utils::debug_make_shared<state::response::Int64Value>(ref);
   } else if (prior->getTypeIndex() == state::response::Value::UINT32_TYPE) {
-    return std::make_shared<state::response::UInt32Value>(ref);
+    return org::apache::nifi::minifi::utils::debug_make_shared<state::response::UInt32Value>(ref);
   } else if (prior->getTypeIndex() == state::response::Value::INT_TYPE) {
-    return std::make_shared<state::response::IntValue>(ref);
+    return org::apache::nifi::minifi::utils::debug_make_shared<state::response::IntValue>(ref);
   } else if (prior->getTypeIndex() == state::response::Value::BOOL_TYPE) {
-    return std::make_shared<state::response::BoolValue>(ref);
+    return org::apache::nifi::minifi::utils::debug_make_shared<state::response::BoolValue>(ref);
   } else {
-    return std::make_shared<state::response::Value>(ref);
+    return org::apache::nifi::minifi::utils::debug_make_shared<state::response::Value>(ref);
   }
 }
 
@@ -72,11 +72,11 @@ class PropertyValue : public state::response::ValueNode {
   PropertyValue(const PropertyValue &o) = default;
   PropertyValue(PropertyValue &&o) noexcept = default;
 
-  void setValidator(const gsl::not_null<std::shared_ptr<PropertyValidator>> &val) {
+  void setValidator(const gsl::not_null<org::apache::nifi::minifi::utils::debug_shared_ptr<PropertyValidator>> &val) {
     validator_ = val;
   }
 
-  std::shared_ptr<PropertyValidator> getValidator() const {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<PropertyValidator> getValidator() const {
     return *validator_;
   }
 
@@ -158,11 +158,11 @@ class PropertyValue : public state::response::ValueNode {
       type_id = std::type_index(typeid(T));
       value_ = minifi::state::response::createValue(ref);
     } else {
-      if (std::dynamic_pointer_cast<DataSizeValue>(value_)) {
-        value_ = std::make_shared<DataSizeValue>(ref);
+      if (dynamic_pointer_cast<DataSizeValue>(value_)) {
+        value_ = org::apache::nifi::minifi::utils::debug_make_shared<DataSizeValue>(ref);
         type_id = DataSizeValue::type_id;
-      } else if (std::dynamic_pointer_cast<TimePeriodValue>(value_)) {
-        value_ = std::make_shared<TimePeriodValue>(ref);
+      } else if (dynamic_pointer_cast<TimePeriodValue>(value_)) {
+        value_ = org::apache::nifi::minifi::utils::debug_make_shared<TimePeriodValue>(ref);
         type_id = TimePeriodValue::type_id;
       } else if (type_id == std::type_index(typeid(T))) {
         value_ = minifi::state::response::createValue(ref);
@@ -189,7 +189,7 @@ class PropertyValue : public state::response::ValueNode {
   std::is_same<T, TimePeriodValue >::value, PropertyValue&>::type {
     validator_.invalidateCachedResult();
     return WithAssignmentGuard(ref, [&] () -> PropertyValue& {
-      value_ = std::make_shared<T>(ref);
+      value_ = org::apache::nifi::minifi::utils::debug_make_shared<T>(ref);
       type_id = value_->getTypeIndex();
       return *this;
     });

@@ -53,8 +53,8 @@ class LuaScriptEngine : public script::ScriptEngine {
 
   class TriggerSession {
    public:
-    TriggerSession(std::shared_ptr<script::ScriptProcessContext> script_context,
-                   std::shared_ptr<lua::LuaProcessSession> lua_session)
+    TriggerSession(org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptProcessContext> script_context,
+                   org::apache::nifi::minifi::utils::debug_shared_ptr<lua::LuaProcessSession> lua_session)
         : script_context_(std::move(script_context)),
           lua_session_(std::move(lua_session)) {
     }
@@ -66,12 +66,12 @@ class LuaScriptEngine : public script::ScriptEngine {
 
 
    private:
-    std::shared_ptr<script::ScriptProcessContext> script_context_;
-    std::shared_ptr<LuaProcessSession> lua_session_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptProcessContext> script_context_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<LuaProcessSession> lua_session_;
   };
 
-  void onTrigger(const std::shared_ptr<core::ProcessContext> &context,
-      const std::shared_ptr<core::ProcessSession> &session) {
+  void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context,
+      const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
     auto script_context = convert(context);
     auto lua_session = convert(session);
     TriggerSession trigger_session(script_context, lua_session);
@@ -88,12 +88,12 @@ class LuaScriptEngine : public script::ScriptEngine {
     return value;
   }
 
-  std::shared_ptr<script::ScriptProcessContext> convert(const std::shared_ptr<core::ProcessContext> &context) {
-    return std::make_shared<script::ScriptProcessContext>(context);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptProcessContext> convert(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context) {
+    return utils::debug_make_shared<script::ScriptProcessContext>(context);
   }
 
-  std::shared_ptr<LuaProcessSession> convert(const std::shared_ptr<core::ProcessSession> &session) {
-    return std::make_shared<LuaProcessSession>(session);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<LuaProcessSession> convert(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
+    return utils::debug_make_shared<LuaProcessSession>(session);
   }
 
  private:

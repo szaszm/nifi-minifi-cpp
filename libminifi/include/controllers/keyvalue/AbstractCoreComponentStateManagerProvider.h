@@ -30,24 +30,24 @@ namespace nifi {
 namespace minifi {
 namespace controllers {
 
-class AbstractCoreComponentStateManagerProvider : public std::enable_shared_from_this<AbstractCoreComponentStateManagerProvider>,
+class AbstractCoreComponentStateManagerProvider : public org::apache::nifi::minifi::utils::enable_debug_shared_from_this<AbstractCoreComponentStateManagerProvider>,
                                                    public core::CoreComponentStateManagerProvider {
  public:
   virtual ~AbstractCoreComponentStateManagerProvider();
 
-  std::shared_ptr<core::CoreComponentStateManager> getCoreComponentStateManager(const std::string& uuid) override;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::CoreComponentStateManager> getCoreComponentStateManager(const std::string& uuid) override;
 
   std::unordered_map<std::string, std::unordered_map<std::string, std::string>> getAllCoreComponentStates() override;
 
   class AbstractCoreComponentStateManager : public core::CoreComponentStateManager{
    private:
-    std::shared_ptr<AbstractCoreComponentStateManagerProvider> provider_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<AbstractCoreComponentStateManagerProvider> provider_;
     std::string id_;
     bool state_valid_;
     std::unordered_map<std::string, std::string> state_;
 
    public:
-    AbstractCoreComponentStateManager(std::shared_ptr<AbstractCoreComponentStateManagerProvider> provider, const std::string& id);
+    AbstractCoreComponentStateManager(org::apache::nifi::minifi::utils::debug_shared_ptr<AbstractCoreComponentStateManagerProvider> provider, const std::string& id);
 
     bool set(const std::unordered_map<std::string, std::string>& kvs) override;
 

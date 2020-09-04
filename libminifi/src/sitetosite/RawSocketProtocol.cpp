@@ -38,8 +38,8 @@ namespace nifi {
 namespace minifi {
 namespace sitetosite {
 
-std::shared_ptr<utils::IdGenerator> RawSiteToSiteClient::id_generator_ = utils::IdGenerator::getIdGenerator();
-std::shared_ptr<utils::IdGenerator> Transaction::id_generator_ = utils::IdGenerator::getIdGenerator();
+org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> RawSiteToSiteClient::id_generator_ = utils::IdGenerator::getIdGenerator();
+org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> Transaction::id_generator_ = utils::IdGenerator::getIdGenerator();
 
 const char *RawSiteToSiteClient::HandShakePropertyStr[MAX_HANDSHAKE_PROPERTY] = {
 /**
@@ -376,7 +376,7 @@ bool RawSiteToSiteClient::getPeerList(std::vector<PeerStatus> &peers) {
         tearDown();
         return false;
       }
-      PeerStatus status(std::make_shared<Peer>(port_id_, host, gsl::narrow<uint16_t>(port), secure != 0), count, true);
+      PeerStatus status(org::apache::nifi::minifi::utils::debug_make_shared<Peer>(port_id_, host, gsl::narrow<uint16_t>(port), secure != 0), count, true);
       peers.push_back(std::move(status));
       logging::LOG_TRACE(logger_) << "Site2Site Peer host " << host << " port " << port << " Secure " << std::to_string(secure);
     }
@@ -414,11 +414,11 @@ bool RawSiteToSiteClient::getPeerList(std::vector<PeerStatus> &peers) {
     return -1;
   }
 
-int RawSiteToSiteClient::readRespond(const std::shared_ptr<Transaction> &transaction, RespondCode &code, std::string &message) {
+int RawSiteToSiteClient::readRespond(const org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> &transaction, RespondCode &code, std::string &message) {
   return readResponse(transaction, code, message);
 }
 
-int RawSiteToSiteClient::writeRespond(const std::shared_ptr<Transaction> &transaction, RespondCode code, std::string message) {
+int RawSiteToSiteClient::writeRespond(const org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> &transaction, RespondCode code, std::string message) {
   return writeResponse(transaction, code, message);
 }
 
@@ -466,10 +466,10 @@ bool RawSiteToSiteClient::bootstrap() {
   }
 }
 
-std::shared_ptr<Transaction> RawSiteToSiteClient::createTransaction(std::string &transactionID, TransferDirection direction) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> RawSiteToSiteClient::createTransaction(std::string &transactionID, TransferDirection direction) {
   int ret;
   bool dataAvailable;
-  std::shared_ptr<Transaction> transaction = nullptr;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> transaction = nullptr;
 
   if (peer_state_ != READY) {
     bootstrap();
@@ -500,7 +500,7 @@ std::shared_ptr<Transaction> RawSiteToSiteClient::createTransaction(std::string 
       case MORE_DATA:
         dataAvailable = true;
         logger_->log_trace("Site2Site peer indicates that data is available");
-        transaction = std::make_shared<Transaction>(direction, crcstream);
+        transaction = org::apache::nifi::minifi::utils::debug_make_shared<Transaction>(direction, crcstream);
         known_transactions_[transaction->getUUIDStr()] = transaction;
         transactionID = transaction->getUUIDStr();
         transaction->setDataAvailable(dataAvailable);
@@ -509,7 +509,7 @@ std::shared_ptr<Transaction> RawSiteToSiteClient::createTransaction(std::string 
       case NO_MORE_DATA:
         dataAvailable = false;
         logger_->log_trace("Site2Site peer indicates that no data is available");
-        transaction = std::make_shared<Transaction>(direction, crcstream);
+        transaction = org::apache::nifi::minifi::utils::debug_make_shared<Transaction>(direction, crcstream);
         known_transactions_[transaction->getUUIDStr()] = transaction;
         transactionID = transaction->getUUIDStr();
         transaction->setDataAvailable(dataAvailable);
@@ -526,7 +526,7 @@ std::shared_ptr<Transaction> RawSiteToSiteClient::createTransaction(std::string 
       return NULL;
     } else {
       org::apache::nifi::minifi::io::CRCStream<SiteToSitePeer> crcstream(peer_.get());
-      transaction = std::make_shared<Transaction>(direction, crcstream);
+      transaction = org::apache::nifi::minifi::utils::debug_make_shared<Transaction>(direction, crcstream);
       known_transactions_[transaction->getUUIDStr()] = transaction;
       transactionID = transaction->getUUIDStr();
       logger_->log_trace("Site2Site create transaction %s", transaction->getUUIDStr());
@@ -535,9 +535,9 @@ std::shared_ptr<Transaction> RawSiteToSiteClient::createTransaction(std::string 
   }
 }
 
-bool RawSiteToSiteClient::transmitPayload(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session, const std::string &payload,
+bool RawSiteToSiteClient::transmitPayload(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session, const std::string &payload,
                                           std::map<std::string, std::string> attributes) {
-  std::shared_ptr<Transaction> transaction = NULL;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> transaction = NULL;
 
   if (payload.length() <= 0)
     return false;

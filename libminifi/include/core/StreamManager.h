@@ -49,21 +49,21 @@ class StreamManager {
    * @param streamId stream identifier
    * @return stream pointer.
    */
-  virtual std::shared_ptr<io::BaseStream> write(const std::shared_ptr<T> &streamId, bool append = false) = 0;
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> write(const org::apache::nifi::minifi::utils::debug_shared_ptr<T> &streamId, bool append = false) = 0;
 
   /**
    * Create a read stream using the streamId as a reference.
    * @param streamId stream identifier
    * @return stream pointer.
    */
-  virtual std::shared_ptr<io::BaseStream> read(const std::shared_ptr<T> &streamId) = 0;
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> read(const org::apache::nifi::minifi::utils::debug_shared_ptr<T> &streamId) = 0;
 
   /**
    * Closes the stream
    * @param streamId stream identifier
    * @return result of operation.
    */
-  virtual bool close(const std::shared_ptr<T> &streamId) = 0;
+  virtual bool close(const org::apache::nifi::minifi::utils::debug_shared_ptr<T> &streamId) = 0;
 
   /**
    * Removes the stream from this stream manager. The end result
@@ -71,20 +71,20 @@ class StreamManager {
    * @param streamId stream identifier
    * @return result of operation.
    */
-  virtual bool remove(const std::shared_ptr<T> &streamId) = 0;
+  virtual bool remove(const org::apache::nifi::minifi::utils::debug_shared_ptr<T> &streamId) = 0;
 
   /**
    * Removes an item if it was orphan
    */
-  virtual bool removeIfOrphaned(const std::shared_ptr<T> &streamId) = 0;
+  virtual bool removeIfOrphaned(const org::apache::nifi::minifi::utils::debug_shared_ptr<T> &streamId) = 0;
 
-  virtual uint32_t getStreamCount(const std::shared_ptr<T> &streamId) = 0;
+  virtual uint32_t getStreamCount(const org::apache::nifi::minifi::utils::debug_shared_ptr<T> &streamId) = 0;
 
-  virtual void incrementStreamCount(const std::shared_ptr<T> &streamId) = 0;
+  virtual void incrementStreamCount(const org::apache::nifi::minifi::utils::debug_shared_ptr<T> &streamId) = 0;
 
-  virtual void decrementStreamCount(const std::shared_ptr<T> &streamId) = 0;
+  virtual void decrementStreamCount(const org::apache::nifi::minifi::utils::debug_shared_ptr<T> &streamId) = 0;
 
-  virtual bool exists(const std::shared_ptr<T> &streamId) = 0;
+  virtual bool exists(const org::apache::nifi::minifi::utils::debug_shared_ptr<T> &streamId) = 0;
 };
 
 }  // namespace core

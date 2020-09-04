@@ -33,8 +33,8 @@ void LogTestController::setLevel(const std::string name, spdlog::level::level_en
   spdlog::get(adjusted_name)->set_level(level);
 }
 
-TestPlan::TestPlan(std::shared_ptr<core::ContentRepository> content_repo, std::shared_ptr<core::Repository> flow_repo, std::shared_ptr<core::Repository> prov_repo,
-                   const std::shared_ptr<minifi::state::response::FlowVersion> &flow_version, const std::shared_ptr<minifi::Configure> &configuration, const char* state_dir)
+TestPlan::TestPlan(org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_repo, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> prov_repo,
+                   const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::state::response::FlowVersion> &flow_version, const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> &configuration, const char* state_dir)
     : configuration_(configuration),
       content_repo_(content_repo),
       flow_repo_(flow_repo),
@@ -44,9 +44,9 @@ TestPlan::TestPlan(std::shared_ptr<core::ContentRepository> content_repo, std::s
       current_flowfile_(nullptr),
       flow_version_(flow_version),
       logger_(logging::LoggerFactory<TestPlan>::getLogger()) {
-  stream_factory = org::apache::nifi::minifi::io::StreamFactory::getInstance(std::make_shared<minifi::Configure>());
-  controller_services_ = std::make_shared<core::controller::ControllerServiceMap>();
-  controller_services_provider_ = std::make_shared<core::controller::StandardControllerServiceProvider>(controller_services_, nullptr, configuration_);
+  stream_factory = org::apache::nifi::minifi::io::StreamFactory::getInstance(org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>());
+  controller_services_ = org::apache::nifi::minifi::utils::debug_make_shared<core::controller::ControllerServiceMap>();
+  controller_services_provider_ = org::apache::nifi::minifi::utils::debug_make_shared<core::controller::StandardControllerServiceProvider>(controller_services_, nullptr, configuration_);
   /* Inject the default state provider ahead of ProcessContext to make sure we have a unique state directory */
   if (state_dir == nullptr) {
     char state_dir_name_template[] = "/var/tmp/teststate.XXXXXX";
@@ -64,7 +64,7 @@ TestPlan::~TestPlan() {
   controller_services_provider_->clearControllerServices();
 }
 
-std::shared_ptr<core::Processor> TestPlan::addProcessor(const std::shared_ptr<core::Processor> &processor, const std::string &name, const std::initializer_list<core::Relationship>& relationships,
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> TestPlan::addProcessor(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> &processor, const std::string &name, const std::initializer_list<core::Relationship>& relationships,
                                                         bool linkToPrevious) {
   if (finalized) {
     return nullptr;
@@ -85,7 +85,7 @@ std::shared_ptr<core::Processor> TestPlan::addProcessor(const std::shared_ptr<co
   if (!linkToPrevious) {
     termination_ = *(relationships.begin());
   } else {
-    std::shared_ptr<core::Processor> last = processor_queue_.back();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> last = processor_queue_.back();
 
     if (last == nullptr) {
       last = processor;
@@ -95,7 +95,7 @@ std::shared_ptr<core::Processor> TestPlan::addProcessor(const std::shared_ptr<co
     std::stringstream connection_name;
     connection_name << last->getUUIDStr() << "-to-" << processor->getUUIDStr();
     logger_->log_info("Creating %s connection for proc %d", connection_name.str(), processor_queue_.size() + 1);
-    std::shared_ptr<minifi::Connection> connection = std::make_shared<minifi::Connection>(flow_repo_, content_repo_, connection_name.str());
+    org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> connection = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Connection>(flow_repo_, content_repo_, connection_name.str());
 
     for (const auto& relationship : relationships) {
       connection->addRelationship(relationship);
@@ -117,11 +117,11 @@ std::shared_ptr<core::Processor> TestPlan::addProcessor(const std::shared_ptr<co
     relationships_.push_back(connection);
   }
 
-  std::shared_ptr<core::ProcessorNode> node = std::make_shared<core::ProcessorNode>(processor);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessorNode> node = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessorNode>(processor);
 
   processor_nodes_.push_back(node);
 
-  // std::shared_ptr<core::ProcessContext> context = std::make_shared<core::ProcessContext>(node, controller_services_provider_, prov_repo_, flow_repo_, configuration_, content_repo_);
+  // org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> context = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessContext>(node, controller_services_provider_, prov_repo_, flow_repo_, configuration_, content_repo_);
 
   auto contextBuilder = core::ClassLoader::getDefaultClassLoader().instantiate<core::ProcessContextBuilder>("ProcessContextBuilder");
 
@@ -136,7 +136,7 @@ std::shared_ptr<core::Processor> TestPlan::addProcessor(const std::shared_ptr<co
   return processor;
 }
 
-std::shared_ptr<core::Processor> TestPlan::addProcessor(const std::string &processor_name, utils::Identifier& uuid, const std::string &name,
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> TestPlan::addProcessor(const std::string &processor_name, utils::Identifier& uuid, const std::string &name,
                                                         const std::initializer_list<core::Relationship>& relationships, bool linkToPrevious) {
   if (finalized) {
     return nullptr;
@@ -147,14 +147,14 @@ std::shared_ptr<core::Processor> TestPlan::addProcessor(const std::string &proce
   if (nullptr == ptr) {
     throw std::exception();
   }
-  std::shared_ptr<core::Processor> processor = std::static_pointer_cast<core::Processor>(ptr);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor = static_pointer_cast<core::Processor>(ptr);
 
   processor->setName(name);
 
   return addProcessor(processor, name, relationships, linkToPrevious);
 }
 
-std::shared_ptr<core::Processor> TestPlan::addProcessor(const std::string &processor_name, const std::string &name, const std::initializer_list<core::Relationship>& relationships,
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> TestPlan::addProcessor(const std::string &processor_name, const std::string &name, const std::initializer_list<core::Relationship>& relationships,
                                                         bool linkToPrevious) {
   if (finalized) {
     return nullptr;
@@ -168,10 +168,10 @@ std::shared_ptr<core::Processor> TestPlan::addProcessor(const std::string &proce
   return addProcessor(processor_name, uuid, name, relationships, linkToPrevious);
 }
 
-std::shared_ptr<minifi::Connection> TestPlan::addConnection(const std::shared_ptr<core::Processor>& source_proc, const core::Relationship& source_relationship, const std::shared_ptr<core::Processor>& destination_proc) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> TestPlan::addConnection(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor>& source_proc, const core::Relationship& source_relationship, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor>& destination_proc) {
   std::stringstream connection_name;
   connection_name << source_proc->getUUIDStr() << "-to-" << destination_proc->getUUIDStr();
-  std::shared_ptr<minifi::Connection> connection = std::make_shared<minifi::Connection>(flow_repo_, content_repo_, connection_name.str());
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> connection = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Connection>(flow_repo_, content_repo_, connection_name.str());
 
   connection->addRelationship(source_relationship);
 
@@ -192,7 +192,7 @@ std::shared_ptr<minifi::Connection> TestPlan::addConnection(const std::shared_pt
   return connection;
 }
 
-std::shared_ptr<core::controller::ControllerServiceNode> TestPlan::addController(const std::string &controller_name, const std::string &name) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> TestPlan::addController(const std::string &controller_name, const std::string &name) {
   if (finalized) {
     return nullptr;
   }
@@ -202,7 +202,7 @@ std::shared_ptr<core::controller::ControllerServiceNode> TestPlan::addController
 
   utils::IdGenerator::getIdGenerator()->generate(uuid);
 
-  std::shared_ptr<core::controller::ControllerServiceNode> controller_service_node =
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> controller_service_node =
       controller_services_provider_->createControllerService(controller_name, controller_name, name, true /*firstTimeAdded*/);
   if (controller_service_node == nullptr) {
     return nullptr;
@@ -217,7 +217,7 @@ std::shared_ptr<core::controller::ControllerServiceNode> TestPlan::addController
   return controller_service_node;
 }
 
-bool TestPlan::setProperty(const std::shared_ptr<core::Processor> proc, const std::string &prop, const std::string &value, bool dynamic) {
+bool TestPlan::setProperty(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> proc, const std::string &prop, const std::string &value, bool dynamic) {
   std::lock_guard<std::recursive_mutex> guard(mutex);
   size_t i = 0;
   logger_->log_info("Attempting to set property %s %s for %s", prop, value, proc->getName());
@@ -238,7 +238,7 @@ bool TestPlan::setProperty(const std::shared_ptr<core::Processor> proc, const st
   }
 }
 
-bool TestPlan::setProperty(const std::shared_ptr<core::controller::ControllerServiceNode> controller_service_node, const std::string &prop, const std::string &value, bool dynamic /*= false*/) {
+bool TestPlan::setProperty(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> controller_service_node, const std::string &prop, const std::string &value, bool dynamic /*= false*/) {
   if (dynamic) {
     controller_service_node->setDynamicProperty(prop, value);
     return controller_service_node->getControllerServiceImplementation()->setDynamicProperty(prop, value);
@@ -262,22 +262,22 @@ void TestPlan::reset(bool reschedule) {
   }
 }
 
-bool TestPlan::runNextProcessor(std::function<void(const std::shared_ptr<core::ProcessContext>, const std::shared_ptr<core::ProcessSession>)> verify) {
+bool TestPlan::runNextProcessor(std::function<void(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession>)> verify) {
   if (!finalized) {
     finalize();
   }
   logger_->log_info("Running next processor %d, processor_queue_.size %d, processor_contexts_.size %d", location, processor_queue_.size(), processor_contexts_.size());
   std::lock_guard<std::recursive_mutex> guard(mutex);
   location++;
-  std::shared_ptr<core::Processor> processor = processor_queue_.at(location);
-  std::shared_ptr<core::ProcessContext> context = processor_contexts_.at(location);
-  std::shared_ptr<core::ProcessSessionFactory> factory = std::make_shared<core::ProcessSessionFactory>(context);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor = processor_queue_.at(location);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> context = processor_contexts_.at(location);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> factory = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessSessionFactory>(context);
   factories_.push_back(factory);
   if (std::find(configured_processors_.begin(), configured_processors_.end(), processor) == configured_processors_.end()) {
     processor->onSchedule(context, factory);
     configured_processors_.push_back(processor);
   }
-  std::shared_ptr<core::ProcessSession> current_session = std::make_shared<core::ProcessSession>(context);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> current_session = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessSession>(context);
   process_sessions_.push_back(current_session);
   current_flowfile_ = nullptr;
   processor->incrementActiveTasks();
@@ -292,16 +292,16 @@ bool TestPlan::runNextProcessor(std::function<void(const std::shared_ptr<core::P
   return gsl::narrow<size_t>(location + 1) < processor_queue_.size();
 }
 
-bool TestPlan::runCurrentProcessor(std::function<void(const std::shared_ptr<core::ProcessContext>, const std::shared_ptr<core::ProcessSession>)> verify) {
+bool TestPlan::runCurrentProcessor(std::function<void(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession>)> verify) {
   if (!finalized) {
     finalize();
   }
   logger_->log_info("Rerunning current processor %d, processor_queue_.size %d, processor_contexts_.size %d", location, processor_queue_.size(), processor_contexts_.size());
   std::lock_guard<std::recursive_mutex> guard(mutex);
 
-  std::shared_ptr<core::Processor> processor = processor_queue_.at(location);
-  std::shared_ptr<core::ProcessContext> context = processor_contexts_.at(location);
-  std::shared_ptr<core::ProcessSession> current_session = std::make_shared<core::ProcessSession>(context);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor = processor_queue_.at(location);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> context = processor_contexts_.at(location);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> current_session = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessSession>(context);
   process_sessions_.push_back(current_session);
   current_flowfile_ = nullptr;
   processor->incrementActiveTasks();
@@ -316,11 +316,11 @@ bool TestPlan::runCurrentProcessor(std::function<void(const std::shared_ptr<core
   return gsl::narrow<size_t>(location + 1) < processor_queue_.size();
 }
 
-std::set<std::shared_ptr<provenance::ProvenanceEventRecord>> TestPlan::getProvenanceRecords() {
+std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<provenance::ProvenanceEventRecord>> TestPlan::getProvenanceRecords() {
   return process_sessions_.at(location)->getProvenanceReporter()->getEvents();
 }
 
-std::shared_ptr<core::FlowFile> TestPlan::getCurrentFlowFile() {
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> TestPlan::getCurrentFlowFile() {
   if (current_flowfile_ == nullptr) {
     current_flowfile_ = process_sessions_.at(location)->get();
   }
@@ -328,15 +328,15 @@ std::shared_ptr<core::FlowFile> TestPlan::getCurrentFlowFile() {
 }
 
 
-std::shared_ptr<core::ProcessContext> TestPlan::getCurrentContext() {
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> TestPlan::getCurrentContext() {
   return processor_contexts_.at(location);
 }
 
-std::shared_ptr<minifi::Connection> TestPlan::buildFinalConnection(std::shared_ptr<core::Processor> processor, bool setDest) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> TestPlan::buildFinalConnection(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor, bool setDest) {
   std::stringstream connection_name;
-  std::shared_ptr<core::Processor> last = processor;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> last = processor;
   connection_name << last->getUUIDStr() << "-to-" << processor->getUUIDStr();
-  std::shared_ptr<minifi::Connection> connection = std::make_shared<minifi::Connection>(flow_repo_, content_repo_, connection_name.str());
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> connection = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Connection>(flow_repo_, content_repo_, connection_name.str());
   connection->addRelationship(termination_);
 
   // link the connections so that we can test results at the end for this

@@ -82,7 +82,7 @@ void ExecuteProcess::initialize() {
 
 void ExecuteProcess::onTrigger(core::ProcessContext *context, core::ProcessSession *session) {
   std::string value;
-  std::shared_ptr<core::FlowFile> flow_file;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow_file;
   if (context->getProperty(Command, value, flow_file)) {
     this->_command = value;
   }
@@ -165,7 +165,7 @@ void ExecuteProcess::onTrigger(core::ProcessContext *context, core::ProcessSessi
               break;
             logger_->log_debug("Execute Command Respond %d", numRead);
             ExecuteProcess::WriteCallback callback(buffer, numRead);
-            std::shared_ptr<FlowFileRecord> flowFile = std::static_pointer_cast<FlowFileRecord>(session->create());
+            org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> flowFile = static_pointer_cast<FlowFileRecord>(session->create());
             if (!flowFile)
               continue;
             flowFile->addAttribute("command", _command);
@@ -178,7 +178,7 @@ void ExecuteProcess::onTrigger(core::ProcessContext *context, core::ProcessSessi
           char buffer[4096];
           char *bufPtr = buffer;
           int totalRead = 0;
-          std::shared_ptr<FlowFileRecord> flowFile = nullptr;
+          org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> flowFile = nullptr;
           while (1) {
             int numRead = read(_pipefd[0], bufPtr, (sizeof(buffer) - totalRead));
             if (numRead <= 0) {
@@ -187,7 +187,7 @@ void ExecuteProcess::onTrigger(core::ProcessContext *context, core::ProcessSessi
                 // child exits and close the pipe
                 ExecuteProcess::WriteCallback callback(buffer, totalRead);
                 if (!flowFile) {
-                  flowFile = std::static_pointer_cast<FlowFileRecord>(session->create());
+                  flowFile = static_pointer_cast<FlowFileRecord>(session->create());
                   if (!flowFile)
                     break;
                   flowFile->addAttribute("command", _command);
@@ -205,7 +205,7 @@ void ExecuteProcess::onTrigger(core::ProcessContext *context, core::ProcessSessi
                 logger_->log_debug("Execute Command Max Respond %d", sizeof(buffer));
                 ExecuteProcess::WriteCallback callback(buffer, sizeof(buffer));
                 if (!flowFile) {
-                  flowFile = std::static_pointer_cast<FlowFileRecord>(session->create());
+                  flowFile = static_pointer_cast<FlowFileRecord>(session->create());
                   if (!flowFile)
                     continue;
                   flowFile->addAttribute("command", _command);

@@ -45,9 +45,9 @@ TEST_CASE("GPSD Create", "[gpsdtest1]") {
 
   LogTestController::getInstance().setTrace<minifi::processors::GetGPS>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
 
-  std::shared_ptr<core::Processor> getfile = plan->addProcessor("GetGPS", "GetGPS");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> getfile = plan->addProcessor("GetGPS", "GetGPS");
 
   plan->addProcessor("LogAttribute", "logattribute", core::Relationship("success", "description"), true);
 
@@ -57,7 +57,7 @@ TEST_CASE("GPSD Create", "[gpsdtest1]") {
   plan->setProperty(getfile, org::apache::nifi::minifi::processors::GetFile::Directory.getName(), dir);
   testController.runSession(plan, false);
   auto records = plan->getProvenanceRecords();
-  std::shared_ptr<core::FlowFile> record = plan->getCurrentFlowFile();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> record = plan->getCurrentFlowFile();
   REQUIRE(record == nullptr);
   REQUIRE(records.size() == 0);
 

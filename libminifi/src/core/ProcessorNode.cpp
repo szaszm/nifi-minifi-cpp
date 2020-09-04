@@ -24,7 +24,7 @@ namespace nifi {
 namespace minifi {
 namespace core {
 
-ProcessorNode::ProcessorNode(const std::shared_ptr<Connectable> &processor)
+ProcessorNode::ProcessorNode(const org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable> &processor)
     : processor_(processor),
       Connectable(processor->getName()),
       ConfigurableComponent() {

@@ -207,9 +207,9 @@ class PutSFTPTestsFixture {
   char *dst_dir;
   std::unique_ptr<SFTPTestServer> sftp_server;
   TestController testController;
-  std::shared_ptr<TestPlan> plan;
-  std::shared_ptr<core::Processor> get_file;
-  std::shared_ptr<core::Processor> put;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> get_file;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> put;
 };
 
 TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP put one file", "[PutSFTP][basic]") {

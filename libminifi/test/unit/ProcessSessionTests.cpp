@@ -36,9 +36,9 @@ class Fixture {
 
  private:
   TestController test_controller_;
-  std::shared_ptr<TestPlan> test_plan_;
-  std::shared_ptr<core::Processor> dummy_processor_;
-  std::shared_ptr<core::ProcessContext> context_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> test_plan_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> dummy_processor_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> context_;
   std::unique_ptr<core::ProcessSession> process_session_;
 };
 

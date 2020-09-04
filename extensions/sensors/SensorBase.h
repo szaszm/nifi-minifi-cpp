@@ -59,9 +59,9 @@ class SensorBase : public core::Processor {
   static core::Relationship Success;
   // Supported Properties
 
-  virtual void onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) override;
+  virtual void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) override;
   virtual void initialize() override;
-  virtual void onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
+  virtual void onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
 
   class WriteCallback : public OutputStreamCallback {
      public:
@@ -71,7 +71,7 @@ class SensorBase : public core::Processor {
       }
       char *_data;
       uint64_t _dataSize;
-      int64_t process(std::shared_ptr<io::BaseStream> stream) {
+      int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
         int64_t ret = 0;
         if (_data && _dataSize > 0)
           ret = stream->write(reinterpret_cast<uint8_t*>(_data), _dataSize);

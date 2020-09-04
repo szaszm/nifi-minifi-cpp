@@ -58,8 +58,8 @@ public:
 
   virtual std::string getMergedContentType() = 0;
   // merge the flows in the bin
-  virtual std::shared_ptr<core::FlowFile> merge(core::ProcessContext *context, core::ProcessSession *session,
-      std::deque<std::shared_ptr<core::FlowFile>> &flows, std::string &header, std::string &footer, std::string &demarcator) = 0;
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> merge(core::ProcessContext *context, core::ProcessSession *session,
+      std::deque<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> &flows, std::string &header, std::string &footer, std::string &demarcator) = 0;
 };
 
 // BinaryConcatenationMerge Class
@@ -69,16 +69,16 @@ public:
   std::string getMergedContentType() {
     return mimeType;
   }
-  std::shared_ptr<core::FlowFile> merge(core::ProcessContext *context, core::ProcessSession *session,
-          std::deque<std::shared_ptr<core::FlowFile>> &flows, std::string &header, std::string &footer, std::string &demarcator);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> merge(core::ProcessContext *context, core::ProcessSession *session,
+          std::deque<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> &flows, std::string &header, std::string &footer, std::string &demarcator);
   // Nest Callback Class for read stream
   class ReadCallback : public InputStreamCallback {
    public:
-    ReadCallback(uint64_t size, std::shared_ptr<io::BaseStream> stream)
+    ReadCallback(uint64_t size, org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream)
         : buffer_size_(size), stream_(stream) {
     }
     ~ReadCallback() = default;
-    int64_t process(std::shared_ptr<io::BaseStream> stream) {
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
       uint8_t buffer[4096U];
       int64_t ret = 0;
       uint64_t read_size = 0;
@@ -94,20 +94,20 @@ public:
       return ret;
     }
     uint64_t buffer_size_;
-    std::shared_ptr<io::BaseStream> stream_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream_;
   };
   // Nest Callback Class for write stream
   class WriteCallback: public OutputStreamCallback {
   public:
-    WriteCallback(std::string &header, std::string &footer, std::string &demarcator, std::deque<std::shared_ptr<core::FlowFile>> &flows, core::ProcessSession *session) :
+    WriteCallback(std::string &header, std::string &footer, std::string &demarcator, std::deque<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> &flows, core::ProcessSession *session) :
       header_(header), footer_(footer), demarcator_(demarcator), flows_(flows), session_(session) {
     }
     std::string &header_;
     std::string &footer_;
     std::string &demarcator_;
-    std::deque<std::shared_ptr<core::FlowFile>> &flows_;
+    std::deque<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> &flows_;
     core::ProcessSession *session_;
-    int64_t process(std::shared_ptr<io::BaseStream> stream) {
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
       int64_t ret = 0;
       if (!header_.empty()) {
         int64_t len = stream->write(reinterpret_cast<uint8_t*>(const_cast<char*>(header_.data())), header_.size());
@@ -150,7 +150,7 @@ public:
         buffer_size_(size), arch_(arch), entry_(entry) {
     }
     ~ReadCallback() = default;
-    int64_t process(std::shared_ptr<io::BaseStream> stream) {
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
       uint8_t buffer[4096U];
       int64_t ret = 0;
       uint64_t read_size = 0;
@@ -174,7 +174,7 @@ public:
   // Nest Callback Class for write stream
   class WriteCallback: public OutputStreamCallback {
   public:
-    WriteCallback(std::string merge_type, std::deque<std::shared_ptr<core::FlowFile>> &flows, core::ProcessSession *session) :
+    WriteCallback(std::string merge_type, std::deque<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> &flows, core::ProcessSession *session) :
         merge_type_(merge_type), flows_(flows), session_(session),
         logger_(logging::LoggerFactory<ArchiveMerge>::getLogger()) {
       size_ = 0;
@@ -183,9 +183,9 @@ public:
     ~WriteCallback() = default;
 
     std::string merge_type_;
-    std::deque<std::shared_ptr<core::FlowFile>> &flows_;
+    std::deque<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> &flows_;
     core::ProcessSession *session_;
-    std::shared_ptr<io::BaseStream> stream_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream_;
     int64_t size_;
     std::shared_ptr<logging::Logger> logger_;
 
@@ -197,7 +197,7 @@ public:
       return ret;
     }
 
-    int64_t process(std::shared_ptr<io::BaseStream> stream) {
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
       struct archive *arch;
 
       arch = archive_write_new();
@@ -247,7 +247,7 @@ public:
 class TarMerge: public ArchiveMerge, public MergeBin {
 public:
   static const char *mimeType;
-  std::shared_ptr<core::FlowFile> merge(core::ProcessContext *context, core::ProcessSession *session, std::deque<std::shared_ptr<core::FlowFile>> &flows, std::string &header, std::string &footer,
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> merge(core::ProcessContext *context, core::ProcessSession *session, std::deque<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> &flows, std::string &header, std::string &footer,
         std::string &demarcator);
   std::string getMergedContentType() {
     return mimeType;
@@ -258,7 +258,7 @@ public:
 class ZipMerge: public ArchiveMerge, public MergeBin {
 public:
   static const char *mimeType;
-  std::shared_ptr<core::FlowFile> merge(core::ProcessContext *context, core::ProcessSession *session, std::deque<std::shared_ptr<core::FlowFile>> &flows, std::string &header, std::string &footer,
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> merge(core::ProcessContext *context, core::ProcessSession *session, std::deque<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> &flows, std::string &header, std::string &footer,
         std::string &demarcator);
   std::string getMergedContentType() {
     return mimeType;
@@ -267,31 +267,31 @@ public:
 
 class AttributeMerger {
 public:
-  explicit AttributeMerger(std::deque<std::shared_ptr<org::apache::nifi::minifi::core::FlowFile>> &flows)
+  explicit AttributeMerger(std::deque<org::apache::nifi::minifi::utils::debug_shared_ptr<org::apache::nifi::minifi::core::FlowFile>> &flows)
     : flows_(flows) {}
-  void mergeAttributes(core::ProcessSession *session, std::shared_ptr<core::FlowFile> &merge_flow);
+  void mergeAttributes(core::ProcessSession *session, org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &merge_flow);
   virtual ~AttributeMerger() = default;
 protected:
   std::map<std::string, std::string> getMergedAttributes();
-  virtual void processFlowFile(const std::shared_ptr<core::FlowFile> &flow_file, std::map<std::string, std::string>& merged_attributes) = 0;
+  virtual void processFlowFile(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow_file, std::map<std::string, std::string>& merged_attributes) = 0;
 
-  const std::deque<std::shared_ptr<core::FlowFile>> &flows_;
+  const std::deque<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> &flows_;
 };
 
 class KeepOnlyCommonAttributesMerger: public AttributeMerger {
 public:
-  explicit KeepOnlyCommonAttributesMerger(std::deque<std::shared_ptr<org::apache::nifi::minifi::core::FlowFile>> &flows)
+  explicit KeepOnlyCommonAttributesMerger(std::deque<org::apache::nifi::minifi::utils::debug_shared_ptr<org::apache::nifi::minifi::core::FlowFile>> &flows)
     : AttributeMerger(flows) {}
 protected:
-  void processFlowFile(const std::shared_ptr<core::FlowFile> &flow_file, std::map<std::string, std::string>& merged_attributes) override;
+  void processFlowFile(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow_file, std::map<std::string, std::string>& merged_attributes) override;
 };
 
 class KeepAllUniqueAttributesMerger: public AttributeMerger {
 public:
-  explicit KeepAllUniqueAttributesMerger(std::deque<std::shared_ptr<org::apache::nifi::minifi::core::FlowFile>> &flows)
+  explicit KeepAllUniqueAttributesMerger(std::deque<org::apache::nifi::minifi::utils::debug_shared_ptr<org::apache::nifi::minifi::core::FlowFile>> &flows)
     : AttributeMerger(flows) {}
 protected:
-  void processFlowFile(const std::shared_ptr<core::FlowFile> &flow_file, std::map<std::string, std::string>& merged_attributes) override;
+  void processFlowFile(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow_file, std::map<std::string, std::string>& merged_attributes) override;
 
 private:
   std::vector<std::string> removed_attributes_;
@@ -347,7 +347,7 @@ public:
 
  protected:
   // Returns a group ID representing a bin. This allows flow files to be binned into like groups
-  virtual std::string getGroupId(core::ProcessContext *context, std::shared_ptr<core::FlowFile> flow);
+  virtual std::string getGroupId(core::ProcessContext *context, org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow);
   // check whether the defragment bin is validate
   bool checkDefragment(std::unique_ptr<Bin> &bin);
 

@@ -45,7 +45,7 @@ class ContentRepository : public StreamManager<minifi::ResourceClaim> {
   /**
    * initialize this content repository using the provided configuration.
    */
-  virtual bool initialize(const std::shared_ptr<Configure> &configure) = 0;
+  virtual bool initialize(const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure) = 0;
 
   virtual std::string getStoragePath() const {
     return directory_;
@@ -59,7 +59,7 @@ class ContentRepository : public StreamManager<minifi::ResourceClaim> {
   /**
    * Removes an item if it was orphan
    */
-  virtual bool removeIfOrphaned(const std::shared_ptr<minifi::ResourceClaim> &streamId) {
+  virtual bool removeIfOrphaned(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> &streamId) {
     std::lock_guard<std::mutex> lock(count_map_mutex_);
     const std::string str = streamId->getContentFullPath();
     auto count = count_map_.find(str);
@@ -77,7 +77,7 @@ class ContentRepository : public StreamManager<minifi::ResourceClaim> {
     }
   }
 
-  virtual uint32_t getStreamCount(const std::shared_ptr<minifi::ResourceClaim> &streamId) {
+  virtual uint32_t getStreamCount(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> &streamId) {
     std::lock_guard<std::mutex> lock(count_map_mutex_);
     auto cnt = count_map_.find(streamId->getContentFullPath());
     if (cnt != count_map_.end()) {
@@ -87,7 +87,7 @@ class ContentRepository : public StreamManager<minifi::ResourceClaim> {
     }
   }
 
-  virtual void incrementStreamCount(const std::shared_ptr<minifi::ResourceClaim> &streamId) {
+  virtual void incrementStreamCount(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> &streamId) {
     std::lock_guard<std::mutex> lock(count_map_mutex_);
     const std::string str = streamId->getContentFullPath();
     auto count = count_map_.find(str);
@@ -98,7 +98,7 @@ class ContentRepository : public StreamManager<minifi::ResourceClaim> {
     }
   }
 
-  virtual void decrementStreamCount(const std::shared_ptr<minifi::ResourceClaim> &streamId) {
+  virtual void decrementStreamCount(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> &streamId) {
     std::lock_guard<std::mutex> lock(count_map_mutex_);
     const std::string str = streamId->getContentFullPath();
     auto count = count_map_.find(str);

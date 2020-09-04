@@ -29,7 +29,7 @@
 
 
 TEST_CASE("TestTDAgent", "[test1]") {
-  std::shared_ptr<core::Processor> procA = std::make_shared<minifi::processors::GetFile>("getFile");
-  std::shared_ptr<core::Processor> procB = std::make_shared<minifi::processors::LogAttribute>("logAttribute");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> procA = utils::debug_make_shared<minifi::processors::GetFile>("getFile");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> procB = utils::debug_make_shared<minifi::processors::LogAttribute>("logAttribute");
   // agent.run()
 }

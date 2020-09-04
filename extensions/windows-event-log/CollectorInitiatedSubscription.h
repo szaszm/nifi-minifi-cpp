@@ -58,18 +58,18 @@ public:
   * @param sessionFactory process session factory that is used when creating
   * ProcessSession objects.
   */
-  void onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
+  void onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
   //! OnTrigger method, implemented by NiFi CollectorInitiatedSubscription
-  void onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) override;
+  void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) override;
   //! Initialize, overwrite by NiFi CollectorInitiatedSubscription
   void initialize(void) override;
   void notifyStop() override;
 
 protected:
-  bool createSubscription(const std::shared_ptr<core::ProcessContext> &context);
-  bool subscribe(const std::shared_ptr<core::ProcessContext> &context);
+  bool createSubscription(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context);
+  bool subscribe(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context);
   void unsubscribe();
-  int processQueue(const std::shared_ptr<core::ProcessSession> &session);
+  int processQueue(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session);
   void logError(int line, const std::string& error);
   void logWindowsError(int line, const std::string& info);
   void logInvalidSubscriptionPropertyType(int line, DWORD type);
@@ -83,7 +83,7 @@ private:
   std::string computerName_;
   EVT_HANDLE subscriptionHandle_{};
   uint64_t lastActivityTimestamp_{};
-  std::shared_ptr<core::ProcessSessionFactory> sessionFactory_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> sessionFactory_;
   SupportedProperties supportedProperties_;
   SupportedProperty<std::wstring> subscriptionName_;
   SupportedProperty<std::wstring> subscriptionDescription_;

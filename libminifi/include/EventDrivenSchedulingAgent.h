@@ -43,8 +43,8 @@ class EventDrivenSchedulingAgent : public ThreadedSchedulingAgent {
   /*!
    * Create a new event driven scheduling agent.
    */
-  EventDrivenSchedulingAgent(const gsl::not_null<core::controller::ControllerServiceProvider*> controller_service_provider, std::shared_ptr<core::Repository> repo,
-                             std::shared_ptr<core::Repository> flow_repo, std::shared_ptr<core::ContentRepository> content_repo, std::shared_ptr<Configure> configuration,
+  EventDrivenSchedulingAgent(const gsl::not_null<core::controller::ControllerServiceProvider*> controller_service_provider, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> repo,
+                             org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_repo, org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo, org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configuration,
                              utils::ThreadPool<utils::TaskRescheduleInfo> &thread_pool)
       : ThreadedSchedulingAgent(controller_service_provider, repo, flow_repo, content_repo, configuration, thread_pool) {
     int slice = configuration->getInt(Configure::nifi_flow_engine_event_driven_time_slice, DEFAULT_TIME_SLICE_MS);
@@ -54,11 +54,11 @@ class EventDrivenSchedulingAgent : public ThreadedSchedulingAgent {
     time_slice_ = std::chrono::milliseconds(slice);
   }
 
-  void schedule(std::shared_ptr<core::Processor> processor) override;
+  void schedule(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor) override;
 
   // Run function for the thread
-  utils::TaskRescheduleInfo run(const std::shared_ptr<core::Processor> &processor, const std::shared_ptr<core::ProcessContext> &processContext,
-      const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
+  utils::TaskRescheduleInfo run(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> &processor, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &processContext,
+      const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
 
  private:
   // Prevent default copy constructor and assignment operation

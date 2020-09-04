@@ -70,11 +70,11 @@ class KafkaConnection {
 
   bool hasTopic(const std::string &topic) const;
 
-  std::shared_ptr<KafkaTopic> getTopic(const std::string &topic) const;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<KafkaTopic> getTopic(const std::string &topic) const;
 
   KafkaConnectionKey const* getKey() const;
 
-  void putTopic(const std::string &topicName, const std::shared_ptr<KafkaTopic> &topic);
+  void putTopic(const std::string &topicName, const org::apache::nifi::minifi::utils::debug_shared_ptr<KafkaTopic> &topic);
 
   static void logCallback(const rd_kafka_t* rk, int level, const char* /*fac*/, const char* buf);
 
@@ -85,7 +85,7 @@ class KafkaConnection {
 
   KafkaConnectionKey key_;
 
-  std::map<std::string, std::shared_ptr<KafkaTopic>> topics_;
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<KafkaTopic>> topics_;
 
   gsl::owner<rd_kafka_t*> kafka_connection_;
 

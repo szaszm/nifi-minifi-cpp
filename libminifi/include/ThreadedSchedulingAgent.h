@@ -47,9 +47,9 @@ class ThreadedSchedulingAgent : public SchedulingAgent {
   /*!
    * Create a new threaded scheduling agent.
    */
-  ThreadedSchedulingAgent(const gsl::not_null<core::controller::ControllerServiceProvider*> controller_service_provider, std::shared_ptr<core::Repository> repo,
-        std::shared_ptr<core::Repository> flow_repo, std::shared_ptr<core::ContentRepository> content_repo,
-        std::shared_ptr<Configure> configuration,  utils::ThreadPool<utils::TaskRescheduleInfo> &thread_pool)
+  ThreadedSchedulingAgent(const gsl::not_null<core::controller::ControllerServiceProvider*> controller_service_provider, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> repo,
+        org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_repo, org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo,
+        org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configuration,  utils::ThreadPool<utils::TaskRescheduleInfo> &thread_pool)
       : SchedulingAgent(controller_service_provider, repo, flow_repo, content_repo, configuration, thread_pool),
         logger_(logging::LoggerFactory<ThreadedSchedulingAgent>::getLogger()) {
   }
@@ -57,14 +57,14 @@ class ThreadedSchedulingAgent : public SchedulingAgent {
   virtual ~ThreadedSchedulingAgent() = default;
 
   // Run function for the thread
-  virtual utils::TaskRescheduleInfo run(const std::shared_ptr<core::Processor> &processor, const std::shared_ptr<core::ProcessContext> &processContext,
-                       const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) = 0;
+  virtual utils::TaskRescheduleInfo run(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> &processor, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &processContext,
+                       const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) = 0;
 
  public:
   // schedule, overwritten by different DrivenTimerDrivenSchedulingAgent
-  virtual void schedule(std::shared_ptr<core::Processor> processor);
+  virtual void schedule(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor);
   // unschedule, overwritten by different DrivenTimerDrivenSchedulingAgent
-  virtual void unschedule(std::shared_ptr<core::Processor> processor);
+  virtual void unschedule(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor);
 
   virtual void stop();
 

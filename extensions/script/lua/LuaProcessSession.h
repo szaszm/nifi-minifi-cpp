@@ -34,14 +34,14 @@ namespace lua {
 
 class LuaProcessSession {
  public:
-  explicit LuaProcessSession(std::shared_ptr<core::ProcessSession> session);
+  explicit LuaProcessSession(org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> session);
 
-  std::shared_ptr<script::ScriptFlowFile> get();
-  std::shared_ptr<script::ScriptFlowFile> create();
-  std::shared_ptr<script::ScriptFlowFile> create(const std::shared_ptr<script::ScriptFlowFile> &flow_file);
-  void transfer(const std::shared_ptr<script::ScriptFlowFile> &flow_file, core::Relationship relationship);
-  void read(const std::shared_ptr<script::ScriptFlowFile> &script_flow_file, sol::table input_stream_callback);
-  void write(const std::shared_ptr<script::ScriptFlowFile> &flow_file, sol::table output_stream_callback);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptFlowFile> get();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptFlowFile> create();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptFlowFile> create(const org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptFlowFile> &flow_file);
+  void transfer(const org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptFlowFile> &flow_file, core::Relationship relationship);
+  void read(const org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptFlowFile> &script_flow_file, sol::table input_stream_callback);
+  void write(const org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptFlowFile> &flow_file, sol::table output_stream_callback);
 
   /**
    * Sometimes we want to release shared pointers to core resources when
@@ -59,8 +59,8 @@ class LuaProcessSession {
       lua_callback_ = input_stream_callback;
     }
 
-    int64_t process(std::shared_ptr<io::BaseStream> stream) override {
-      auto lua_stream = std::make_shared<LuaBaseStream>(stream);
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) override {
+      auto lua_stream = utils::debug_make_shared<LuaBaseStream>(stream);
       sol::function callback = lua_callback_["process"];
       return callback(lua_callback_, lua_stream);
     }
@@ -75,8 +75,8 @@ class LuaProcessSession {
       lua_callback_ = output_stream_callback;
     }
 
-    int64_t process(std::shared_ptr<io::BaseStream> stream) override {
-      auto lua_stream = std::make_shared<LuaBaseStream>(stream);
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) override {
+      auto lua_stream = utils::debug_make_shared<LuaBaseStream>(stream);
       sol::function callback = lua_callback_["process"];
       return callback(lua_callback_, lua_stream);
     }
@@ -86,8 +86,8 @@ class LuaProcessSession {
   };
 
  private:
-  std::vector<std::shared_ptr<script::ScriptFlowFile>> flow_files_;
-  std::shared_ptr<core::ProcessSession> session_;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptFlowFile>> flow_files_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> session_;
 };
 
 } /* namespace lua */

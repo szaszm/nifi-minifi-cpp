@@ -79,7 +79,7 @@ bool KafkaConnection::hasTopic(const std::string &topic) const {
   return topics_.count(topic);
 }
 
-std::shared_ptr<KafkaTopic> KafkaConnection::getTopic(const std::string &topic) const {
+org::apache::nifi::minifi::utils::debug_shared_ptr<KafkaTopic> KafkaConnection::getTopic(const std::string &topic) const {
   auto topicObj = topics_.find(topic);
   if (topicObj != topics_.end()) {
     return topicObj->second;
@@ -91,7 +91,7 @@ KafkaConnectionKey const* KafkaConnection::getKey() const {
   return &key_;
 }
 
-void KafkaConnection::putTopic(const std::string &topicName, const std::shared_ptr<KafkaTopic> &topic) {
+void KafkaConnection::putTopic(const std::string &topicName, const org::apache::nifi::minifi::utils::debug_shared_ptr<KafkaTopic> &topic) {
   topics_[topicName] = topic;
 }
 

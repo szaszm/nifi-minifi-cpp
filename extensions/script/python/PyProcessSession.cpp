@@ -46,7 +46,7 @@ std::shared_ptr<script::ScriptFlowFile> PyProcessSession::get() {
     return nullptr;
   }
 
-  auto result = std::make_shared<script::ScriptFlowFile>(flow_file);
+  auto result = utils::debug_make_shared<script::ScriptFlowFile>(flow_file);
   flow_files_.push_back(result);
 
   return result;
@@ -104,7 +104,7 @@ std::shared_ptr<script::ScriptFlowFile> PyProcessSession::create() {
     throw std::runtime_error("Access of ProcessSession after it has been released");
   }
 
-  auto result = std::make_shared<script::ScriptFlowFile>(session_->create());
+  auto result = utils::debug_make_shared<script::ScriptFlowFile>(session_->create());
   flow_files_.push_back(result);
   return result;
 }
@@ -117,9 +117,9 @@ std::shared_ptr<script::ScriptFlowFile> PyProcessSession::create(std::shared_ptr
   std::shared_ptr<script::ScriptFlowFile> result;
 
   if (flow_file == nullptr) {
-    result = std::make_shared<script::ScriptFlowFile>(session_->create());
+    result = utils::debug_make_shared<script::ScriptFlowFile>(session_->create());
   } else {
-    result = std::make_shared<script::ScriptFlowFile>(session_->create(flow_file->getFlowFile()));
+    result = utils::debug_make_shared<script::ScriptFlowFile>(session_->create(flow_file->getFlowFile()));
   }
 
   flow_files_.push_back(result);

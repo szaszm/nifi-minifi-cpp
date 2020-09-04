@@ -69,9 +69,9 @@ class PutOPCProcessor : public BaseOPCProcessor {
     logger_ = logging::LoggerFactory<PutOPCProcessor>::getLogger();
   }
 
-  virtual void onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &factory) override;
+  virtual void onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &factory) override;
 
-  virtual void onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) override;
+  virtual void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) override;
 
   virtual void initialize(void) override;
 
@@ -80,7 +80,7 @@ class PutOPCProcessor : public BaseOPCProcessor {
   class ReadCallback : public InputStreamCallback {
   public:
     ReadCallback(std::shared_ptr<logging::Logger> logger) : logger_(logger) {}
-    int64_t process(std::shared_ptr<io::BaseStream> stream) override;
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) override;
     const std::vector<uint8_t>& getContent() const { return buf_; }
 
   private:

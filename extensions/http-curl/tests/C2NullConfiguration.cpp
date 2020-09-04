@@ -64,11 +64,11 @@ public:
         "Class is RESTSender"));
   }
 
-  void queryRootProcessGroup(std::shared_ptr<core::ProcessGroup> pg) override {
-    std::shared_ptr<core::Processor> proc = pg->findProcessor("invoke");
+  void queryRootProcessGroup(org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessGroup> pg) override {
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> proc = pg->findProcessor("invoke");
     assert(proc != nullptr);
 
-    std::shared_ptr<minifi::processors::InvokeHTTP> inv = std::dynamic_pointer_cast<minifi::processors::InvokeHTTP>(proc);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::processors::InvokeHTTP> inv = dynamic_pointer_cast<minifi::processors::InvokeHTTP>(proc);
 
     assert(inv != nullptr);
     std::string url;

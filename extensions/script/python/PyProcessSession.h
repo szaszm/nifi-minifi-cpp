@@ -64,8 +64,8 @@ class PyProcessSession {
       py_callback_ = input_stream_callback;
     }
 
-    int64_t process(std::shared_ptr<io::BaseStream> stream) override {
-      auto py_stream = std::make_shared<PyBaseStream>(stream);
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) override {
+      auto py_stream = utils::debug_make_shared<PyBaseStream>(stream);
       return py_callback_.attr("process")(py_stream).cast<int64_t>();
     }
 
@@ -79,8 +79,8 @@ class PyProcessSession {
       py_callback_ = output_stream_callback;
     }
 
-    int64_t process(std::shared_ptr<io::BaseStream> stream) override {
-      auto py_stream = std::make_shared<PyBaseStream>(stream);
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) override {
+      auto py_stream = utils::debug_make_shared<PyBaseStream>(stream);
       return py_callback_.attr("process")(py_stream).cast<int64_t>();
     }
 
@@ -89,8 +89,8 @@ class PyProcessSession {
   };
 
  private:
-  std::vector<std::shared_ptr<script::ScriptFlowFile>> flow_files_;
-  std::shared_ptr<core::ProcessSession> session_;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptFlowFile>> flow_files_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> session_;
 };
 
 } /* namespace python */

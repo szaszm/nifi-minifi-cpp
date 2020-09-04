@@ -183,9 +183,9 @@ class StateMonitor : public StateController {
     return controller_running_;
   }
 
-  virtual std::vector<std::shared_ptr<StateController>> getComponents(const std::string &name) = 0;
+  virtual std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<StateController>> getComponents(const std::string &name) = 0;
 
-  virtual std::vector<std::shared_ptr<StateController>> getAllComponents() = 0;
+  virtual std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<StateController>> getAllComponents() = 0;
   /**
    * Operational controllers
    */
@@ -212,7 +212,7 @@ class StateMonitor : public StateController {
    * Apply an update that the agent must decode. This is useful for certain operations
    * that can't be encapsulated within these definitions.
    */
-  virtual int16_t applyUpdate(const std::string &source, const std::shared_ptr<Update> &updateController) = 0;
+  virtual int16_t applyUpdate(const std::string &source, const org::apache::nifi::minifi::utils::debug_shared_ptr<Update> &updateController) = 0;
 
   /**
    * Returns uptime for this module.

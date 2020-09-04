@@ -88,9 +88,9 @@ namespace processors {
     return true;
   }
 
-  virtual void onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) override;
+  virtual void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) override;
   virtual void initialize() override;
-  virtual void onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
+  virtual void onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
 
   class ReadCallback : public InputStreamCallback {
    public:
@@ -98,7 +98,7 @@ namespace processors {
         utils::SFTPClient& client,
         const std::string& conflict_resolution);
     ~ReadCallback();
-    virtual int64_t process(std::shared_ptr<io::BaseStream> stream) override;
+    virtual int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) override;
 
    private:
     std::shared_ptr<logging::Logger> logger_;
@@ -116,7 +116,7 @@ namespace processors {
   bool reject_zero_byte_;
   bool dot_rename_;
 
-  bool processOne(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session);
+  bool processOne(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session);
 };
 
 REGISTER_RESOURCE(PutSFTP, "Sends FlowFiles to an SFTP Server")

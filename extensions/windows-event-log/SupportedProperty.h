@@ -33,7 +33,7 @@ namespace minifi {
 namespace processors {
 
 struct ISupportedProperty {
-  void virtual Init(const std::shared_ptr<core::ProcessContext>& context) = 0;
+  void virtual Init(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>& context) = 0;
 };
 
 class SupportedProperties {
@@ -41,7 +41,7 @@ class SupportedProperties {
   std::vector<core::Property*> listProperties_;
 
 public:
-  void init(const std::shared_ptr<core::ProcessContext>& context) {
+  void init(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>& context) {
     for (auto pProp : listISupportedProperty_) {
       pProp->Init(context);
     }
@@ -85,7 +85,7 @@ public:
   SupportedProperty(const Args& ...args): core::Property(args...) {
   }
 
-  void Init(const std::shared_ptr<core::ProcessContext>& context) override {
+  void Init(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>& context) override {
     context->getProperty(getName(), t_);
   }
 
@@ -94,7 +94,7 @@ public:
   }
 };
 
-void SupportedProperty<std::wstring>::Init(const std::shared_ptr<core::ProcessContext>& context) {
+void SupportedProperty<std::wstring>::Init(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>& context) {
   std::string val;
   context->getProperty(getName(), val);
 

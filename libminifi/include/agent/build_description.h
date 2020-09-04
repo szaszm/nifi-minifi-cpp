@@ -132,15 +132,15 @@ class BuildDescription {
         }
         auto obj = core::ClassLoader::getDefaultClassLoader().instantiate(class_name, class_name);
 
-        std::shared_ptr<core::ConfigurableComponent> component = std::dynamic_pointer_cast<core::ConfigurableComponent>(obj);
+        org::apache::nifi::minifi::utils::debug_shared_ptr<core::ConfigurableComponent> component = dynamic_pointer_cast<core::ConfigurableComponent>(obj);
 
         std::string classDescriptionName = clazz;
         utils::StringUtils::replaceAll(classDescriptionName, "::", ".");
         ClassDescription description(classDescriptionName);
         if (nullptr != component) {
-          auto processor = std::dynamic_pointer_cast<core::Processor>(obj);
+          auto processor = dynamic_pointer_cast<core::Processor>(obj);
           bool is_processor = processor != nullptr;
-          bool is_controller_service = LIKELY(is_processor == true) ? false : std::dynamic_pointer_cast<core::controller::ControllerService>(obj) != nullptr;
+          bool is_controller_service = LIKELY(is_processor == true) ? false : dynamic_pointer_cast<core::controller::ControllerService>(obj) != nullptr;
 
           component->initialize();
           description.class_properties_ = component->getProperties();

@@ -47,7 +47,7 @@ class C2CallbackAgent : public c2::C2Agent {
 
  public:
 
-  explicit C2CallbackAgent(core::controller::ControllerServiceProvider* controller, const std::shared_ptr<state::StateMonitor> &updateSink, const std::shared_ptr<Configure> &configure);
+  explicit C2CallbackAgent(core::controller::ControllerServiceProvider* controller, const org::apache::nifi::minifi::utils::debug_shared_ptr<state::StateMonitor> &updateSink, const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure);
 
   virtual ~C2CallbackAgent() = default;
 

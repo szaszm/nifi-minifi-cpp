@@ -111,7 +111,7 @@ void BinFiles::onSchedule(core::ProcessContext *context, core::ProcessSessionFac
   }
 }
 
-void BinFiles::preprocessFlowFile(core::ProcessContext *context, core::ProcessSession *session, std::shared_ptr<core::FlowFile> flow) {
+void BinFiles::preprocessFlowFile(core::ProcessContext *context, core::ProcessSession *session, org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow) {
   // handle backward compatibility with old segment attributes
   std::string value;
   if (!flow->getAttribute(BinFiles::FRAGMENT_COUNT_ATTRIBUTE, value) && flow->getAttribute(BinFiles::SEGMENT_COUNT_ATTRIBUTE, value)) {
@@ -189,7 +189,7 @@ void BinManager::getReadyBin(std::deque<std::unique_ptr<Bin>> &retBins) {
   }
 }
 
-bool BinManager::offer(const std::string &group, std::shared_ptr<core::FlowFile> flow) {
+bool BinManager::offer(const std::string &group, org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow) {
   std::lock_guard < std::mutex > lock(mutex_);
   if (flow->getSize() > maxSize_) {
     // could not be added to a bin -- too large by itself, so create a separate bin for just this guy.
@@ -236,7 +236,7 @@ bool BinManager::offer(const std::string &group, std::shared_ptr<core::FlowFile>
   return true;
 }
 
-void BinFiles::onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
+void BinFiles::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   // Rollback is not viable for this processor!!
   {
     // process resurrected FlowFiles first
@@ -259,7 +259,7 @@ void BinFiles::onTrigger(const std::shared_ptr<core::ProcessContext> &context, c
     }
   }
 
-  std::shared_ptr<FlowFileRecord> flow = std::static_pointer_cast < FlowFileRecord > (session->get());
+  org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> flow = static_pointer_cast < FlowFileRecord > (session->get());
 
   if (flow != nullptr) {
     preprocessFlowFile(context.get(), session.get(), flow);
@@ -307,7 +307,7 @@ void BinFiles::onTrigger(const std::shared_ptr<core::ProcessContext> &context, c
 }
 
 void BinFiles::transferFlowsToFail(core::ProcessContext *context, core::ProcessSession *session, std::unique_ptr<Bin> &bin) {
-  std::deque<std::shared_ptr<core::FlowFile>> &flows = bin->getFlowFile();
+  std::deque<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> &flows = bin->getFlowFile();
   for (auto flow : flows) {
     session->transfer(flow, Failure);
   }
@@ -315,14 +315,14 @@ void BinFiles::transferFlowsToFail(core::ProcessContext *context, core::ProcessS
 }
 
 void BinFiles::addFlowsToSession(core::ProcessContext *context, core::ProcessSession *session, std::unique_ptr<Bin> &bin) {
-  std::deque<std::shared_ptr<core::FlowFile>> &flows = bin->getFlowFile();
+  std::deque<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> &flows = bin->getFlowFile();
   for (auto flow : flows) {
     session->add(flow);
   }
 }
 
-void BinFiles::put(std::shared_ptr<core::Connectable> flow) {
-  auto flowFile = std::dynamic_pointer_cast<core::FlowFile>(flow);
+void BinFiles::put(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable> flow) {
+  auto flowFile = dynamic_pointer_cast<core::FlowFile>(flow);
   if (!flowFile) return;
   if (flowFile->getOriginalConnection()) {
     // onTrigger assumed ownership over a FlowFile
@@ -333,7 +333,7 @@ void BinFiles::put(std::shared_ptr<core::Connectable> flow) {
   file_store_.put(flowFile);
 }
 
-void BinFiles::FlowFileStore::put(std::shared_ptr<core::FlowFile>& flowFile) {
+void BinFiles::FlowFileStore::put(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>& flowFile) {
   {
     std::lock_guard<std::mutex> guard(flow_file_mutex_);
     incoming_files_.emplace(std::move(flowFile));
@@ -341,7 +341,7 @@ void BinFiles::FlowFileStore::put(std::shared_ptr<core::FlowFile>& flowFile) {
   has_new_flow_file_.store(true, std::memory_order_release);
 }
 
-std::unordered_set<std::shared_ptr<core::FlowFile>> BinFiles::FlowFileStore::getNewFlowFiles() {
+std::unordered_set<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> BinFiles::FlowFileStore::getNewFlowFiles() {
   bool hasNewFlowFiles = true;
   if (!has_new_flow_file_.compare_exchange_strong(hasNewFlowFiles, false, std::memory_order_acquire, std::memory_order_relaxed)) {
     return {};
@@ -350,10 +350,10 @@ std::unordered_set<std::shared_ptr<core::FlowFile>> BinFiles::FlowFileStore::get
   return std::move(incoming_files_);
 }
 
-std::set<std::shared_ptr<core::Connectable>> BinFiles::getOutGoingConnections(const std::string &relationship) const {
+std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable>> BinFiles::getOutGoingConnections(const std::string &relationship) const {
   auto result = core::Connectable::getOutGoingConnections(relationship);
   if (relationship == Self.getName()) {
-    result.insert(std::static_pointer_cast<core::Connectable>(std::const_pointer_cast<core::Processor>(shared_from_this())));
+    result.insert(static_pointer_cast<core::Connectable>(const_pointer_cast<core::Processor>(shared_from_this())));
   }
   return result;
 }

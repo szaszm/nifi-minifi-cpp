@@ -26,12 +26,12 @@ namespace nifi {
 namespace minifi {
 namespace core {
 namespace controller {
-std::shared_ptr<core::ProcessGroup> &StandardControllerServiceNode::getProcessGroup() {
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessGroup> &StandardControllerServiceNode::getProcessGroup() {
   std::lock_guard<std::mutex> lock(mutex_);
   return process_group_;
 }
 
-void StandardControllerServiceNode::setProcessGroup(std::shared_ptr<ProcessGroup> &processGroup) {
+void StandardControllerServiceNode::setProcessGroup(org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessGroup> &processGroup) {
   std::lock_guard<std::mutex> lock(mutex_);
   process_group_ = processGroup;
 }
@@ -43,7 +43,7 @@ bool StandardControllerServiceNode::enable() {
   if (getProperty(property.getName(), property)) {
     active = true;
     for (auto linked_service : property.getValues()) {
-      std::shared_ptr<ControllerServiceNode> csNode = provider->getControllerServiceNode(linked_service);
+      org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerServiceNode> csNode = provider->getControllerServiceNode(linked_service);
       if (nullptr != csNode) {
         std::lock_guard<std::mutex> lock(mutex_);
         linked_controller_services_.push_back(csNode);
@@ -51,10 +51,10 @@ bool StandardControllerServiceNode::enable() {
     }
   } else {
   }
-  std::shared_ptr<ControllerService> impl = getControllerServiceImplementation();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerService> impl = getControllerServiceImplementation();
   if (nullptr != impl) {
     std::lock_guard<std::mutex> lock(mutex_);
-    std::vector<std::shared_ptr<ControllerService> > services;
+    std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerService> > services;
     for (auto service : linked_controller_services_) {
       services.push_back(service->getControllerServiceImplementation());
     }

@@ -45,7 +45,7 @@ void reportEvent(const std::string& channel, const char* message, WORD log_level
 
 TEST_CASE("ConsumeWindowsEventLog constructor works", "[create]") {
   TestController test_controller;
-  std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> test_plan = test_controller.createPlan();
 
   REQUIRE_NOTHROW(ConsumeWindowsEventLog processor_one("one"));
 
@@ -63,7 +63,7 @@ TEST_CASE("ConsumeWindowsEventLog properties work with default values", "[create
   TestController test_controller;
   LogTestController::getInstance().setDebug<ConfigurableComponent>();
   LogTestController::getInstance().setTrace<ConsumeWindowsEventLog>();
-  std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> test_plan = test_controller.createPlan();
 
   auto processor = test_plan->addProcessor("ConsumeWindowsEventLog", "cwel");
   test_controller.runSession(test_plan);
@@ -103,7 +103,7 @@ TEST_CASE("ConsumeWindowsEventLog properties work with default values", "[create
 
 TEST_CASE("ConsumeWindowsEventLog onSchedule throws if it cannot create the bookmark", "[create][bookmark]") {
   TestController test_controller;
-  std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> test_plan = test_controller.createPlan();
 
   auto processor = test_plan->addProcessor("ConsumeWindowsEventLog", "cwel");
   test_plan->setProperty(processor, ConsumeWindowsEventLog::Channel.getName(), "NonexistentChannel1234981");
@@ -115,7 +115,7 @@ TEST_CASE("ConsumeWindowsEventLog can consume new events", "[onTrigger]") {
   TestController test_controller;
   LogTestController::getInstance().setDebug<ConsumeWindowsEventLog>();
   LogTestController::getInstance().setDebug<LogAttribute>();
-  std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> test_plan = test_controller.createPlan();
 
   auto cwel_processor = test_plan->addProcessor("ConsumeWindowsEventLog", "cwel");
   test_plan->setProperty(cwel_processor, ConsumeWindowsEventLog::Channel.getName(), APPLICATION_CHANNEL);
@@ -164,7 +164,7 @@ TEST_CASE("ConsumeWindowsEventLog bookmarking works", "[onTrigger]") {
   TestController test_controller;
   LogTestController::getInstance().setDebug<ConsumeWindowsEventLog>();
   LogTestController::getInstance().setDebug<LogAttribute>();
-  std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> test_plan = test_controller.createPlan();
 
   auto cwel_processor = test_plan->addProcessor("ConsumeWindowsEventLog", "cwel");
   test_plan->setProperty(cwel_processor, ConsumeWindowsEventLog::Channel.getName(), APPLICATION_CHANNEL);
@@ -211,7 +211,7 @@ TEST_CASE("ConsumeWindowsEventLog extracts some attributes by default", "[onTrig
   TestController test_controller;
   LogTestController::getInstance().setDebug<ConsumeWindowsEventLog>();
   LogTestController::getInstance().setDebug<LogAttribute>();
-  std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> test_plan = test_controller.createPlan();
 
   auto cwel_processor = test_plan->addProcessor("ConsumeWindowsEventLog", "cwel");
   test_plan->setProperty(cwel_processor, ConsumeWindowsEventLog::Channel.getName(), APPLICATION_CHANNEL);
@@ -260,7 +260,7 @@ void outputFormatSetterTestHelper(const std::string &output_format, int expected
   TestController test_controller;
   LogTestController::getInstance().setDebug<ConsumeWindowsEventLog>();
   LogTestController::getInstance().setDebug<LogAttribute>();
-  std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> test_plan = test_controller.createPlan();
 
   auto cwel_processor = test_plan->addProcessor("ConsumeWindowsEventLog", "cwel");
   test_plan->setProperty(cwel_processor, ConsumeWindowsEventLog::Channel.getName(), APPLICATION_CHANNEL);
@@ -308,7 +308,7 @@ TEST_CASE("ConsumeWindowsEventLog prints events in XML correctly", "[onTrigger]"
   TestController test_controller;
   LogTestController::getInstance().setDebug<ConsumeWindowsEventLog>();
   LogTestController::getInstance().setDebug<LogAttribute>();
-  std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> test_plan = test_controller.createPlan();
 
   auto cwel_processor = test_plan->addProcessor("ConsumeWindowsEventLog", "cwel");
   test_plan->setProperty(cwel_processor, ConsumeWindowsEventLog::Channel.getName(), APPLICATION_CHANNEL);
@@ -350,7 +350,7 @@ namespace {
 void batchCommitSizeTestHelper(int batch_commit_size, int expected_num_commits) {
   TestController test_controller;
   LogTestController::getInstance().setDebug<ConsumeWindowsEventLog>();
-  std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> test_plan = test_controller.createPlan();
 
   auto cwel_processor = test_plan->addProcessor("ConsumeWindowsEventLog", "cwel");
   test_plan->setProperty(cwel_processor, ConsumeWindowsEventLog::Channel.getName(), APPLICATION_CHANNEL);

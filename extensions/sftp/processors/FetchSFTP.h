@@ -73,16 +73,16 @@ class FetchSFTP : public SFTPProcessorBase {
   static constexpr char const* ATTRIBUTE_SFTP_REMOTE_PORT = "sftp.remote.port";
   static constexpr char const* ATTRIBUTE_SFTP_REMOTE_FILENAME = "sftp.remote.filename";
 
-  virtual void onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) override;
+  virtual void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) override;
   virtual void initialize() override;
-  virtual void onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
+  virtual void onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
 
   class WriteCallback : public OutputStreamCallback {
    public:
     WriteCallback(const std::string& remote_file,
                  utils::SFTPClient& client);
     ~WriteCallback();
-    virtual int64_t process(std::shared_ptr<io::BaseStream> stream) override;
+    virtual int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) override;
 
    private:
     std::shared_ptr<logging::Logger> logger_;

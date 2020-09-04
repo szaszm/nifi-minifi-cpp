@@ -57,7 +57,7 @@ class RepositoryMetrics : public ResponseNode {
     return "RepositoryMetrics";
   }
 
-  void addRepository(const std::shared_ptr<core::Repository> &repo) {
+  void addRepository(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> &repo) {
     if (nullptr != repo) {
       repositories.insert(std::make_pair(repo->getName(), repo));
     }
@@ -91,7 +91,7 @@ class RepositoryMetrics : public ResponseNode {
   }
 
  protected:
-  std::map<std::string, std::shared_ptr<core::Repository>> repositories;
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository>> repositories;
 };
 
 }  // namespace response

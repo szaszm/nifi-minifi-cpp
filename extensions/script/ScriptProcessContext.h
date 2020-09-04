@@ -31,13 +31,13 @@ namespace script {
 
 class ScriptProcessContext {
  public:
-  explicit ScriptProcessContext(std::shared_ptr<core::ProcessContext> context);
+  explicit ScriptProcessContext(org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> context);
 
   std::string getProperty(const std::string &name);
   void releaseProcessContext();
 
  private:
-  std::shared_ptr<core::ProcessContext> context_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> context_;
 };
 
 } /* namespace script */

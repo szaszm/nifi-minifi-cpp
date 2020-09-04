@@ -96,13 +96,13 @@ class PersistableKeyValueStoreServiceTestsFixture {
     test_repo.reset();
     configuration.reset();
 
-    configuration = std::make_shared<minifi::Configure>();
-    test_repo = std::make_shared<TestRepository>();
-    test_flow_repo = std::make_shared<TestFlowRepository>();
+    configuration = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>();
+    test_repo = org::apache::nifi::minifi::utils::debug_make_shared<TestRepository>();
+    test_flow_repo = org::apache::nifi::minifi::utils::debug_make_shared<TestFlowRepository>();
 
     configuration->set(minifi::Configure::nifi_flow_configuration_file, config_yaml);
 
-    content_repo = std::make_shared<core::repository::VolatileContentRepository>();
+    content_repo = org::apache::nifi::minifi::utils::debug_make_shared<core::repository::VolatileContentRepository>();
     content_repo->initialize(configuration);
     stream_factory = minifi::io::StreamFactory::getInstance(configuration);
 
@@ -113,24 +113,24 @@ class PersistableKeyValueStoreServiceTestsFixture {
     REQUIRE(persistable_key_value_store_service_node != nullptr);
     persistable_key_value_store_service_node->enable();
 
-    controller = std::dynamic_pointer_cast<minifi::controllers::PersistableKeyValueStoreService>(
+    controller = dynamic_pointer_cast<minifi::controllers::PersistableKeyValueStoreService>(
         persistable_key_value_store_service_node->getControllerServiceImplementation());
     REQUIRE(controller != nullptr);
   }
 
  protected:
   std::string state_dir;
-  std::shared_ptr<minifi::Configure> configuration;
-  std::shared_ptr<core::Repository> test_repo;
-  std::shared_ptr<core::Repository> test_flow_repo;
-  std::shared_ptr<core::ContentRepository> content_repo;
-  std::shared_ptr<minifi::io::StreamFactory> stream_factory;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> configuration;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> test_repo;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> test_flow_repo;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::io::StreamFactory> stream_factory;
 
   std::unique_ptr<core::YamlConfiguration> yaml_config;
   std::unique_ptr<core::ProcessGroup> process_group;
 
-  std::shared_ptr<core::controller::ControllerServiceNode> persistable_key_value_store_service_node;
-  std::shared_ptr<minifi::controllers::PersistableKeyValueStoreService> controller;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> persistable_key_value_store_service_node;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::controllers::PersistableKeyValueStoreService> controller;
 
   TestController testController;
 };

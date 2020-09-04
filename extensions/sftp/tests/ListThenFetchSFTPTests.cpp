@@ -228,11 +228,11 @@ class ListThenFetchSFTPTestsFixture {
   char *dst_dir;
   std::unique_ptr<SFTPTestServer> sftp_server;
   TestController testController;
-  std::shared_ptr<TestPlan> plan;
-  std::shared_ptr<core::Processor> list_sftp;
-  std::shared_ptr<core::Processor> fetch_sftp;
-  std::shared_ptr<core::Processor> log_attribute;
-  std::shared_ptr<core::Processor> put_file;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> list_sftp;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> fetch_sftp;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> log_attribute;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> put_file;
 };
 
 TEST_CASE_METHOD(ListThenFetchSFTPTestsFixture, "ListSFTP then FetchSFTP one file", "[ListThenFetchSFTP][basic]") {

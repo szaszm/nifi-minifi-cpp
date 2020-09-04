@@ -95,13 +95,13 @@ class RetryFlowFileTest {
     const core::Relationship failure         {RetryFlowFile::Failure};
 
     // Processors
-    std::shared_ptr<core::Processor> generate                    = plan_->addProcessor("GenerateFlowFile", "generate", {success}, false);
-    std::shared_ptr<core::Processor> update                      = plan_->addProcessor("UpdateAttribute", "update", {success}, false);
-    std::shared_ptr<core::Processor> retryflowfile               = plan_->addProcessor("RetryFlowFile", "retryflowfile", {retry, retries_exceeded, failure}, false);
-    std::shared_ptr<core::Processor> putfile_on_retry            = plan_->addProcessor("PutFile", "putfile_on_retry", {success}, false);
-    std::shared_ptr<core::Processor> putfile_on_retries_exceeded = plan_->addProcessor("PutFile", "putfile_on_retries_exceeded", {success}, false);
-    std::shared_ptr<core::Processor> putfile_on_failure          = plan_->addProcessor("PutFile", "putfile_on_failure", {success}, false);
-    std::shared_ptr<core::Processor> log_attribute               = plan_->addProcessor("LogAttribute", "log", {success}, false);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> generate                    = plan_->addProcessor("GenerateFlowFile", "generate", {success}, false);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> update                      = plan_->addProcessor("UpdateAttribute", "update", {success}, false);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> retryflowfile               = plan_->addProcessor("RetryFlowFile", "retryflowfile", {retry, retries_exceeded, failure}, false);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> putfile_on_retry            = plan_->addProcessor("PutFile", "putfile_on_retry", {success}, false);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> putfile_on_retries_exceeded = plan_->addProcessor("PutFile", "putfile_on_retries_exceeded", {success}, false);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> putfile_on_failure          = plan_->addProcessor("PutFile", "putfile_on_failure", {success}, false);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> log_attribute               = plan_->addProcessor("LogAttribute", "log", {success}, false);
 
     retryflowfile->setPenalizationPeriodMsec(0);
 
@@ -183,7 +183,7 @@ class RetryFlowFileTest {
   }
 
   std::unique_ptr<TestController> testController_;
-  std::shared_ptr<TestPlan> plan_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan_;
   LogTestController& logTestController_;
   std::shared_ptr<logging::Logger> logger_;
 };

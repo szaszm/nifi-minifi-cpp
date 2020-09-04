@@ -42,11 +42,11 @@ template<typename T, typename V>
 class SocketCreator : public AbstractStreamFactory {
  public:
   template<typename Q = V>
-  std::shared_ptr<Q> create(const std::shared_ptr<Configure> &configure) {
-    return std::make_shared<V>(configure);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Q> create(const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure) {
+    return org::apache::nifi::minifi::utils::debug_make_shared<V>(configure);
   }
 
-  SocketCreator<T, V>(const std::shared_ptr<Configure> &configuration)
+  SocketCreator<T, V>(const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configuration)
       : configuration_(configuration) {
     context_ = create(configuration);
   }
@@ -61,10 +61,10 @@ class SocketCreator : public AbstractStreamFactory {
     return std::unique_ptr<Socket>(socket);
   }
 
-  std::unique_ptr<Socket> createSecureSocket(const std::string &host, const uint16_t port, const std::shared_ptr<minifi::controllers::SSLContextService> &ssl_service) {
+  std::unique_ptr<Socket> createSecureSocket(const std::string &host, const uint16_t port, const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::controllers::SSLContextService> &ssl_service) {
 #ifdef OPENSSL_SUPPORT
     if (ssl_service != nullptr) {
-      auto context = std::make_shared<TLSContext>(configuration_, ssl_service);
+      auto context = org::apache::nifi::minifi::utils::debug_make_shared<TLSContext>(configuration_, ssl_service);
       return utils::make_unique<TLSSocket>(context, host, port);
     }
 #endif /* OPENSSL_SUPPORT */
@@ -72,23 +72,23 @@ class SocketCreator : public AbstractStreamFactory {
   }
 
  private:
-  std::shared_ptr<V> context_;
-  std::shared_ptr<Configure> configuration_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<V> context_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configuration_;
 };
 
 // std::atomic<StreamFactory*> StreamFactory::context_instance_;
 // std::mutex StreamFactory::context_mutex_;
-StreamFactory::StreamFactory(const std::shared_ptr<Configure> &configure) {
+StreamFactory::StreamFactory(const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure) {
   std::string secureStr;
   bool is_secure = false;
   if (configure->get(Configure::nifi_remote_input_secure, secureStr) && org::apache::nifi::minifi::utils::StringUtils::StringToBool(secureStr, is_secure)) {
 #ifdef OPENSSL_SUPPORT
-    delegate_ = std::make_shared<SocketCreator<TLSSocket, TLSContext>>(configure);
+    delegate_ = org::apache::nifi::minifi::utils::debug_make_shared<SocketCreator<TLSSocket, TLSContext>>(configure);
 #else
-    delegate_ = std::make_shared<SocketCreator<Socket, SocketContext>>(configure);
+    delegate_ = org::apache::nifi::minifi::utils::debug_make_shared<SocketCreator<Socket, SocketContext>>(configure);
 #endif
   } else {
-    delegate_ = std::make_shared<SocketCreator<Socket, SocketContext>>(configure);
+    delegate_ = org::apache::nifi::minifi::utils::debug_make_shared<SocketCreator<Socket, SocketContext>>(configure);
   }
 }
 }  // namespace io

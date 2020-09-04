@@ -96,7 +96,7 @@ class PeersEntity {
 
           // host name and port are required.
           if (!IsNullOrEmpty(hostname) && port > 0) {
-            sitetosite::PeerStatus status(std::make_shared<sitetosite::Peer>(id, hostname, port, secure), flowFileCount, true);
+            sitetosite::PeerStatus status(utils::debug_make_shared<sitetosite::Peer>(id, hostname, port, secure), flowFileCount, true);
             peer_statuses.push_back(std::move(status));
           } else {
             logger->log_debug("hostname empty or port is zero. hostname: %s, port: %d", hostname, port);

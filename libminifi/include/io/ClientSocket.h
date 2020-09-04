@@ -75,7 +75,7 @@ bool valid_socket(SocketDescriptor) noexcept;
  */
 class SocketContext {
  public:
-  SocketContext(const std::shared_ptr<Configure> &configure) { // NOLINT
+  SocketContext(const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure) { // NOLINT
   }
 };
 /**
@@ -93,7 +93,7 @@ class Socket : public BaseStream {
    * @param hostname hostname we are connecting to.
    * @param port port we are connecting to.
    */
-  explicit Socket(const std::shared_ptr<SocketContext> &context, std::string hostname, uint16_t port);
+  explicit Socket(const org::apache::nifi::minifi::utils::debug_shared_ptr<SocketContext> &context, std::string hostname, uint16_t port);
 
   Socket(const Socket&) = delete;
   Socket(Socket&&) noexcept;
@@ -240,7 +240,7 @@ class Socket : public BaseStream {
    * @param port connecting port
    * @param listeners number of listeners in the queue
    */
-  explicit Socket(const std::shared_ptr<SocketContext> &context, std::string hostname, uint16_t port, uint16_t listeners);
+  explicit Socket(const org::apache::nifi::minifi::utils::debug_shared_ptr<SocketContext> &context, std::string hostname, uint16_t port, uint16_t listeners);
 
   /**
    * Creates a vector and returns the vector using the provided

@@ -39,7 +39,7 @@ class AbstractStreamFactory {
 
   virtual std::unique_ptr<Socket> createSocket(const std::string &host, uint16_t port) = 0;
 
-  virtual std::unique_ptr<Socket> createSecureSocket(const std::string &host, uint16_t port, const std::shared_ptr<minifi::controllers::SSLContextService> &ssl_service) = 0;
+  virtual std::unique_ptr<Socket> createSecureSocket(const std::string &host, uint16_t port, const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::controllers::SSLContextService> &ssl_service) = 0;
 };
 
 /**
@@ -70,7 +70,7 @@ class StreamFactory {
    * Creates a socket and returns a unique ptr
    *
    */
-  std::unique_ptr<Socket> createSecureSocket(const std::string &host, const uint16_t port, const std::shared_ptr<minifi::controllers::SSLContextService> &ssl_service, uint32_t estimated_size = 0) {
+  std::unique_ptr<Socket> createSecureSocket(const std::string &host, const uint16_t port, const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::controllers::SSLContextService> &ssl_service, uint32_t estimated_size = 0) {
     auto socket = delegate_->createSecureSocket(host, port, ssl_service);
     auto prioritizer_ = NetworkPrioritizerFactory::getInstance()->getPrioritizer();
     if (nullptr != prioritizer_) {
@@ -84,16 +84,16 @@ class StreamFactory {
     return socket;
   }
 
-  static std::shared_ptr<StreamFactory> getInstance(const std::shared_ptr<Configure> &configuration) {
+  static org::apache::nifi::minifi::utils::debug_shared_ptr<StreamFactory> getInstance(const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configuration) {
     // avoid invalid access
-    static std::shared_ptr<StreamFactory> factory = std::shared_ptr<StreamFactory>(new StreamFactory(configuration));
+    static org::apache::nifi::minifi::utils::debug_shared_ptr<StreamFactory> factory = org::apache::nifi::minifi::utils::debug_shared_ptr<StreamFactory>(new StreamFactory(configuration));
     return factory;
   }
 
  protected:
-  StreamFactory(const std::shared_ptr<Configure> &configure); // NOLINT
+  StreamFactory(const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure); // NOLINT
 
-  std::shared_ptr<AbstractStreamFactory> delegate_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<AbstractStreamFactory> delegate_;
 };
 
 }  // namespace io

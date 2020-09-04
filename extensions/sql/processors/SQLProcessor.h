@@ -39,18 +39,18 @@ class SQLProcessor: public core::Processor {
     : core::Processor(name, uuid), logger_(logging::LoggerFactory<T>::getLogger()) {
   }
 
-  void onSchedule(const std::shared_ptr<core::ProcessContext>& context, const std::shared_ptr<core::ProcessSessionFactory>& sessionFactory) override {
+  void onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>& context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory>& sessionFactory) override {
     std::string controllerService;
     context->getProperty(dbControllerService().getName(), controllerService);
 
-    dbService_ = std::dynamic_pointer_cast<sql::controllers::DatabaseService>(context->getControllerService(controllerService));
+    dbService_ = dynamic_pointer_cast<sql::controllers::DatabaseService>(context->getControllerService(controllerService));
     if (!dbService_)
       throw minifi::Exception(PROCESSOR_EXCEPTION, "'DB Controller Service' must be defined");
 
     static_cast<T*>(this)->processOnSchedule(*context);
   }
 
-  void onTrigger(const std::shared_ptr<core::ProcessContext>& context, const std::shared_ptr<core::ProcessSession>& session) override {
+  void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>& context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession>& session) override {
     std::unique_lock<std::mutex> lock(onTriggerMutex_, std::try_to_lock);
     if (!lock.owns_lock()) {
       logger_->log_warn("'onTrigger' is called before previous 'onTrigger' call is finished.");
@@ -92,7 +92,7 @@ class SQLProcessor: public core::Processor {
    }
 
    std::shared_ptr<logging::Logger> logger_;
-   std::shared_ptr<sql::controllers::DatabaseService> dbService_;
+   org::apache::nifi::minifi::utils::debug_shared_ptr<sql::controllers::DatabaseService> dbService_;
    std::unique_ptr<sql::Connection> connection_;
    std::mutex onTriggerMutex_;
 };

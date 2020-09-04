@@ -196,11 +196,11 @@ class FetchSFTPTestsFixture {
   char *dst_dir;
   std::unique_ptr<SFTPTestServer> sftp_server;
   TestController testController;
-  std::shared_ptr<TestPlan> plan;
-  std::shared_ptr<core::Processor> generate_flow_file;
-  std::shared_ptr<core::Processor> update_attribute;
-  std::shared_ptr<core::Processor> fetch_sftp;
-  std::shared_ptr<core::Processor> put_file;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> generate_flow_file;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> update_attribute;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> fetch_sftp;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> put_file;
 };
 
 TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP fetch one file", "[FetchSFTP][basic]") {

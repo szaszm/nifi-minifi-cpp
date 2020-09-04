@@ -80,7 +80,7 @@ class PutFile : public core::Processor {
    public:
     ReadCallback(const std::string &tmp_file, const std::string &dest_file);
     ~ReadCallback() override;
-    int64_t process(std::shared_ptr<io::BaseStream> stream) override;
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) override;
     bool commit();
 
    private:
@@ -104,12 +104,12 @@ class PutFile : public core::Processor {
   int64_t max_dest_files_ = -1;
 
   bool putFile(core::ProcessSession *session,
-               std::shared_ptr<FlowFileRecord> flowFile,
+               org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> flowFile,
                const std::string &tmpFile,
                const std::string &destFile,
                const std::string &destDir);
   std::shared_ptr<logging::Logger> logger_;
-  static std::shared_ptr<utils::IdGenerator> id_generator_;
+  static org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> id_generator_;
 };
 
 REGISTER_RESOURCE(PutFile, "Writes the contents of a FlowFile to the local file system");

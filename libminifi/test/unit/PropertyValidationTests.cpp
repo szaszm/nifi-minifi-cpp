@@ -219,7 +219,7 @@ TEST_CASE("Property Change notification gets called even on erroneous assignment
 
 TEST_CASE("Correctly Typed Property With Invalid Validation") {
   auto prop = PropertyBuilder::createProperty("prop")
-      ->withDefaultValue<int64_t>(5, std::make_shared<LongValidator>("myValidator", 0, 10))
+      ->withDefaultValue<int64_t>(5, org::apache::nifi::minifi::utils::debug_make_shared<LongValidator>("myValidator", 0, 10))
       ->build();
   TestConfigurableComponent component;
   component.setSupportedProperties({prop});

@@ -46,20 +46,20 @@
 int main(int argc, char **argv) {
 #ifndef WIN32
   TestController testController;
-  std::shared_ptr<core::Processor> processor = std::make_shared<org::apache::nifi::minifi::processors::ExecuteProcess>("executeProcess");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor = utils::debug_make_shared<org::apache::nifi::minifi::processors::ExecuteProcess>("executeProcess");
   processor->setMaxConcurrentTasks(1);
 
-  std::shared_ptr<core::Repository> test_repo =
-      std::make_shared<TestRepository>();
-  std::shared_ptr<core::ContentRepository> content_repo = std::make_shared<core::repository::VolatileContentRepository>();
-  std::shared_ptr<TestRepository> repo =
-      std::static_pointer_cast<TestRepository>(test_repo);
-  std::shared_ptr<minifi::FlowController> controller = std::make_shared<
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> test_repo =
+      utils::debug_make_shared<TestRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo = utils::debug_make_shared<core::repository::VolatileContentRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestRepository> repo =
+      static_pointer_cast<TestRepository>(test_repo);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::FlowController> controller = utils::debug_make_shared<
       TestFlowController>(test_repo, test_repo, content_repo);
 
   utils::Identifier processoruuid;
   assert(true == processor->getUUID(processoruuid));
-  std::shared_ptr<minifi::Connection> connection = std::make_shared<minifi::Connection>(test_repo, content_repo, "executeProcessConnection");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> connection = utils::debug_make_shared<minifi::Connection>(test_repo, content_repo, "executeProcessConnection");
   connection->addRelationship(core::Relationship("success", "description"));
 
   // link the connections so that we can test results at the end for this
@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
   processor->addConnection(connection);
   assert(processor->getName() == "executeProcess");
 
-  std::shared_ptr<core::FlowFile> record;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> record;
   processor->setScheduledState(core::ScheduledState::RUNNING);
 
   processor->initialize();
@@ -81,17 +81,17 @@ int main(int argc, char **argv) {
 
   std::vector<std::thread> processor_workers;
 
-  std::shared_ptr<core::ProcessorNode> node2 = std::make_shared<core::ProcessorNode>(processor);
-  std::shared_ptr<core::ProcessContext> contextset = std::make_shared<core::ProcessContext>(node2, nullptr, test_repo, test_repo);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessorNode> node2 = utils::debug_make_shared<core::ProcessorNode>(processor);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> contextset = utils::debug_make_shared<core::ProcessContext>(node2, nullptr, test_repo, test_repo);
   core::ProcessSessionFactory factory(contextset);
   processor->onSchedule(contextset.get(), &factory);
 
   for (int i = 0; i < 1; i++) {
     processor_workers.push_back(std::thread([processor, test_repo, &is_ready]() {
-      std::shared_ptr<core::ProcessorNode> node = std::make_shared<core::ProcessorNode>(processor);
-      std::shared_ptr<core::ProcessContext> context = std::make_shared<core::ProcessContext>(node, nullptr, test_repo, test_repo);
+      org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessorNode> node = utils::debug_make_shared<core::ProcessorNode>(processor);
+      org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> context = utils::debug_make_shared<core::ProcessContext>(node, nullptr, test_repo, test_repo);
       context->setProperty(org::apache::nifi::minifi::processors::ExecuteProcess::Command, "sleep 0.5");
-      std::shared_ptr<core::ProcessSession> session = std::make_shared<core::ProcessSession>(context);
+      org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> session = utils::debug_make_shared<core::ProcessSession>(context);
       while (!is_ready.load(std::memory_order_relaxed)) {
       }
       processor->onTrigger(context.get(), session.get());
@@ -104,6 +104,6 @@ int main(int argc, char **argv) {
     t.join();
   });
 
-  std::shared_ptr<org::apache::nifi::minifi::processors::ExecuteProcess> execp = std::static_pointer_cast<org::apache::nifi::minifi::processors::ExecuteProcess>(processor);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<org::apache::nifi::minifi::processors::ExecuteProcess> execp = static_pointer_cast<org::apache::nifi::minifi::processors::ExecuteProcess>(processor);
 #endif
 }

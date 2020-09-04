@@ -43,21 +43,21 @@ class FileSystemRepository : public core::ContentRepository, public core::CoreCo
   }
   virtual ~FileSystemRepository() = default;
 
-  virtual bool initialize(const std::shared_ptr<minifi::Configure> &configuration);
+  virtual bool initialize(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> &configuration);
 
   virtual void stop();
 
-  bool exists(const std::shared_ptr<minifi::ResourceClaim> &streamId);
+  bool exists(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> &streamId);
 
-  virtual std::shared_ptr<io::BaseStream> write(const std::shared_ptr<minifi::ResourceClaim> &claim, bool append = false);
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> write(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> &claim, bool append = false);
 
-  virtual std::shared_ptr<io::BaseStream> read(const std::shared_ptr<minifi::ResourceClaim> &claim);
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> read(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> &claim);
 
-  virtual bool close(const std::shared_ptr<minifi::ResourceClaim> &claim) {
+  virtual bool close(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> &claim) {
     return remove(claim);
   }
 
-  virtual bool remove(const std::shared_ptr<minifi::ResourceClaim> &claim);
+  virtual bool remove(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> &claim);
 
  private:
   std::shared_ptr<logging::Logger> logger_;

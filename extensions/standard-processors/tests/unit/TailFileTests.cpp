@@ -80,8 +80,8 @@ TEST_CASE("TailFile reads the file until the first delimiter", "[simple]") {
   LogTestController::getInstance().setTrace<minifi::processors::TailFile>();
   LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
-  std::shared_ptr<core::Processor> tailfile = plan->addProcessor("TailFile", "tailfileProc");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> tailfile = plan->addProcessor("TailFile", "tailfileProc");
   auto id = tailfile->getUUIDStr();
   plan->addProcessor("LogAttribute", "logattribute", core::Relationship("success", "description"), true);
 
@@ -122,8 +122,8 @@ TEST_CASE("TailFile picks up the second line if a delimiter is written between r
   LogTestController::getInstance().setTrace<TestPlan>();
   LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
-  std::shared_ptr<core::Processor> tailfile = plan->addProcessor("TailFile", "tailfileProc");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> tailfile = plan->addProcessor("TailFile", "tailfileProc");
   auto id = tailfile->getUUIDStr();
 
   plan->addProcessor("LogAttribute", "logattribute", core::Relationship("success", "description"), true);
@@ -168,8 +168,8 @@ TEST_CASE("TailFile re-reads the file if the state is deleted between runs", "[s
   LogTestController::getInstance().setTrace<TestPlan>();
   LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
-  std::shared_ptr<core::Processor> tailfile = plan->addProcessor("TailFile", "tailfileProc");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> tailfile = plan->addProcessor("TailFile", "tailfileProc");
   auto id = tailfile->getUUIDStr();
 
   plan->addProcessor("LogAttribute", "logattribute", core::Relationship("success", "description"), true);
@@ -211,8 +211,8 @@ TEST_CASE("TailFile picks up the state correctly if it is rewritten between runs
   LogTestController::getInstance().setTrace<TestPlan>();
   LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
-  std::shared_ptr<core::Processor> tailfile = plan->addProcessor("TailFile", "tailfileProc");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> tailfile = plan->addProcessor("TailFile", "tailfileProc");
   auto id = tailfile->getUUIDStr();
 
   plan->addProcessor("LogAttribute", "logattribute", core::Relationship("success", "description"), true);
@@ -390,11 +390,11 @@ TEST_CASE("TailFile picks up the new File to Tail if it is changed between runs"
   LogTestController::getInstance().setDebug<minifi::processors::TailFile>();
   LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
-  std::shared_ptr<core::Processor> tail_file = plan->addProcessor("TailFile", "tail_file");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> tail_file = plan->addProcessor("TailFile", "tail_file");
   plan->setProperty(tail_file, org::apache::nifi::minifi::processors::TailFile::Delimiter.getName(), "\n");
 
-  std::shared_ptr<core::Processor> log_attribute = plan->addProcessor("LogAttribute", "log_attribute", core::Relationship("success", "description"), true);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> log_attribute = plan->addProcessor("LogAttribute", "log_attribute", core::Relationship("success", "description"), true);
   plan->setProperty(log_attribute, org::apache::nifi::minifi::processors::LogAttribute::FlowFilesToLog.getName(), "0");
 
   char format[] = "/var/tmp/gt.XXXXXX";
@@ -435,15 +435,15 @@ TEST_CASE("TailFile picks up the new File to Tail if it is changed between runs 
   char format[] = "/var/tmp/gt.XXXXXX";
   std::string directory = testController.createTempDirectory(format);
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
-  std::shared_ptr<core::Processor> tail_file = plan->addProcessor("TailFile", "tail_file");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> tail_file = plan->addProcessor("TailFile", "tail_file");
   plan->setProperty(tail_file, org::apache::nifi::minifi::processors::TailFile::Delimiter.getName(), "\n");
   plan->setProperty(tail_file, org::apache::nifi::minifi::processors::TailFile::TailMode.getName(), "Multiple file");
   plan->setProperty(tail_file, org::apache::nifi::minifi::processors::TailFile::BaseDirectory.getName(), directory);
   plan->setProperty(tail_file, org::apache::nifi::minifi::processors::TailFile::LookupFrequency.getName(), "0 sec");
   plan->setProperty(tail_file, org::apache::nifi::minifi::processors::TailFile::FileName.getName(), "first\\..*\\.log");
 
-  std::shared_ptr<core::Processor> log_attribute = plan->addProcessor("LogAttribute", "log_attribute", core::Relationship("success", "description"), true);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> log_attribute = plan->addProcessor("LogAttribute", "log_attribute", core::Relationship("success", "description"), true);
   plan->setProperty(log_attribute, org::apache::nifi::minifi::processors::LogAttribute::FlowFilesToLog.getName(), "0");
 
   createTempFile(directory, "first.fruit.log", "apple\n");
@@ -483,8 +483,8 @@ TEST_CASE("TailFile finds the single input file in both Single and Multiple mode
   LogTestController::getInstance().setDebug<core::ProcessSession>();
   LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
-  std::shared_ptr<core::Processor> tailfile = plan->addProcessor("TailFile", "tailfileProc");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> tailfile = plan->addProcessor("TailFile", "tailfileProc");
   plan->setProperty(tailfile, org::apache::nifi::minifi::processors::TailFile::Delimiter.getName(), "");
 
   plan->addProcessor("LogAttribute", "logattribute", core::Relationship("success", "description"), true);
@@ -531,15 +531,15 @@ TEST_CASE("TailFile picks up new files created between runs", "[multiple_file]")
   char format[] = "/var/tmp/gt.XXXXXX";
   auto dir = testController.createTempDirectory(format);
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
-  std::shared_ptr<core::Processor> tailfile = plan->addProcessor("TailFile", "tailfile");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> tailfile = plan->addProcessor("TailFile", "tailfile");
   plan->setProperty(tailfile, org::apache::nifi::minifi::processors::TailFile::TailMode.getName(), "Multiple file");
   plan->setProperty(tailfile, org::apache::nifi::minifi::processors::TailFile::BaseDirectory.getName(), dir);
   plan->setProperty(tailfile, org::apache::nifi::minifi::processors::TailFile::LookupFrequency.getName(), "0 sec");
   plan->setProperty(tailfile, org::apache::nifi::minifi::processors::TailFile::FileName.getName(), ".*\\.log");
   plan->setProperty(tailfile, org::apache::nifi::minifi::processors::TailFile::Delimiter.getName(), "\n");
 
-  std::shared_ptr<core::Processor> logattribute = plan->addProcessor("LogAttribute", "logattribute", core::Relationship("success", "description"), true);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> logattribute = plan->addProcessor("LogAttribute", "logattribute", core::Relationship("success", "description"), true);
   plan->setProperty(logattribute, org::apache::nifi::minifi::processors::LogAttribute::FlowFilesToLog.getName(), "0");
 
   createTempFile(dir, "application.log", "line1\nline2\n");
@@ -567,15 +567,15 @@ TEST_CASE("TailFile can handle input files getting removed", "[multiple_file]") 
   char format[] = "/var/tmp/gt.XXXXXX";
   auto dir = testController.createTempDirectory(format);
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
-  std::shared_ptr<core::Processor> tailfile = plan->addProcessor("TailFile", "tailfile");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> tailfile = plan->addProcessor("TailFile", "tailfile");
   plan->setProperty(tailfile, org::apache::nifi::minifi::processors::TailFile::TailMode.getName(), "Multiple file");
   plan->setProperty(tailfile, org::apache::nifi::minifi::processors::TailFile::BaseDirectory.getName(), dir);
   plan->setProperty(tailfile, org::apache::nifi::minifi::processors::TailFile::LookupFrequency.getName(), "0 sec");
   plan->setProperty(tailfile, org::apache::nifi::minifi::processors::TailFile::FileName.getName(), ".*\\.log");
   plan->setProperty(tailfile, org::apache::nifi::minifi::processors::TailFile::Delimiter.getName(), "\n");
 
-  std::shared_ptr<core::Processor> logattribute = plan->addProcessor("LogAttribute", "logattribute",
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> logattribute = plan->addProcessor("LogAttribute", "logattribute",
                                                                      core::Relationship("success", "description"),
                                                                      true);
   plan->setProperty(logattribute, org::apache::nifi::minifi::processors::LogAttribute::FlowFilesToLog.getName(), "0");
@@ -615,8 +615,8 @@ TEST_CASE("TailFile processes a very long line correctly", "[simple]") {
   LogTestController::getInstance().setTrace<processors::LogAttribute>();
   LogTestController::getInstance().setTrace<core::ProcessSession>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
-  std::shared_ptr<core::Processor> tailfile = plan->addProcessor("TailFile", "tailfileProc");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> tailfile = plan->addProcessor("TailFile", "tailfileProc");
 
   char format[] = "/var/tmp/gt.XXXXXX";
   auto dir = testController.createTempDirectory(format);
@@ -631,7 +631,7 @@ TEST_CASE("TailFile processes a very long line correctly", "[simple]") {
   plan->setProperty(tailfile, org::apache::nifi::minifi::processors::TailFile::FileName.getName(), temp_file.str());
   plan->setProperty(tailfile, org::apache::nifi::minifi::processors::TailFile::Delimiter.getName(), "\n");
 
-  std::shared_ptr<core::Processor> log_attr = plan->addProcessor("LogAttribute", "Log", core::Relationship("success", "description"), true);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> log_attr = plan->addProcessor("LogAttribute", "Log", core::Relationship("success", "description"), true);
   plan->setProperty(log_attr, processors::LogAttribute::FlowFilesToLog.getName(), "0");
   plan->setProperty(log_attr, processors::LogAttribute::LogPayload.getName(), "true");
   plan->setProperty(log_attr, processors::LogAttribute::HexencodePayload.getName(), "true");
@@ -692,8 +692,8 @@ TEST_CASE("TailFile processes a long line followed by multiple newlines correctl
   LogTestController::getInstance().setTrace<processors::LogAttribute>();
   LogTestController::getInstance().setTrace<core::ProcessSession>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
-  std::shared_ptr<core::Processor> tailfile = plan->addProcessor("TailFile", "tailfileProc");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> tailfile = plan->addProcessor("TailFile", "tailfileProc");
   auto id = tailfile->getUUIDStr();
 
   char format[] = "/var/tmp/gt.XXXXXX";
@@ -709,7 +709,7 @@ TEST_CASE("TailFile processes a long line followed by multiple newlines correctl
   plan->setProperty(tailfile, org::apache::nifi::minifi::processors::TailFile::FileName.getName(), temp_file.str());
   plan->setProperty(tailfile, org::apache::nifi::minifi::processors::TailFile::Delimiter.getName(), "\n");
 
-  std::shared_ptr<core::Processor> log_attr = plan->addProcessor("LogAttribute", "Log", core::Relationship("success", "description"), true);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> log_attr = plan->addProcessor("LogAttribute", "Log", core::Relationship("success", "description"), true);
   plan->setProperty(log_attr, processors::LogAttribute::FlowFilesToLog.getName(), "0");
   plan->setProperty(log_attr, processors::LogAttribute::LogPayload.getName(), "true");
   plan->setProperty(log_attr, processors::LogAttribute::HexencodePayload.getName(), "true");
@@ -734,8 +734,8 @@ TEST_CASE("TailFile onSchedule throws if file(s) to tail cannot be determined", 
   TestController testController;
   LogTestController::getInstance().setDebug<minifi::processors::TailFile>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
-  std::shared_ptr<core::Processor> tailfile = plan->addProcessor("TailFile", "tailfileProc");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> tailfile = plan->addProcessor("TailFile", "tailfileProc");
 
   SECTION("Single file mode by default") {
     SECTION("No FileName") {
@@ -775,8 +775,8 @@ TEST_CASE("TailFile onSchedule throws in Multiple mode if the Base Directory doe
   TestController testController;
   LogTestController::getInstance().setDebug<minifi::processors::TailFile>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
-  std::shared_ptr<core::Processor> tailfile = plan->addProcessor("TailFile", "tailfileProc");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> tailfile = plan->addProcessor("TailFile", "tailfileProc");
   plan->setProperty(tailfile, processors::TailFile::TailMode.getName(), "Multiple file");
   plan->setProperty(tailfile, processors::TailFile::FileName.getName(), ".*\\.log");
 
@@ -945,12 +945,12 @@ TEST_CASE("TailFile ignores old rotated files", "[rotation]") {
 
   std::string log_file_name = dir + utils::file::FileUtils::get_separator() + "test.log";
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
-  std::shared_ptr<core::Processor> tailfile = plan->addProcessor("TailFile", "tailfile");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> tailfile = plan->addProcessor("TailFile", "tailfile");
   plan->setProperty(tailfile, org::apache::nifi::minifi::processors::TailFile::FileName.getName(), log_file_name);
   plan->setProperty(tailfile, org::apache::nifi::minifi::processors::TailFile::Delimiter.getName(), "\n");
 
-  std::shared_ptr<core::Processor> logattribute = plan->addProcessor("LogAttribute", "logattribute",
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> logattribute = plan->addProcessor("LogAttribute", "logattribute",
                                                                      core::Relationship("success", "description"),
                                                                      true);
   plan->setProperty(logattribute, org::apache::nifi::minifi::processors::LogAttribute::FlowFilesToLog.getName(), "0");
@@ -1502,7 +1502,7 @@ TEST_CASE("TailFile interprets the lookup frequency property correctly", "[multi
   SECTION("Lookup frequency not set => defaults to 10 minutes") {
     testController.runSession(plan, true);
 
-    std::shared_ptr<processors::TailFile> tail_file_processor = std::dynamic_pointer_cast<processors::TailFile>(tail_file);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<processors::TailFile> tail_file_processor = dynamic_pointer_cast<processors::TailFile>(tail_file);
     REQUIRE(tail_file_processor);
     REQUIRE(tail_file_processor->getLookupFrequency() == std::chrono::minutes{10});
   }

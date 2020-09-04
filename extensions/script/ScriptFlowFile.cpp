@@ -30,7 +30,7 @@ namespace nifi {
 namespace minifi {
 namespace script {
 
-ScriptFlowFile::ScriptFlowFile(std::shared_ptr<core::FlowFile> flow_file)
+ScriptFlowFile::ScriptFlowFile(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow_file)
     : flow_file_(std::move(flow_file)) {
 }
 
@@ -68,7 +68,7 @@ bool ScriptFlowFile::removeAttribute(std::string key) {
   return flow_file_->removeAttribute(std::move(key));
 }
 
-std::shared_ptr<core::FlowFile> ScriptFlowFile::getFlowFile() {
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> ScriptFlowFile::getFlowFile() {
   return flow_file_;
 }
 

@@ -143,12 +143,12 @@ class IdGenerator {
  public:
   void generate(Identifier &output);
   Identifier generate();
-  void initialize(const std::shared_ptr<Properties> & properties);
+  void initialize(const org::apache::nifi::minifi::utils::debug_shared_ptr<Properties> & properties);
 
   ~IdGenerator();
 
-  static std::shared_ptr<IdGenerator> getIdGenerator() {
-    static std::shared_ptr<IdGenerator> generator = std::shared_ptr<IdGenerator>(new IdGenerator());
+  static org::apache::nifi::minifi::utils::debug_shared_ptr<IdGenerator> getIdGenerator() {
+    static org::apache::nifi::minifi::utils::debug_shared_ptr<IdGenerator> generator = org::apache::nifi::minifi::utils::debug_shared_ptr<IdGenerator>(new IdGenerator());
     return generator;
   }
 

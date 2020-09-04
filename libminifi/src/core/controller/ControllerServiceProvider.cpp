@@ -32,7 +32,7 @@ namespace controller {
  * @return the ControllerService that is registered with the given
  * identifier
  */
-std::shared_ptr<ControllerService> ControllerServiceProvider::getControllerService(const std::string &identifier) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerService> ControllerServiceProvider::getControllerService(const std::string &identifier) {
   auto service = controller_map_->getControllerServiceNode(identifier);
   if (service != nullptr) {
     return service->getControllerServiceImplementation();

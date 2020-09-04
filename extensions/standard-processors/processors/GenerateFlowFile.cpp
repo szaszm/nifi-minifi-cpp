@@ -93,7 +93,7 @@ void generateData(std::vector<char>& data, bool textData = false) {
   }
 }
 
-void GenerateFlowFile::onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
+void GenerateFlowFile::onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
   if (context->getProperty(FileSize.getName(), fileSize_)) {
     logger_->log_trace("File size is configured to be %d", fileSize_);
   }
@@ -119,7 +119,7 @@ void GenerateFlowFile::onSchedule(const std::shared_ptr<core::ProcessContext> &c
 void GenerateFlowFile::onTrigger(core::ProcessContext *context, core::ProcessSession *session) {
   for (uint64_t i = 0; i < batchSize_; i++) {
     // For each batch
-    std::shared_ptr<FlowFileRecord> flowFile = std::static_pointer_cast<FlowFileRecord>(session->create());
+    org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> flowFile = static_pointer_cast<FlowFileRecord>(session->create());
     if (!flowFile) {
       logger_->log_error("Failed to create flowfile!");
       return;

@@ -70,8 +70,8 @@ namespace minifi {
 
 #define DEFAULT_CONFIG_NAME "conf/config.yml"
 
-FlowController::FlowController(std::shared_ptr<core::Repository> provenance_repo, std::shared_ptr<core::Repository> flow_file_repo, std::shared_ptr<Configure> configure,
-                               std::unique_ptr<core::FlowConfiguration> flow_configuration, std::shared_ptr<core::ContentRepository> content_repo, const std::string name, bool headless_mode)
+FlowController::FlowController(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> provenance_repo, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_file_repo, org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configure,
+                               std::unique_ptr<core::FlowConfiguration> flow_configuration, org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo, const std::string name, bool headless_mode)
     : core::controller::ControllerServiceProvider(core::getClassName<FlowController>()),
       root_(nullptr),
       running_(false),
@@ -80,7 +80,7 @@ FlowController::FlowController(std::shared_ptr<core::Repository> provenance_repo
       initialized_(false),
       provenance_repo_(provenance_repo),
       flow_file_repo_(flow_file_repo),
-      controller_service_map_(std::make_shared<core::controller::ControllerServiceMap>()),
+      controller_service_map_(org::apache::nifi::minifi::utils::debug_make_shared<core::controller::ControllerServiceMap>()),
       thread_pool_(2, false, nullptr, "Flowcontroller threadpool"),
       flow_configuration_(std::move(flow_configuration)),
       configuration_(configure),
@@ -211,7 +211,7 @@ bool FlowController::applyConfiguration(const std::string &source, const std::st
   unload();
   controller_map_->clear();
   auto prevRoot = std::move(this->root_);
-  this->root_ = std::move(newRoot);
+  this->root_ = utils::debug_shared_ptr<core::ProcessGroup>{std::move(newRoot)};
   initialized_ = false;
   bool started = false;
   try {
@@ -248,7 +248,7 @@ int16_t FlowController::stop() {
     logger_->log_info("Stop Flow Controller");
     if (this->root_) {
       // stop source processors first
-      this->root_->stopProcessing(timer_scheduler_, event_scheduler_, cron_scheduler_, [] (const std::shared_ptr<core::Processor>& proc) -> bool {
+      this->root_->stopProcessing(timer_scheduler_, event_scheduler_, cron_scheduler_, [] (const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor>& proc) -> bool {
         return !proc->hasIncomingConnections();
       });
       // we enable C2 to progressively increase the timeout
@@ -318,7 +318,7 @@ void FlowController::unload() {
   }
 }
 
-void FlowController::load(const std::shared_ptr<core::ProcessGroup> &root, bool reload) {
+void FlowController::load(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessGroup> &root, bool reload) {
   std::lock_guard<std::recursive_mutex> flow_lock(mutex_);
   if (running_) {
     stop();
@@ -334,11 +334,11 @@ void FlowController::load(const std::shared_ptr<core::ProcessGroup> &root, bool 
       io::NetworkPrioritizerFactory::getInstance()->clearPrioritizer();
     }
 
-    this->root_ = root == nullptr ? std::shared_ptr<core::ProcessGroup>(flow_configuration_->getRoot(configuration_filename_)) : root;
+    this->root_ = root == nullptr ? org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessGroup>(flow_configuration_->getRoot(configuration_filename_)) : root;
     logger_->log_info("Loaded root processor Group");
     logger_->log_info("Initializing timers");
     controller_service_provider_ = flow_configuration_->getControllerServiceProvider();
-    auto base_shared_ptr = std::dynamic_pointer_cast<core::controller::ControllerServiceProvider>(shared_from_this());
+    auto base_shared_ptr = dynamic_pointer_cast<core::controller::ControllerServiceProvider>(shared_from_this());
 
     if (!thread_pool_.isRunning() || reload) {
       thread_pool_.shutdown();
@@ -351,9 +351,9 @@ void FlowController::load(const std::shared_ptr<core::ProcessGroup> &root, bool 
     conditionalReloadScheduler<EventDrivenSchedulingAgent>(event_scheduler_, !event_scheduler_ || reload);
     conditionalReloadScheduler<CronDrivenSchedulingAgent>(cron_scheduler_, !cron_scheduler_ || reload);
 
-    std::static_pointer_cast<core::controller::StandardControllerServiceProvider>(controller_service_provider_)->setRootGroup(root_);
-    std::static_pointer_cast<core::controller::StandardControllerServiceProvider>(controller_service_provider_)->setSchedulingAgent(
-        std::static_pointer_cast<minifi::SchedulingAgent>(event_scheduler_));
+    static_pointer_cast<core::controller::StandardControllerServiceProvider>(controller_service_provider_)->setRootGroup(root_);
+    static_pointer_cast<core::controller::StandardControllerServiceProvider>(controller_service_provider_)->setSchedulingAgent(
+        static_pointer_cast<minifi::SchedulingAgent>(event_scheduler_));
 
     logger_->log_info("Loaded controller service provider");
     // Load Flow File from Repo
@@ -366,8 +366,8 @@ void FlowController::load(const std::shared_ptr<core::ProcessGroup> &root, bool 
 void FlowController::loadFlowRepo() {
   if (this->flow_file_repo_ != nullptr) {
     logger_->log_debug("Getting connection map");
-    std::map<std::string, std::shared_ptr<core::Connectable>> connectionMap;
-    std::map<std::string, std::shared_ptr<core::Connectable>> containers;
+    std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable>> connectionMap;
+    std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable>> containers;
     if (this->root_ != nullptr) {
       this->root_->getConnections(connectionMap);
       this->root_->getFlowFileContainers(containers);
@@ -465,14 +465,14 @@ void FlowController::initializeC2() {
 
   std::string class_csv;
   if (root_ != nullptr) {
-    std::shared_ptr<state::response::QueueMetrics> queueMetrics = std::make_shared<state::response::QueueMetrics>();
-    std::map<std::string, std::shared_ptr<Connection>> connections;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::QueueMetrics> queueMetrics = org::apache::nifi::minifi::utils::debug_make_shared<state::response::QueueMetrics>();
+    std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<Connection>> connections;
     root_->getConnections(connections);
     for (auto con : connections) {
       queueMetrics->addConnection(con.second);
     }
     device_information_[queueMetrics->getName()] = queueMetrics;
-    std::shared_ptr<state::response::RepositoryMetrics> repoMetrics = std::make_shared<state::response::RepositoryMetrics>();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::RepositoryMetrics> repoMetrics = org::apache::nifi::minifi::utils::debug_make_shared<state::response::RepositoryMetrics>();
     repoMetrics->addRepository(provenance_repo_);
     repoMetrics->addRepository(flow_file_repo_);
     device_information_[repoMetrics->getName()] = repoMetrics;
@@ -487,20 +487,20 @@ void FlowController::initializeC2() {
         logger_->log_error("No metric defined for %s", clazz);
         continue;
       }
-      std::shared_ptr<state::response::ResponseNode> processor = std::static_pointer_cast<state::response::ResponseNode>(ptr);
-      auto identifier = std::dynamic_pointer_cast<state::response::AgentIdentifier>(processor);
+      org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode> processor = static_pointer_cast<state::response::ResponseNode>(ptr);
+      auto identifier = dynamic_pointer_cast<state::response::AgentIdentifier>(processor);
       if (identifier != nullptr) {
         identifier->setIdentifier(identifier_str);
         identifier->setAgentClass(class_str);
       }
-      auto monitor = std::dynamic_pointer_cast<state::response::AgentMonitor>(processor);
+      auto monitor = dynamic_pointer_cast<state::response::AgentMonitor>(processor);
       if (monitor != nullptr) {
         monitor->addRepository(provenance_repo_);
         monitor->addRepository(flow_file_repo_);
         monitor->setStateMonitor(shared_from_this());
       }
-      auto flowMonitor = std::dynamic_pointer_cast<state::response::FlowMonitor>(processor);
-      std::map<std::string, std::shared_ptr<Connection>> connections;
+      auto flowMonitor = dynamic_pointer_cast<state::response::FlowMonitor>(processor);
+      std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<Connection>> connections;
       root_->getConnections(connections);
       if (flowMonitor != nullptr) {
         for (auto con : connections) {
@@ -522,7 +522,7 @@ void FlowController::initializeC2() {
         logger_->log_error("No metric defined for %s", clazz);
         continue;
       }
-      std::shared_ptr<state::response::ResponseNode> processor = std::static_pointer_cast<state::response::ResponseNode>(ptr);
+      org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode> processor = static_pointer_cast<state::response::ResponseNode>(ptr);
       std::lock_guard<std::mutex> lock(metrics_mutex_);
       device_information_[processor->getName()] = processor;
     }
@@ -530,14 +530,14 @@ void FlowController::initializeC2() {
 
   // first we should get all component metrics, then
   // we will build the mapping
-  std::vector<std::shared_ptr<core::Processor>> processors;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor>> processors;
   if (root_ != nullptr) {
     root_->getAllProcessors(processors);
     for (const auto &processor : processors) {
-      auto rep = std::dynamic_pointer_cast<state::response::ResponseNodeSource>(processor);
+      auto rep = dynamic_pointer_cast<state::response::ResponseNodeSource>(processor);
       // we have a metrics source.
       if (nullptr != rep) {
-        std::vector<std::shared_ptr<state::response::ResponseNode>> metric_vector;
+        std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode>> metric_vector;
         rep->getResponseNodes(metric_vector);
         for (auto metric : metric_vector) {
           component_metrics_[metric->getName()] = metric;
@@ -581,7 +581,7 @@ void FlowController::initializeC2() {
 
   if (!c2_initialized_) {
     c2_agent_ = std::unique_ptr<c2::C2Agent>(new c2::C2Agent(this,
-                                                             std::dynamic_pointer_cast<FlowController>(shared_from_this()),
+                                                             dynamic_pointer_cast<FlowController>(shared_from_this()),
                                                              configuration_));
     c2_agent_->start();
     c2_initialized_ = true;
@@ -607,7 +607,7 @@ void FlowController::loadC2ResponseConfiguration(const std::string &prefix) {
         std::string name;
 
         if (configuration_->get(nameOption.str(), name)) {
-          std::shared_ptr<state::response::ResponseNode> new_node = std::make_shared<state::response::ObjectNode>(name);
+          org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode> new_node = org::apache::nifi::minifi::utils::debug_make_shared<state::response::ObjectNode>(name);
           if (configuration_->get(classOption.str(), class_definitions)) {
             std::vector<std::string> classes = utils::StringUtils::split(class_definitions, ",");
             for (std::string clazz : classes) {
@@ -624,8 +624,8 @@ void FlowController::loadC2ResponseConfiguration(const std::string &prefix) {
                   continue;
                 }
               }
-              auto node = std::dynamic_pointer_cast<state::response::ResponseNode>(ptr);
-              std::static_pointer_cast<state::response::ObjectNode>(new_node)->add_node(node);
+              auto node = dynamic_pointer_cast<state::response::ResponseNode>(ptr);
+              static_pointer_cast<state::response::ObjectNode>(new_node)->add_node(node);
             }
 
           } else {
@@ -643,7 +643,7 @@ void FlowController::loadC2ResponseConfiguration(const std::string &prefix) {
   }
 }
 
-std::shared_ptr<state::response::ResponseNode> FlowController::loadC2ResponseConfiguration(const std::string &prefix, std::shared_ptr<state::response::ResponseNode> prev_node) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode> FlowController::loadC2ResponseConfiguration(const std::string &prefix, org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode> prev_node) {
   std::string class_definitions;
   if (configuration_->get(prefix, class_definitions)) {
     std::vector<std::string> classes = utils::StringUtils::split(class_definitions, ",");
@@ -661,13 +661,13 @@ std::shared_ptr<state::response::ResponseNode> FlowController::loadC2ResponseCon
         std::string name;
 
         if (configuration_->get(nameOption.str(), name)) {
-          std::shared_ptr<state::response::ResponseNode> new_node = std::make_shared<state::response::ObjectNode>(name);
+          org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode> new_node = org::apache::nifi::minifi::utils::debug_make_shared<state::response::ObjectNode>(name);
           if (name.find(",") != std::string::npos) {
             std::vector<std::string> sub_classes = utils::StringUtils::split(name, ",");
             for (std::string subClassStr : classes) {
               auto node = loadC2ResponseConfiguration(subClassStr, prev_node);
               if (node != nullptr)
-                std::static_pointer_cast<state::response::ObjectNode>(prev_node)->add_node(node);
+                static_pointer_cast<state::response::ObjectNode>(prev_node)->add_node(node);
             }
 
           } else {
@@ -687,17 +687,17 @@ std::shared_ptr<state::response::ResponseNode> FlowController::loadC2ResponseCon
                   }
                 }
 
-                auto node = std::dynamic_pointer_cast<state::response::ResponseNode>(ptr);
-                std::static_pointer_cast<state::response::ObjectNode>(new_node)->add_node(node);
+                auto node = dynamic_pointer_cast<state::response::ResponseNode>(ptr);
+                static_pointer_cast<state::response::ObjectNode>(new_node)->add_node(node);
               }
               if (!new_node->isEmpty())
-                std::static_pointer_cast<state::response::ObjectNode>(prev_node)->add_node(new_node);
+                static_pointer_cast<state::response::ObjectNode>(prev_node)->add_node(new_node);
 
             } else {
               std::stringstream optionName;
               optionName << option.str() << "." << name;
               auto sub_node = loadC2ResponseConfiguration(optionName.str(), new_node);
-              std::static_pointer_cast<state::response::ObjectNode>(prev_node)->add_node(sub_node);
+              static_pointer_cast<state::response::ObjectNode>(prev_node)->add_node(sub_node);
             }
           }
         }
@@ -724,7 +724,7 @@ void FlowController::loadC2ResponseConfiguration() {
  * @param id service identifier
  * @param firstTimeAdded first time this CS was added
  */
-std::shared_ptr<core::controller::ControllerServiceNode> FlowController::createControllerService(const std::string &type, const std::string &fullType, const std::string &id, bool firstTimeAdded) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> FlowController::createControllerService(const std::string &type, const std::string &fullType, const std::string &id, bool firstTimeAdded) {
   return controller_service_provider_->createControllerService(type, fullType, id, firstTimeAdded);
 }
 
@@ -736,7 +736,7 @@ std::shared_ptr<core::controller::ControllerServiceNode> FlowController::createC
  * @param serviceNode service node to be removed.
  */
 
-void FlowController::removeControllerService(const std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
+void FlowController::removeControllerService(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
   controller_map_->removeControllerService(serviceNode);
 }
 
@@ -744,7 +744,7 @@ void FlowController::removeControllerService(const std::shared_ptr<core::control
  * Enables the controller service services
  * @param serviceNode service node which will be disabled, along with linked services.
  */
-std::future<utils::TaskRescheduleInfo> FlowController::enableControllerService(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
+std::future<utils::TaskRescheduleInfo> FlowController::enableControllerService(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
   return controller_service_provider_->enableControllerService(serviceNode);
 }
 
@@ -752,14 +752,14 @@ std::future<utils::TaskRescheduleInfo> FlowController::enableControllerService(s
  * Enables controller services
  * @param serviceNoden vector of service nodes which will be enabled, along with linked services.
  */
-void FlowController::enableControllerServices(std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> serviceNodes) {
+void FlowController::enableControllerServices(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> serviceNodes) {
 }
 
 /**
  * Disables controller services
  * @param serviceNode service node which will be disabled, along with linked services.
  */
-std::future<utils::TaskRescheduleInfo> FlowController::disableControllerService(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
+std::future<utils::TaskRescheduleInfo> FlowController::disableControllerService(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
   return controller_service_provider_->disableControllerService(serviceNode);
 }
 
@@ -773,7 +773,7 @@ void FlowController::clearControllerServices() {
 /**
  * Gets all controller services.
  */
-std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> FlowController::getAllControllerServices() {
+std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> FlowController::getAllControllerServices() {
   return controller_service_provider_->getAllControllerServices();
 }
 
@@ -782,7 +782,7 @@ std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> FlowContro
  * @param identifier service identifier
  * @return shared pointer to teh controller service implementation or nullptr if it does not exist.
  */
-std::shared_ptr<core::controller::ControllerService> FlowController::getControllerService(const std::string &identifier) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerService> FlowController::getControllerService(const std::string &identifier) {
   return controller_service_provider_->getControllerService(identifier);
 }
 /**
@@ -790,17 +790,17 @@ std::shared_ptr<core::controller::ControllerService> FlowController::getControll
  * @param id service identifier
  * @return shared pointer to the controller service node or nullptr if it does not exist.
  */
-std::shared_ptr<core::controller::ControllerServiceNode> FlowController::getControllerServiceNode(const std::string &id) const {
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> FlowController::getControllerServiceNode(const std::string &id) const {
   return controller_service_provider_->getControllerServiceNode(id);
 }
 
-void FlowController::verifyCanStopReferencingComponents(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
+void FlowController::verifyCanStopReferencingComponents(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
 }
 
 /**
  * Unschedules referencing components.
  */
-std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> FlowController::unscheduleReferencingComponents(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
+std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> FlowController::unscheduleReferencingComponents(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
   return controller_service_provider_->unscheduleReferencingComponents(serviceNode);
 }
 
@@ -808,7 +808,7 @@ std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> FlowContro
  * Verify can disable referencing components
  * @param serviceNode service node whose referenced components will be scheduled.
  */
-void FlowController::verifyCanDisableReferencingServices(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
+void FlowController::verifyCanDisableReferencingServices(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
   controller_service_provider_->verifyCanDisableReferencingServices(serviceNode);
 }
 
@@ -816,7 +816,7 @@ void FlowController::verifyCanDisableReferencingServices(std::shared_ptr<core::c
  * Disables referencing components
  * @param serviceNode service node whose referenced components will be scheduled.
  */
-std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> FlowController::disableReferencingServices(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
+std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> FlowController::disableReferencingServices(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
   return controller_service_provider_->disableReferencingServices(serviceNode);
 }
 
@@ -824,7 +824,7 @@ std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> FlowContro
  * Verify can enable referencing components
  * @param serviceNode service node whose referenced components will be scheduled.
  */
-void FlowController::verifyCanEnableReferencingServices(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
+void FlowController::verifyCanEnableReferencingServices(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
   controller_service_provider_->verifyCanEnableReferencingServices(serviceNode);
 }
 
@@ -839,7 +839,7 @@ bool FlowController::isControllerServiceEnabled(const std::string &identifier) {
  * Enables referencing components
  * @param serviceNode service node whose referenced components will be scheduled.
  */
-std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> FlowController::enableReferencingServices(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
+std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> FlowController::enableReferencingServices(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
   return controller_service_provider_->enableReferencingServices(serviceNode);
 }
 
@@ -847,7 +847,7 @@ std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> FlowContro
  * Schedules referencing components
  * @param serviceNode service node whose referenced components will be scheduled.
  */
-std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> FlowController::scheduleReferencingComponents(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
+std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> FlowController::scheduleReferencingComponents(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
   return controller_service_provider_->scheduleReferencingComponents(serviceNode);
 }
 
@@ -855,7 +855,7 @@ std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> FlowContro
  * Returns controller service components referenced by serviceIdentifier from the embedded
  * controller service provider;
  */
-std::shared_ptr<core::controller::ControllerService> FlowController::getControllerServiceForComponent(const std::string &serviceIdentifier, const std::string &componentId) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerService> FlowController::getControllerServiceForComponent(const std::string &serviceIdentifier, const std::string &componentId) {
   return controller_service_provider_->getControllerServiceForComponent(serviceIdentifier, componentId);
 }
 
@@ -884,7 +884,7 @@ int16_t FlowController::applyUpdate(const std::string &source, const std::string
 int16_t FlowController::clearConnection(const std::string &connection) {
   if (root_ != nullptr) {
     logger_->log_info("Attempting to clear connection %s", connection);
-    std::map<std::string, std::shared_ptr<Connection>> connections;
+    std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<Connection>> connections;
     root_->getConnections(connections);
     auto conn = connections.find(connection);
     if (conn != connections.end()) {
@@ -895,7 +895,7 @@ int16_t FlowController::clearConnection(const std::string &connection) {
   return -1;
 }
 
-std::shared_ptr<state::response::ResponseNode> FlowController::getMetricsNode(const std::string& metricsClass) const {
+org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode> FlowController::getMetricsNode(const std::string& metricsClass) const {
   std::lock_guard<std::mutex> lock(metrics_mutex_);
   if (!metricsClass.empty()) {
     const auto citer = component_metrics_.find(metricsClass);
@@ -911,14 +911,14 @@ std::shared_ptr<state::response::ResponseNode> FlowController::getMetricsNode(co
   return nullptr;
 }
 
-std::vector<std::shared_ptr<state::response::ResponseNode>> FlowController::getHeartbeatNodes(bool includeManifest) const {
+std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode>> FlowController::getHeartbeatNodes(bool includeManifest) const {
   std::string fullHb{"true"};
   configuration_->get("nifi.c2.full.heartbeat", fullHb);
   const bool include = includeManifest ? true : (fullHb == "true");
 
-  std::vector<std::shared_ptr<state::response::ResponseNode>> nodes;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode>> nodes;
   for (const auto& entry : root_response_nodes_) {
-    auto identifier = std::dynamic_pointer_cast<state::response::AgentIdentifier>(entry.second);
+    auto identifier = dynamic_pointer_cast<state::response::AgentIdentifier>(entry.second);
     if (identifier) {
       identifier->includeAgentManifest(include);
     }
@@ -927,30 +927,30 @@ std::vector<std::shared_ptr<state::response::ResponseNode>> FlowController::getH
   return nodes;
 }
 
-std::shared_ptr<state::response::ResponseNode> FlowController::getAgentManifest() const {
-  auto agentInfo = std::make_shared<state::response::AgentInformation>("agentInfo");
+org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode> FlowController::getAgentManifest() const {
+  auto agentInfo = org::apache::nifi::minifi::utils::debug_make_shared<state::response::AgentInformation>("agentInfo");
   agentInfo->setIdentifier(configuration_->getAgentIdentifier());
   agentInfo->setAgentClass(configuration_->getAgentClass());
   agentInfo->includeAgentStatus(false);
   return agentInfo;
 }
 
-std::vector<std::shared_ptr<state::StateController>> FlowController::getAllComponents() {
-  std::vector<std::shared_ptr<state::StateController>> vec;
+std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<state::StateController>> FlowController::getAllComponents() {
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<state::StateController>> vec;
   vec.push_back(shared_from_this());
-  std::vector<std::shared_ptr<core::Processor>> processors;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor>> processors;
   if (root_ != nullptr) {
     root_->getAllProcessors(processors);
     for (auto &processor : processors) {
       switch (processor->getSchedulingStrategy()) {
         case core::SchedulingStrategy::TIMER_DRIVEN:
-          vec.push_back(std::make_shared<state::ProcessorController>(processor, timer_scheduler_));
+          vec.push_back(org::apache::nifi::minifi::utils::debug_make_shared<state::ProcessorController>(processor, timer_scheduler_));
           break;
         case core::SchedulingStrategy::EVENT_DRIVEN:
-          vec.push_back(std::make_shared<state::ProcessorController>(processor, event_scheduler_));
+          vec.push_back(org::apache::nifi::minifi::utils::debug_make_shared<state::ProcessorController>(processor, event_scheduler_));
           break;
         case core::SchedulingStrategy::CRON_DRIVEN:
-          vec.push_back(std::make_shared<state::ProcessorController>(processor, cron_scheduler_));
+          vec.push_back(org::apache::nifi::minifi::utils::debug_make_shared<state::ProcessorController>(processor, cron_scheduler_));
           break;
         default:
           break;
@@ -959,24 +959,24 @@ std::vector<std::shared_ptr<state::StateController>> FlowController::getAllCompo
   }
   return vec;
 }
-std::vector<std::shared_ptr<state::StateController>> FlowController::getComponents(const std::string &name) {
-  std::vector<std::shared_ptr<state::StateController>> vec;
+std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<state::StateController>> FlowController::getComponents(const std::string &name) {
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<state::StateController>> vec;
 
   if (name == "FlowController") {
     vec.push_back(shared_from_this());
   } else {
     // check processors
-    std::shared_ptr<core::Processor> processor = root_->findProcessor(name);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor = root_->findProcessor(name);
     if (processor != nullptr) {
       switch (processor->getSchedulingStrategy()) {
         case core::SchedulingStrategy::TIMER_DRIVEN:
-          vec.push_back(std::make_shared<state::ProcessorController>(processor, timer_scheduler_));
+          vec.push_back(org::apache::nifi::minifi::utils::debug_make_shared<state::ProcessorController>(processor, timer_scheduler_));
           break;
         case core::SchedulingStrategy::EVENT_DRIVEN:
-          vec.push_back(std::make_shared<state::ProcessorController>(processor, event_scheduler_));
+          vec.push_back(org::apache::nifi::minifi::utils::debug_make_shared<state::ProcessorController>(processor, event_scheduler_));
           break;
         case core::SchedulingStrategy::CRON_DRIVEN:
-          vec.push_back(std::make_shared<state::ProcessorController>(processor, cron_scheduler_));
+          vec.push_back(org::apache::nifi::minifi::utils::debug_make_shared<state::ProcessorController>(processor, cron_scheduler_));
           break;
         default:
           break;

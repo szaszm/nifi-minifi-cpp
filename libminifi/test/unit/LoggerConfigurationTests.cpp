@@ -55,7 +55,7 @@ TEST_CASE("TestLoggerConfiguration::initialize_namespaces", "[test initialize_na
   TestController test_controller;
   LogTestController &logTestController = LogTestController::getInstance();
   LogTestController::getInstance().setDebug<logging::LoggerProperties>();
-  std::shared_ptr<logging::LoggerProperties> logger_properties = std::make_shared<logging::LoggerProperties>();
+  auto logger_properties = std::make_shared<logging::LoggerProperties>();
 
   std::ostringstream stdout;
   std::ostringstream stderr;

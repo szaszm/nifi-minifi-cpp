@@ -65,7 +65,7 @@ class ConvertJSONAck : public ConvertBase {
    * ProcessSession objects.
    */
 
-  virtual void onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) override;
+  virtual void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) override;
 
  protected:
 
@@ -73,7 +73,7 @@ class ConvertJSONAck : public ConvertBase {
    public:
     ReadCallback() = default;
     ~ReadCallback() = default;
-    int64_t process(std::shared_ptr<io::BaseStream> stream) {
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
       int64_t ret = 0;
       if (nullptr == stream)
         return 0;

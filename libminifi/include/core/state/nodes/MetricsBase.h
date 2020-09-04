@@ -104,7 +104,7 @@ class ObjectNode : public ResponseNode {
       : ResponseNode(name, uuid) {
   }
 
-  void add_node(const std::shared_ptr<ResponseNode> &node) {
+  void add_node(const org::apache::nifi::minifi::utils::debug_shared_ptr<ResponseNode> &node) {
     nodes_.push_back(node);
   }
 
@@ -133,7 +133,7 @@ class ObjectNode : public ResponseNode {
   }
 
  protected:
-  std::vector<std::shared_ptr<ResponseNode>> nodes_;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<ResponseNode>> nodes_;
 };
 
 /**
@@ -154,9 +154,9 @@ class ResponseNodeSource {
    *  1 No error condition, but cannot obtain lock in timely manner.
    *  -1 failure
    */
-  virtual int16_t getResponseNodes(std::vector<std::shared_ptr<ResponseNode>> &metric_vector) = 0;
+  virtual int16_t getResponseNodes(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<ResponseNode>> &metric_vector) = 0;
 
-  virtual int16_t getMetricNodes(std::vector<std::shared_ptr<ResponseNode>> &metric_vector) = 0;
+  virtual int16_t getMetricNodes(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<ResponseNode>> &metric_vector) = 0;
 };
 
 /**
@@ -177,11 +177,11 @@ class MetricsNodeSource : public ResponseNodeSource {
    *  1 No error condition, but cannot obtain lock in timely manner.
    *  -1 failure
    */
-  virtual int16_t getResponseNodes(std::vector<std::shared_ptr<ResponseNode>> &metric_vector) {
+  virtual int16_t getResponseNodes(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<ResponseNode>> &metric_vector) {
     return getMetricNodes(metric_vector);
   }
 
-  virtual int16_t getMetricNodes(std::vector<std::shared_ptr<ResponseNode>> &metric_vector) = 0;
+  virtual int16_t getMetricNodes(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<ResponseNode>> &metric_vector) = 0;
 };
 
 class NodeReporter {
@@ -194,20 +194,20 @@ class NodeReporter {
    * Retrieves metrics node
    * @return metrics response node
    */
-  virtual std::shared_ptr<ResponseNode> getMetricsNode(const std::string& metricsClass) const = 0;
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<ResponseNode> getMetricsNode(const std::string& metricsClass) const = 0;
 
   /**
    * Retrieves root nodes configured to be included in heartbeat
    * @param includeManifest -- determines if manifest is to be included
    * @return a list of response nodes
    */
-  virtual std::vector<std::shared_ptr<ResponseNode>> getHeartbeatNodes(bool includeManifest) const = 0;
+  virtual std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<ResponseNode>> getHeartbeatNodes(bool includeManifest) const = 0;
 
   /**
    * Retrieves the agent manifest to be sent as a response to C2 DESCRIBE manifest
    * @return the agent manifest response node
    */
-  virtual std::shared_ptr<state::response::ResponseNode> getAgentManifest() const = 0;
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode> getAgentManifest() const = 0;
 };
 
 /**
@@ -225,7 +225,7 @@ class ResponseNodeSink {
    *  1 No error condition, but cannot obtain lock in timely manner.
    *  -1 failure
    */
-  virtual int16_t setResponseNodes(const std::shared_ptr<ResponseNode> &metrics) = 0;
+  virtual int16_t setResponseNodes(const org::apache::nifi::minifi::utils::debug_shared_ptr<ResponseNode> &metrics) = 0;
 
   /**
    * Setter for metrics nodes in this sink.
@@ -235,7 +235,7 @@ class ResponseNodeSink {
    *  1 No error condition, but cannot obtain lock in timely manner.
    *  -1 failure
    */
-  virtual int16_t setMetricsNodes(const std::shared_ptr<ResponseNode> &metrics) = 0;
+  virtual int16_t setMetricsNodes(const org::apache::nifi::minifi::utils::debug_shared_ptr<ResponseNode> &metrics) = 0;
 };
 
 }  // namespace response

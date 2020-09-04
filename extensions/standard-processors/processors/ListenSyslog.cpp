@@ -295,12 +295,12 @@ void ListenSyslog::onTrigger(core::ProcessContext *context, core::ProcessSession
   std::queue<SysLogEvent> eventQueue;
   pollEvent(eventQueue, _maxBatchSize);
   bool firstEvent = true;
-  std::shared_ptr<FlowFileRecord> flowFile = NULL;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> flowFile = NULL;
   while (!eventQueue.empty()) {
     SysLogEvent event = eventQueue.front();
     eventQueue.pop();
     if (firstEvent) {
-      flowFile = std::static_pointer_cast<FlowFileRecord>(session->create());
+      flowFile = static_pointer_cast<FlowFileRecord>(session->create());
       if (!flowFile)
         return;
       ListenSyslog::WriteCallback callback(event.payload, event.len);

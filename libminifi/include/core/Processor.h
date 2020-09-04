@@ -62,7 +62,7 @@ namespace core {
 
 #define BUILDING_DLL 1
 // Processor Class
-class Processor : public Connectable, public ConfigurableComponent, public std::enable_shared_from_this<Processor> {
+class Processor : public Connectable, public ConfigurableComponent, public org::apache::nifi::minifi::utils::enable_debug_shared_from_this<Processor> {
  public:
   // Constructor
   /*!
@@ -216,18 +216,18 @@ class Processor : public Connectable, public ConfigurableComponent, public std::
   bool flowFilesOutGoingFull();
 
   // Add connection
-  bool addConnection(std::shared_ptr<Connectable> connection);
+  bool addConnection(org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable> connection);
   // Remove connection
-  void removeConnection(std::shared_ptr<Connectable> connection);
+  void removeConnection(org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable> connection);
   // Get the UUID as string
   std::string getUUIDStr() const {
     return uuidStr_;
   }
   // Get the Next RoundRobin incoming connection
-  std::shared_ptr<Connection> getNextIncomingConnection();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Connection> getNextIncomingConnection();
   // On Trigger
 
-  virtual void onTrigger(const std::shared_ptr<ProcessContext> &context, const std::shared_ptr<ProcessSessionFactory> &sessionFactory);
+  virtual void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessSessionFactory> &sessionFactory);
 
   void onTrigger(ProcessContext *context, ProcessSessionFactory *sessionFactory);
 
@@ -237,7 +237,7 @@ class Processor : public Connectable, public ConfigurableComponent, public std::
 
  public:
   // OnTrigger method, implemented by NiFi Processor Designer
-  virtual void onTrigger(const std::shared_ptr<ProcessContext> &context, const std::shared_ptr<ProcessSession> &session) {
+  virtual void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessSession> &session) {
     onTrigger(context.get(), session.get());
   }
   virtual void onTrigger(ProcessContext *context, ProcessSession *session) {
@@ -246,7 +246,7 @@ class Processor : public Connectable, public ConfigurableComponent, public std::
   void initialize() override {
   }
   // Scheduled event hook, overridden by NiFi Process Designer
-  virtual void onSchedule(const std::shared_ptr<ProcessContext> &context, const std::shared_ptr<ProcessSessionFactory> &sessionFactory) {
+  virtual void onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessSessionFactory> &sessionFactory) {
     onSchedule(context.get(), sessionFactory.get());
   }
   virtual void onSchedule(ProcessContext *context, ProcessSessionFactory *sessionFactory) {
@@ -260,7 +260,7 @@ class Processor : public Connectable, public ConfigurableComponent, public std::
   // Check all incoming connections for work
   bool isWorkAvailable() override;
 
-  void setStreamFactory(std::shared_ptr<minifi::io::StreamFactory> stream_factory) {
+  void setStreamFactory(org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::io::StreamFactory> stream_factory) {
     stream_factory_ = stream_factory;
   }
 
@@ -270,13 +270,13 @@ class Processor : public Connectable, public ConfigurableComponent, public std::
 
   bool isThrottledByBackpressure() const;
 
-  std::shared_ptr<Connectable> pickIncomingConnection() override;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable> pickIncomingConnection() override;
 
  protected:
   virtual void notifyStop() {
   }
 
-  std::shared_ptr<minifi::io::StreamFactory> stream_factory_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::io::StreamFactory> stream_factory_;
 
   // Processor state
   std::atomic<ScheduledState> state_;
@@ -317,10 +317,10 @@ class Processor : public Connectable, public ConfigurableComponent, public std::
   // must hold the graphMutex
   void updateReachability(const std::lock_guard<std::mutex>& graph_lock, bool force = false);
 
-  static bool partOfCycle(const std::shared_ptr<Connection>& conn);
+  static bool partOfCycle(const org::apache::nifi::minifi::utils::debug_shared_ptr<Connection>& conn);
 
   // an outgoing connection allows us to reach these nodes
-  std::unordered_map<std::shared_ptr<Connection>, std::unordered_set<std::shared_ptr<const Processor>>> reachable_processors_;
+  std::unordered_map<org::apache::nifi::minifi::utils::debug_shared_ptr<Connection>, std::unordered_set<org::apache::nifi::minifi::utils::debug_shared_ptr<const Processor>>> reachable_processors_;
 
   std::shared_ptr<logging::Logger> logger_;
 };

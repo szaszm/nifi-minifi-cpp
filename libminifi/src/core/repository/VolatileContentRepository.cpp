@@ -36,16 +36,16 @@ namespace repository {
 
 const char *VolatileContentRepository::minimal_locking = "minimal.locking";
 
-bool VolatileContentRepository::initialize(const std::shared_ptr<Configure> &configure) {
+bool VolatileContentRepository::initialize(const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure) {
   VolatileRepository::initialize(configure);
-  resource_claim_comparator_ = [](std::shared_ptr<minifi::ResourceClaim> lhsPtr, std::shared_ptr<minifi::ResourceClaim> rhsPtr) {
+  resource_claim_comparator_ = [](org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> lhsPtr, org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> rhsPtr) {
     if (lhsPtr == nullptr || rhsPtr == nullptr) {
       return false;
     }
     return lhsPtr->getContentFullPath() == rhsPtr->getContentFullPath();};
-  resource_claim_check_ = [](std::shared_ptr<minifi::ResourceClaim> claim) {
+  resource_claim_check_ = [](org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> claim) {
     return claim->getFlowFileRecordOwnedCount() <= 0;};
-  claim_reclaimer_ = [&](std::shared_ptr<minifi::ResourceClaim> claim) {if (claim->getFlowFileRecordOwnedCount() <= 0) {
+  claim_reclaimer_ = [&](org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> claim) {if (claim->getFlowFileRecordOwnedCount() <= 0) {
       remove(claim);
     }
   };
@@ -84,12 +84,11 @@ void VolatileContentRepository::start() {
   if (running_)
     return;
   thread_ = std::thread(&VolatileContentRepository::run, shared_from_parent<VolatileContentRepository>());
-  thread_.detach();
   running_ = true;
   logger_->log_info("%s Repository Monitor Thread Start", getName());
 }
 
-std::shared_ptr<io::BaseStream> VolatileContentRepository::write(const std::shared_ptr<minifi::ResourceClaim> &claim, bool append) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> VolatileContentRepository::write(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> &claim, bool append) {
   logger_->log_info("enter write for %s", claim->getContentFullPath());
   {
     std::lock_guard<std::mutex> lock(map_mutex_);
@@ -100,7 +99,7 @@ std::shared_ptr<io::BaseStream> VolatileContentRepository::write(const std::shar
       if (ent == nullptr) {
         return nullptr;
       }
-      return std::make_shared<io::AtomicEntryStream<std::shared_ptr<minifi::ResourceClaim>>>(claim, ent);
+      return org::apache::nifi::minifi::utils::debug_make_shared<io::AtomicEntryStream<org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim>>>(claim, ent);
     }
   }
 
@@ -111,7 +110,7 @@ std::shared_ptr<io::BaseStream> VolatileContentRepository::write(const std::shar
         std::lock_guard<std::mutex> lock(map_mutex_);
         master_list_[claim->getContentFullPath()] = ent;
         logger_->log_info("Minimize locking, return stream for %s", claim->getContentFullPath());
-        return std::make_shared<io::AtomicEntryStream<std::shared_ptr<minifi::ResourceClaim>>>(claim, ent);
+        return org::apache::nifi::minifi::utils::debug_make_shared<io::AtomicEntryStream<org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim>>>(claim, ent);
       }
       size++;
     }
@@ -119,12 +118,12 @@ std::shared_ptr<io::BaseStream> VolatileContentRepository::write(const std::shar
     std::lock_guard<std::mutex> lock(map_mutex_);
     auto claim_check = master_list_.find(claim->getContentFullPath());
     if (claim_check != master_list_.end()) {
-      return std::make_shared<io::AtomicEntryStream<std::shared_ptr<minifi::ResourceClaim>>>(claim, claim_check->second);
+      return org::apache::nifi::minifi::utils::debug_make_shared<io::AtomicEntryStream<org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim>>>(claim, claim_check->second);
     } else {
-      AtomicEntry<std::shared_ptr<minifi::ResourceClaim>> *ent = new AtomicEntry<std::shared_ptr<minifi::ResourceClaim>>(&current_size_, &max_size_);
+      AtomicEntry<org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim>> *ent = new AtomicEntry<org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim>>(&current_size_, &max_size_);
       if (ent->testAndSetKey(claim, nullptr, nullptr, resource_claim_comparator_)) {
         master_list_[claim->getContentFullPath()] = ent;
-        return std::make_shared<io::AtomicEntryStream<std::shared_ptr<minifi::ResourceClaim>>>(claim, ent);
+        return org::apache::nifi::minifi::utils::debug_make_shared<io::AtomicEntryStream<org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim>>>(claim, ent);
       }
     }
   }
@@ -132,7 +131,7 @@ std::shared_ptr<io::BaseStream> VolatileContentRepository::write(const std::shar
   return nullptr;
 }
 
-bool VolatileContentRepository::exists(const std::shared_ptr<minifi::ResourceClaim> &claim) {
+bool VolatileContentRepository::exists(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> &claim) {
   std::lock_guard<std::mutex> lock(map_mutex_);
   auto claim_check = master_list_.find(claim->getContentFullPath());
   if (claim_check != master_list_.end()) {
@@ -146,7 +145,7 @@ bool VolatileContentRepository::exists(const std::shared_ptr<minifi::ResourceCla
   return false;
 }
 
-std::shared_ptr<io::BaseStream> VolatileContentRepository::read(const std::shared_ptr<minifi::ResourceClaim> &claim) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> VolatileContentRepository::read(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> &claim) {
   std::lock_guard<std::mutex> lock(map_mutex_);
   auto claim_check = master_list_.find(claim->getContentFullPath());
   if (claim_check != master_list_.end()) {
@@ -154,13 +153,13 @@ std::shared_ptr<io::BaseStream> VolatileContentRepository::read(const std::share
     if (ent == nullptr) {
       return nullptr;
     }
-    return std::make_shared<io::AtomicEntryStream<std::shared_ptr<minifi::ResourceClaim>>>(claim, ent);
+    return org::apache::nifi::minifi::utils::debug_make_shared<io::AtomicEntryStream<org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim>>>(claim, ent);
   }
 
   return nullptr;
 }
 
-bool VolatileContentRepository::remove(const std::shared_ptr<minifi::ResourceClaim> &claim) {
+bool VolatileContentRepository::remove(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> &claim) {
   if (LIKELY(minimize_locking_ == true)) {
     std::lock_guard<std::mutex> lock(map_mutex_);
     auto ent = master_list_.find(claim->getContentFullPath());

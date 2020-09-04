@@ -23,11 +23,11 @@
 #include "core/RepositoryFactory.h"
 
 TEST_CASE("NoYamlSupport1", "[NoYamlSupport1]") {
-  std::shared_ptr<core::Repository> prov_repo = core::createRepository(
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> prov_repo = core::createRepository(
       "provenancerepository", true);
   REQUIRE(nullptr != prov_repo);
   std::unique_ptr<core::FlowConfiguration> flow_configuration = std::move(
-      core::createFlowConfiguration(prov_repo, prov_repo, std::make_shared<minifi::Configure>(), std::make_shared<minifi::io::StreamFactory>(false),
+      core::createFlowConfiguration(prov_repo, prov_repo, org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>(), org::apache::nifi::minifi::utils::debug_make_shared<minifi::io::StreamFactory>(false),
           "yamlconfiguration"));
 
   REQUIRE(nullptr != flow_configuration);

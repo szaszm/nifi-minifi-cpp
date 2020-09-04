@@ -78,7 +78,7 @@ TEST_CASE("Python: Test Read File", "[executescriptPythonRead]") { // NOLINT
   testController.runSession(plan, false);
 
   auto records = plan->getProvenanceRecords();
-  std::shared_ptr<core::FlowFile> record = plan->getCurrentFlowFile();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> record = plan->getCurrentFlowFile();
   REQUIRE(record == nullptr);
   REQUIRE(records.empty());
 
@@ -162,7 +162,7 @@ TEST_CASE("Python: Test Write File", "[executescriptPythonWrite]") { // NOLINT
   testController.runSession(plan, false);
 
   auto records = plan->getProvenanceRecords();
-  std::shared_ptr<core::FlowFile> record = plan->getCurrentFlowFile();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> record = plan->getCurrentFlowFile();
   REQUIRE(record == nullptr);
   REQUIRE(records.empty());
 

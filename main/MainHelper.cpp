@@ -84,7 +84,7 @@ bool validHome(const std::string &home_path) {
 }
 
 void setSyslogLogger() {
-  std::shared_ptr<logging::LoggerProperties> service_logger = std::make_shared<logging::LoggerProperties>();
+  auto service_logger = std::make_shared<logging::LoggerProperties>();
   service_logger->set("appender.syslog", "syslog");
   service_logger->set("logger.root", "INFO,syslog");
   logging::LoggerConfiguration::getConfiguration().initialize(service_logger);

@@ -41,7 +41,7 @@ namespace controllers {
 /**
  * Purpose: Network prioritizer for selecting network interfaces through the flow configuration.
  */
-class NetworkPrioritizerService : public core::controller::ControllerService, public minifi::io::NetworkPrioritizer, public std::enable_shared_from_this<NetworkPrioritizerService> {
+class NetworkPrioritizerService : public core::controller::ControllerService, public minifi::io::NetworkPrioritizer, public org::apache::nifi::minifi::utils::enable_debug_shared_from_this<NetworkPrioritizerService> {
  public:
   explicit NetworkPrioritizerService(const std::string &name, const std::string &id)
       : ControllerService(name, id),
@@ -69,7 +69,7 @@ class NetworkPrioritizerService : public core::controller::ControllerService, pu
         logger_(logging::LoggerFactory<NetworkPrioritizerService>::getLogger()) {
   }
 
-  explicit NetworkPrioritizerService(const std::string &name, const std::shared_ptr<Configure> &configuration)
+  explicit NetworkPrioritizerService(const std::string &name, const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configuration)
       : NetworkPrioritizerService(name) {
     setConfiguration(configuration);
     initialize();

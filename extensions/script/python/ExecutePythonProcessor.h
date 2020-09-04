@@ -59,8 +59,8 @@ class ExecutePythonProcessor : public core::Processor {
   static core::Relationship Failure;
 
   void initialize() override;
-  void onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
-  void onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) override;
+  void onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
+  void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) override;
 
   void setSupportsDynamicProperties() {
     python_dynamic_ = true;
@@ -106,10 +106,10 @@ class ExecutePythonProcessor : public core::Processor {
   std::string script_to_exec_;
   std::string module_directory_;
 
-  moodycamel::ConcurrentQueue<std::shared_ptr<python::PythonScriptEngine>> script_engine_q_;
+  moodycamel::ConcurrentQueue<org::apache::nifi::minifi::utils::debug_shared_ptr<python::PythonScriptEngine>> script_engine_q_;
 
-  std::shared_ptr<python::PythonScriptEngine> getScriptEngine();
-  void handleEngineNoLongerInUse(std::shared_ptr<python::PythonScriptEngine>&& engine);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<python::PythonScriptEngine> getScriptEngine();
+  void handleEngineNoLongerInUse(org::apache::nifi::minifi::utils::debug_shared_ptr<python::PythonScriptEngine>&& engine);
   void appendPathForImportModules();
   void loadScriptFromFile(const std::string& file_path);
   void loadScript();
@@ -117,8 +117,8 @@ class ExecutePythonProcessor : public core::Processor {
 
 
   template<typename T>
-  std::shared_ptr<T> createEngine() const {
-    auto engine = std::make_shared<T>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<T> createEngine() const {
+    auto engine = utils::debug_make_shared<T>();
 
     engine->bind("log", python_logger_);
     engine->bind("REL_SUCCESS", Success);

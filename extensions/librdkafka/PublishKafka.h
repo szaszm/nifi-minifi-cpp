@@ -101,16 +101,16 @@ class PublishKafka : public core::Processor {
    * @param sessionFactory process session factory that is used when creating
    * ProcessSession objects.
    */
-  void onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) override;
+  void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) override;
   void initialize() override;
-  void onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
+  void onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
   void notifyStop() override;
 
   class Messages;
 
  protected:
-  bool configureNewConnection(const std::shared_ptr<core::ProcessContext> &context);
-  bool createNewTopic(const std::shared_ptr<core::ProcessContext> &context, const std::string& topic_name);
+  bool configureNewConnection(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context);
+  bool createNewTopic(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const std::string& topic_name);
 
  private:
   std::shared_ptr<logging::Logger> logger_{logging::LoggerFactory<PublishKafka>::getLogger()};
@@ -126,7 +126,7 @@ class PublishKafka : public core::Processor {
 
   std::atomic<bool> interrupted_{false};
   std::mutex messages_mutex_;
-  std::set<std::shared_ptr<Messages>> messages_set_;
+  std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<Messages>> messages_set_;
 };
 
 REGISTER_RESOURCE(PublishKafka, "This Processor puts the contents of a FlowFile to a Topic in Apache Kafka. The content of a FlowFile becomes the contents of a Kafka message. "

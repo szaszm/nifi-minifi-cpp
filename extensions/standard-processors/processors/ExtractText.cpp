@@ -101,7 +101,7 @@ void ExtractText::initialize() {
 }
 
 void ExtractText::onTrigger(core::ProcessContext *context, core::ProcessSession *session) {
-  std::shared_ptr<core::FlowFile> flowFile = session->get();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flowFile = session->get();
 
   if (!flowFile) {
     return;
@@ -112,7 +112,7 @@ void ExtractText::onTrigger(core::ProcessContext *context, core::ProcessSession 
   session->transfer(flowFile, Success);
 }
 
-int64_t ExtractText::ReadCallback::process(std::shared_ptr<io::BaseStream> stream) {
+int64_t ExtractText::ReadCallback::process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
   int64_t ret = 0;
   uint64_t read_size = 0;
   bool regex_mode;
@@ -215,7 +215,7 @@ int64_t ExtractText::ReadCallback::process(std::shared_ptr<io::BaseStream> strea
   return read_size;
 }
 
-ExtractText::ReadCallback::ReadCallback(std::shared_ptr<core::FlowFile> flowFile, core::ProcessContext *ctx,  std::shared_ptr<logging::Logger> lgr)
+ExtractText::ReadCallback::ReadCallback(utils::debug_shared_ptr<core::FlowFile> flowFile, core::ProcessContext *ctx,  std::shared_ptr<logging::Logger> lgr)
     : flowFile_(std::move(flowFile)),
       ctx_(ctx),
       logger_(std::move(lgr)) {

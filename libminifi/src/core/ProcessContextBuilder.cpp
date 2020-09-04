@@ -38,43 +38,43 @@ namespace core {
 
 ProcessContextBuilder::ProcessContextBuilder(const std::string &name, minifi::utils::Identifier &uuid)
     : core::CoreComponent(name, uuid) {
-  content_repo_ = std::make_shared<core::repository::FileSystemRepository>();
-  configuration_ = std::make_shared<minifi::Configure>();
+  content_repo_ = org::apache::nifi::minifi::utils::debug_make_shared<core::repository::FileSystemRepository>();
+  configuration_ = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>();
 }
 
 ProcessContextBuilder::ProcessContextBuilder(const std::string &name)
     : core::CoreComponent(name) {
-  content_repo_ = std::make_shared<core::repository::FileSystemRepository>();
-  configuration_ = std::make_shared<minifi::Configure>();
+  content_repo_ = org::apache::nifi::minifi::utils::debug_make_shared<core::repository::FileSystemRepository>();
+  configuration_ = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>();
 }
 
-std::shared_ptr<ProcessContextBuilder> ProcessContextBuilder::withProvider(core::controller::ControllerServiceProvider* controller_service_provider) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessContextBuilder> ProcessContextBuilder::withProvider(core::controller::ControllerServiceProvider* controller_service_provider) {
   controller_service_provider_ = controller_service_provider;
   return this->shared_from_this();
 }
 
-std::shared_ptr<ProcessContextBuilder> ProcessContextBuilder::withProvenanceRepository(const std::shared_ptr<core::Repository> &repo) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessContextBuilder> ProcessContextBuilder::withProvenanceRepository(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> &repo) {
   prov_repo_ = repo;
   return this->shared_from_this();
 }
 
-std::shared_ptr<ProcessContextBuilder> ProcessContextBuilder::withFlowFileRepository(const std::shared_ptr<core::Repository> &repo) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessContextBuilder> ProcessContextBuilder::withFlowFileRepository(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> &repo) {
   flow_repo_ = repo;
   return this->shared_from_this();
 }
 
-std::shared_ptr<ProcessContextBuilder> ProcessContextBuilder::withContentRepository(const std::shared_ptr<core::ContentRepository> &repo) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessContextBuilder> ProcessContextBuilder::withContentRepository(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> &repo) {
   content_repo_ = repo;
   return this->shared_from_this();
 }
 
-std::shared_ptr<ProcessContextBuilder> ProcessContextBuilder::withConfiguration(const std::shared_ptr<minifi::Configure> &configuration) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessContextBuilder> ProcessContextBuilder::withConfiguration(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> &configuration) {
   configuration_ = configuration;
   return this->shared_from_this();
 }
 
-std::shared_ptr<core::ProcessContext> ProcessContextBuilder::build(const std::shared_ptr<ProcessorNode> &processor) {
-  return std::make_shared<core::ProcessContext>(processor, controller_service_provider_, prov_repo_, flow_repo_, configuration_, content_repo_);
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> ProcessContextBuilder::build(const org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessorNode> &processor) {
+  return org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessContext>(processor, controller_service_provider_, prov_repo_, flow_repo_, configuration_, content_repo_);
 }
 
 } /* namespace core */

@@ -38,7 +38,7 @@ namespace processors {
 
 class Bookmark {
 public:
-  Bookmark(const std::wstring& channel, const std::wstring& query, const std::string& bookmarkRootDir, const std::string& uuid, bool processOldEvents, std::shared_ptr<core::CoreComponentStateManager> state_manager, std::shared_ptr<logging::Logger> logger);
+  Bookmark(const std::wstring& channel, const std::wstring& query, const std::string& bookmarkRootDir, const std::string& uuid, bool processOldEvents, std::shared_ptr<core::CoreComponentStateManager> state_manager, org::apache::nifi::minifi::utils::debug_shared_ptr<logging::Logger> logger);
   ~Bookmark();
   explicit operator bool() const noexcept;
 
@@ -53,7 +53,7 @@ private:
   using unique_evt_handle = wel::unique_evt_handle;
 
   std::shared_ptr<logging::Logger> logger_;
-  std::shared_ptr<core::CoreComponentStateManager> state_manager_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::CoreComponentStateManager> state_manager_;
   std::string filePath_;
   bool ok_{};
   unique_evt_handle hBookmark_;

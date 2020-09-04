@@ -81,7 +81,7 @@ class RemoteProcessorGroupPort : public core::Processor {
   /*!
    * Create a new processor
    */
-  RemoteProcessorGroupPort(const std::shared_ptr<io::StreamFactory> &stream_factory, std::string name, std::string url, const std::shared_ptr<Configure> &configure, utils::Identifier uuid = utils::Identifier()) // NOLINT
+  RemoteProcessorGroupPort(const org::apache::nifi::minifi::utils::debug_shared_ptr<io::StreamFactory> &stream_factory, std::string name, std::string url, const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure, utils::Identifier uuid = utils::Identifier()) // NOLINT
       : core::Processor(name, uuid),
         configure_(configure),
         direction_(sitetosite::SEND),
@@ -114,9 +114,9 @@ class RemoteProcessorGroupPort : public core::Processor {
   static core::Relationship relation;
 
  public:
-  virtual void onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory);
+  virtual void onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory);
   // OnTrigger method, implemented by NiFi RemoteProcessorGroupPort
-  virtual void onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session);
+  virtual void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session);
 
   // Initialize, over write by NiFi RemoteProcessorGroupPort
   virtual void initialize(void);
@@ -195,13 +195,13 @@ class RemoteProcessorGroupPort : public core::Processor {
     }
   }
 
-  std::shared_ptr<io::StreamFactory> stream_factory_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<io::StreamFactory> stream_factory_;
   std::unique_ptr<sitetosite::SiteToSiteClient> getNextProtocol(bool create);
   void returnProtocol(std::unique_ptr<sitetosite::SiteToSiteClient> protocol);
 
   moodycamel::ConcurrentQueue<std::unique_ptr<sitetosite::SiteToSiteClient>> available_protocols_;
 
-  std::shared_ptr<Configure> configure_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configure_;
   // Transaction Direction
   sitetosite::TransferDirection direction_;
   // Transmitting
@@ -234,7 +234,7 @@ class RemoteProcessorGroupPort : public core::Processor {
   std::string rest_user_name_;
   std::string rest_password_;
 
-  std::shared_ptr<controllers::SSLContextService> ssl_service;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<controllers::SSLContextService> ssl_service;
 
  private:
   // Logger

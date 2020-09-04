@@ -62,7 +62,7 @@ class OpenSSLInitializer {
 
 class TLSContext : public SocketContext {
  public:
-  TLSContext(const std::shared_ptr<Configure> &configure, std::shared_ptr<minifi::controllers::SSLContextService> ssl_service = nullptr); // NOLINT
+  TLSContext(const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure, org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::controllers::SSLContextService> ssl_service = nullptr); // NOLINT
 
   virtual ~TLSContext() = default;
 
@@ -80,8 +80,8 @@ class TLSContext : public SocketContext {
   static void deleteContext(SSL_CTX* ptr) { SSL_CTX_free(ptr); }
 
   std::shared_ptr<logging::Logger> logger_;
-  std::shared_ptr<Configure> configure_;
-  std::shared_ptr<minifi::controllers::SSLContextService> ssl_service_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configure_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::controllers::SSLContextService> ssl_service_;
   std::unique_ptr<SSL_CTX, decltype(&deleteContext)> ctx;
 
   int16_t error_value;
@@ -97,7 +97,7 @@ class TLSSocket : public Socket {
    * @param port connecting port
    * @param listeners number of listeners in the queue
    */
-  explicit TLSSocket(const std::shared_ptr<TLSContext> &context, const std::string &hostname, uint16_t port, uint16_t listeners);
+  explicit TLSSocket(const org::apache::nifi::minifi::utils::debug_shared_ptr<TLSContext> &context, const std::string &hostname, uint16_t port, uint16_t listeners);
 
   /**
    * Constructor that creates a client socket.
@@ -105,7 +105,7 @@ class TLSSocket : public Socket {
    * @param hostname hostname we are connecting to.
    * @param port port we are connecting to.
    */
-  explicit TLSSocket(const std::shared_ptr<TLSContext> &context, const std::string &hostname, uint16_t port);
+  explicit TLSSocket(const org::apache::nifi::minifi::utils::debug_shared_ptr<TLSContext> &context, const std::string &hostname, uint16_t port);
 
   /**
    * Move constructor.
@@ -179,7 +179,7 @@ class TLSSocket : public Socket {
   void close_ssl(int fd);
 
   std::atomic<bool> connected_{ false };
-  std::shared_ptr<TLSContext> context_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TLSContext> context_;
   SSL* ssl_{ nullptr };
   std::mutex ssl_mutex_;
   std::map<int, SSL*> ssl_map_;

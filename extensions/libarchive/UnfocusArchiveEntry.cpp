@@ -40,7 +40,7 @@ namespace processors {
 
 core::Relationship UnfocusArchiveEntry::Success("success", "success operational on the flow record");
 
-bool UnfocusArchiveEntry::set_or_update_attr(std::shared_ptr<core::FlowFile> flowFile, const std::string& key, const std::string& value) const {
+bool UnfocusArchiveEntry::set_or_update_attr(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flowFile, const std::string& key, const std::string& value) const {
   if (flowFile->updateAttribute(key, value))
     return true;
   else
@@ -159,7 +159,7 @@ UnfocusArchiveEntry::WriteCallback::WriteCallback(ArchiveMetadata *archiveMetada
 }
 
 typedef struct {
-  std::shared_ptr<io::BaseStream> stream;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream;
 } UnfocusArchiveEntryWriteData;
 
 la_ssize_t UnfocusArchiveEntry::WriteCallback::write_cb(struct archive *, void *d, const void *buffer, size_t length) {
@@ -168,7 +168,7 @@ la_ssize_t UnfocusArchiveEntry::WriteCallback::write_cb(struct archive *, void *
   return data->stream->writeData(const_cast<uint8_t*>(ui_buffer), length);
 }
 
-int64_t UnfocusArchiveEntry::WriteCallback::process(std::shared_ptr<io::BaseStream> stream) {
+int64_t UnfocusArchiveEntry::WriteCallback::process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
   auto outputArchive = archive_write_new();
   int64_t nlen = 0;
 

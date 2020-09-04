@@ -59,8 +59,8 @@ class SchedulingAgent {
   /*!
    * Create a new scheduling agent.
    */
-  SchedulingAgent(const gsl::not_null<core::controller::ControllerServiceProvider*> controller_service_provider, std::shared_ptr<core::Repository> repo, std::shared_ptr<core::Repository> flow_repo,
-                  std::shared_ptr<core::ContentRepository> content_repo, std::shared_ptr<Configure> configuration, utils::ThreadPool<utils::TaskRescheduleInfo> &thread_pool)
+  SchedulingAgent(const gsl::not_null<core::controller::ControllerServiceProvider*> controller_service_provider, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> repo, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_repo,
+                  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo, org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configuration, utils::ThreadPool<utils::TaskRescheduleInfo> &thread_pool)
       : admin_yield_duration_(),
         bored_yield_duration_(0),
         configure_(configuration),
@@ -88,11 +88,11 @@ class SchedulingAgent {
   }
 
   // onTrigger, return whether the yield is need
-  bool onTrigger(const std::shared_ptr<core::Processor> &processor, const std::shared_ptr<core::ProcessContext> &processContext, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory);
+  bool onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> &processor, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &processContext, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory);
   // Whether agent has work to do
-  bool hasWorkToDo(std::shared_ptr<core::Processor> processor);
+  bool hasWorkToDo(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor);
   // Whether the outgoing need to be backpressure
-  bool hasTooMuchOutGoing(std::shared_ptr<core::Processor> processor);
+  bool hasTooMuchOutGoing(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor);
   // start
   void start() {
     running_ = true;
@@ -105,12 +105,12 @@ class SchedulingAgent {
 
   void watchDogFunc();
 
-  virtual std::future<utils::TaskRescheduleInfo> enableControllerService(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode);
-  virtual std::future<utils::TaskRescheduleInfo> disableControllerService(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode);
+  virtual std::future<utils::TaskRescheduleInfo> enableControllerService(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode);
+  virtual std::future<utils::TaskRescheduleInfo> disableControllerService(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode);
   // schedule, overwritten by different DrivenSchedulingAgent
-  virtual void schedule(std::shared_ptr<core::Processor> processor) = 0;
+  virtual void schedule(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor) = 0;
   // unschedule, overwritten by different DrivenSchedulingAgent
-  virtual void unschedule(std::shared_ptr<core::Processor> processor) = 0;
+  virtual void unschedule(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor) = 0;
 
   SchedulingAgent(const SchedulingAgent &parent) = delete;
   SchedulingAgent &operator=(const SchedulingAgent &parent) = delete;
@@ -125,13 +125,13 @@ class SchedulingAgent {
   // BoredYieldDuration
   int64_t bored_yield_duration_;
 
-  std::shared_ptr<Configure> configure_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configure_;
 
-  std::shared_ptr<core::Repository> repo_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> repo_;
 
-  std::shared_ptr<core::Repository> flow_repo_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_repo_;
 
-  std::shared_ptr<core::ContentRepository> content_repo_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo_;
   // thread pool for components.
   utils::ThreadPool<utils::TaskRescheduleInfo> &thread_pool_;
   // controller service provider reference
@@ -145,7 +145,7 @@ class SchedulingAgent {
     std::string name_;
     std::string uuid_;
 
-    explicit SchedulingInfo(const std::shared_ptr<core::Processor> &processor) :
+    explicit SchedulingInfo(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> &processor) :
       name_(processor->getName()),
       uuid_(processor->getUUIDStr()) {}
 

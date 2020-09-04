@@ -92,7 +92,7 @@ class MQTTControllerService : public core::controller::ControllerService {
         logger_(logging::LoggerFactory<MQTTControllerService>::getLogger()) {
   }
 
-  explicit MQTTControllerService(const std::string &name, const std::shared_ptr<Configure> &configuration)
+  explicit MQTTControllerService(const std::string &name, const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configuration)
       : ControllerService(name),
         initialized_(false),
         client_(nullptr),
@@ -325,7 +325,7 @@ class MQTTControllerService : public core::controller::ControllerService {
 
   MQTTClient_SSLOptions sslopts_;
 
-  std::shared_ptr<controllers::SSLContextService> ssl_context_service_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<controllers::SSLContextService> ssl_context_service_;
 
   std::shared_ptr<logging::Logger> logger_;
 

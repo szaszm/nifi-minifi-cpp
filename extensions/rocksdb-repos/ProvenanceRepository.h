@@ -35,7 +35,7 @@ namespace provenance {
 #define MAX_PROVENANCE_ENTRY_LIFE_TIME (60000) // 1 minute
 #define PROVENANCE_PURGE_PERIOD (2500) // 2500 msec
 
-class ProvenanceRepository : public core::Repository, public std::enable_shared_from_this<ProvenanceRepository> {
+class ProvenanceRepository : public core::Repository, public org::apache::nifi::minifi::utils::enable_debug_shared_from_this<ProvenanceRepository> {
  public:
   ProvenanceRepository(std::string name, utils::Identifier uuid)
       : ProvenanceRepository(name){
@@ -69,7 +69,7 @@ class ProvenanceRepository : public core::Repository, public std::enable_shared_
   }
 
   // initialize
-  virtual bool initialize(const std::shared_ptr<org::apache::nifi::minifi::Configure> &config) {
+  virtual bool initialize(const org::apache::nifi::minifi::utils::debug_shared_ptr<org::apache::nifi::minifi::Configure> &config) {
     std::string value;
     if (config->get(Configure::nifi_provenance_repository_directory_default, value)) {
       directory_ = value;
@@ -150,21 +150,21 @@ class ProvenanceRepository : public core::Repository, public std::enable_shared_
     return Put(key, buffer, bufferSize);
   }
 
-  virtual bool get(std::vector<std::shared_ptr<core::CoreComponent>> &store, size_t max_size) {
+  virtual bool get(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::CoreComponent>> &store, size_t max_size) {
     std::unique_ptr<rocksdb::Iterator> it(db_->NewIterator(rocksdb::ReadOptions()));
     for (it->SeekToFirst(); it->Valid(); it->Next()) {
-      std::shared_ptr<ProvenanceEventRecord> eventRead = std::make_shared<ProvenanceEventRecord>();
+      org::apache::nifi::minifi::utils::debug_shared_ptr<ProvenanceEventRecord> eventRead = utils::debug_make_shared<ProvenanceEventRecord>();
       std::string key = it->key().ToString();
       if (store.size() >= max_size)
         break;
       if (eventRead->DeSerialize((uint8_t *) it->value().data(), (int) it->value().size())) {
-        store.push_back(std::dynamic_pointer_cast<core::CoreComponent>(eventRead));
+        store.push_back(dynamic_pointer_cast<core::CoreComponent>(eventRead));
       }
     }
     return true;
   }
 
-  virtual bool DeSerialize(std::vector<std::shared_ptr<core::SerializableComponent>> &records, size_t &max_size, std::function<std::shared_ptr<core::SerializableComponent>()> lambda) {
+  virtual bool DeSerialize(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent>> &records, size_t &max_size, std::function<org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent>()> lambda) {
     std::unique_ptr<rocksdb::Iterator> it(db_->NewIterator(rocksdb::ReadOptions()));
     size_t requested_batch = max_size;
     max_size = 0;
@@ -172,7 +172,7 @@ class ProvenanceRepository : public core::Repository, public std::enable_shared_
 
       if (max_size >= requested_batch)
         break;
-      std::shared_ptr<core::SerializableComponent> eventRead = lambda();
+      org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent> eventRead = lambda();
       std::string key = it->key().ToString();
       if (eventRead->DeSerialize((uint8_t *) it->value().data(), (int) it->value().size())) {
         max_size++;
@@ -183,10 +183,10 @@ class ProvenanceRepository : public core::Repository, public std::enable_shared_
   }
 
   //! get record
-  void getProvenanceRecord(std::vector<std::shared_ptr<ProvenanceEventRecord>> &records, int maxSize) {
+  void getProvenanceRecord(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<ProvenanceEventRecord>> &records, int maxSize) {
     std::unique_ptr<rocksdb::Iterator> it(db_->NewIterator(rocksdb::ReadOptions()));
     for (it->SeekToFirst(); it->Valid(); it->Next()) {
-      std::shared_ptr<ProvenanceEventRecord> eventRead = std::make_shared<ProvenanceEventRecord>();
+      org::apache::nifi::minifi::utils::debug_shared_ptr<ProvenanceEventRecord> eventRead = utils::debug_make_shared<ProvenanceEventRecord>();
       std::string key = it->key().ToString();
       if (records.size() >= (uint64_t)maxSize)
         break;
@@ -196,11 +196,11 @@ class ProvenanceRepository : public core::Repository, public std::enable_shared_
     }
   }
 
-  virtual bool DeSerialize(std::vector<std::shared_ptr<core::SerializableComponent>> &store, size_t &max_size) {
+  virtual bool DeSerialize(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent>> &store, size_t &max_size) {
     std::unique_ptr<rocksdb::Iterator> it(db_->NewIterator(rocksdb::ReadOptions()));
     max_size = 0;
     for (it->SeekToFirst(); it->Valid(); it->Next()) {
-      std::shared_ptr<ProvenanceEventRecord> eventRead = std::make_shared<ProvenanceEventRecord>();
+      org::apache::nifi::minifi::utils::debug_shared_ptr<ProvenanceEventRecord> eventRead = utils::debug_make_shared<ProvenanceEventRecord>();
       std::string key = it->key().ToString();
 
       if (store.at(max_size)->DeSerialize((uint8_t *) it->value().data(), (int) it->value().size())) {

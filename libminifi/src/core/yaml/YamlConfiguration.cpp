@@ -33,7 +33,7 @@ namespace nifi {
 namespace minifi {
 namespace core {
 
-std::shared_ptr<utils::IdGenerator> YamlConfiguration::id_generator_ = utils::IdGenerator::getIdGenerator();
+org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> YamlConfiguration::id_generator_ = utils::IdGenerator::getIdGenerator();
 
 core::ProcessGroup *YamlConfiguration::parseRootProcessGroupYaml(YAML::Node rootFlowNode) {
   utils::Identifier uuid;
@@ -86,7 +86,7 @@ void YamlConfiguration::parseProcessorNodeYaml(YAML::Node processorsNode, core::
   int64_t yieldPeriod = -1;
   int64_t runDurationNanos = -1;
   utils::Identifier uuid;
-  std::shared_ptr<core::Processor> processor = nullptr;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor = nullptr;
 
   if (!parentGroup) {
     logger_->log_error("parseProcessNodeYaml: no parent group exists");
@@ -399,9 +399,9 @@ void YamlConfiguration::parseProvenanceReportingYaml(YAML::Node *reportNode, cor
     return;
   }
 
-  std::shared_ptr<core::Processor> processor = nullptr;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor = nullptr;
   processor = createProvenanceReportTask();
-  std::shared_ptr<core::reporting::SiteToSiteProvenanceReportingTask> reportTask = std::static_pointer_cast<core::reporting::SiteToSiteProvenanceReportingTask>(processor);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::reporting::SiteToSiteProvenanceReportingTask> reportTask = static_pointer_cast<core::reporting::SiteToSiteProvenanceReportingTask>(processor);
 
   YAML::Node node = reportNode->as<YAML::Node>();
 
@@ -503,10 +503,10 @@ void YamlConfiguration::parseControllerServices(YAML::Node *controllerServicesNo
             controller_service_node->initialize();
             YAML::Node propertiesNode = controllerServiceNode["Properties"];
             // we should propogate properties to the node and to the implementation
-            parsePropertiesNodeYaml(&propertiesNode, std::static_pointer_cast<core::ConfigurableComponent>(controller_service_node), name,
+            parsePropertiesNodeYaml(&propertiesNode, static_pointer_cast<core::ConfigurableComponent>(controller_service_node), name,
             CONFIG_YAML_CONTROLLER_SERVICES_KEY);
             if (controller_service_node->getControllerServiceImplementation() != nullptr) {
-              parsePropertiesNodeYaml(&propertiesNode, std::static_pointer_cast<core::ConfigurableComponent>(controller_service_node->getControllerServiceImplementation()), name,
+              parsePropertiesNodeYaml(&propertiesNode, static_pointer_cast<core::ConfigurableComponent>(controller_service_node->getControllerServiceImplementation()), name,
               CONFIG_YAML_CONTROLLER_SERVICES_KEY);
             }
           } else {
@@ -532,7 +532,7 @@ void YamlConfiguration::parseConnectionYaml(YAML::Node *connectionsNode, core::P
     if (connectionsNode->IsSequence()) {
       for (YAML::const_iterator iter = connectionsNode->begin(); iter != connectionsNode->end(); ++iter) {
         YAML::Node connectionNode = iter->as<YAML::Node>();
-        std::shared_ptr<minifi::Connection> connection = nullptr;
+        org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> connection = nullptr;
 
         // Configure basic connection
         utils::Identifier uuid;
@@ -700,8 +700,8 @@ void YamlConfiguration::parseConnectionYaml(YAML::Node *connectionsNode, core::P
 
 void YamlConfiguration::parsePortYaml(YAML::Node *portNode, core::ProcessGroup *parent, sitetosite::TransferDirection direction) {
   utils::Identifier uuid;
-  std::shared_ptr<core::Processor> processor = NULL;
-  std::shared_ptr<minifi::RemoteProcessorGroupPort> port = NULL;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor = NULL;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::RemoteProcessorGroupPort> port = NULL;
 
   if (!parent) {
     logger_->log_error("parseProcessNode: no parent group existed");
@@ -724,9 +724,9 @@ void YamlConfiguration::parsePortYaml(YAML::Node *portNode, core::ProcessGroup *
   auto portId = inputPortsObj["id"].as<std::string>();
   uuid = portId;
 
-  port = std::make_shared<minifi::RemoteProcessorGroupPort>(stream_factory_, nameStr, parent->getURL(), this->configuration_, uuid);
+  port = org::apache::nifi::minifi::utils::debug_make_shared<minifi::RemoteProcessorGroupPort>(stream_factory_, nameStr, parent->getURL(), this->configuration_, uuid);
 
-  processor = std::static_pointer_cast<core::Processor>(port);
+  processor = static_pointer_cast<core::Processor>(port);
   port->setDirection(direction);
   port->setTimeOut(parent->getTimeOut());
   port->setTransmitting(true);
@@ -744,7 +744,7 @@ void YamlConfiguration::parsePortYaml(YAML::Node *portNode, core::ProcessGroup *
   // handle port properties
   YAML::Node nodeVal = portNode->as<YAML::Node>();
   YAML::Node propertiesNode = nodeVal["Properties"];
-  parsePropertiesNodeYaml(&propertiesNode, std::static_pointer_cast<core::ConfigurableComponent>(processor), nameStr,
+  parsePropertiesNodeYaml(&propertiesNode, static_pointer_cast<core::ConfigurableComponent>(processor), nameStr,
   CONFIG_YAML_REMOTE_PROCESS_GROUP_KEY);
 
   // add processor to parent
@@ -762,7 +762,7 @@ void YamlConfiguration::parsePortYaml(YAML::Node *portNode, core::ProcessGroup *
   }
 }
 
-void YamlConfiguration::parsePropertiesNodeYaml(YAML::Node *propertiesNode, std::shared_ptr<core::ConfigurableComponent> processor, const std::string &component_name,
+void YamlConfiguration::parsePropertiesNodeYaml(YAML::Node *propertiesNode, org::apache::nifi::minifi::utils::debug_shared_ptr<core::ConfigurableComponent> processor, const std::string &component_name,
                                                 const std::string &yaml_section) {
   // Treat generically as a YAML node so we can perform inspection on entries to ensure they are populated
   logger_->log_trace("Entered %s", component_name);
@@ -780,7 +780,7 @@ void YamlConfiguration::parsePropertiesNodeYaml(YAML::Node *propertiesNode, std:
             std::string rawValueString = propertiesNode.as<std::string>();
             logger_->log_debug("Found %s=%s", propertyName, rawValueString);
             if (!processor->updateProperty(propertyName, rawValueString)) {
-              std::shared_ptr<core::Connectable> proc = std::dynamic_pointer_cast<core::Connectable>(processor);
+              org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable> proc = dynamic_pointer_cast<core::Connectable>(processor);
               if (proc != 0) {
                 logger_->log_warn("Received property %s with value %s but is not one of the properties for %s. "
                                   "Attempting to add as dynamic property.",
@@ -845,7 +845,7 @@ void YamlConfiguration::parsePropertiesNodeYaml(YAML::Node *propertiesNode, std:
         }
         std::string rawValueString = propertyValueNode.as<std::string>();
         if (!processor->setProperty(myProp, coercedValue)) {
-          std::shared_ptr<core::Connectable> proc = std::dynamic_pointer_cast<core::Connectable>(processor);
+          org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable> proc = dynamic_pointer_cast<core::Connectable>(processor);
           if (proc != 0) {
             logger_->log_warn("Received property %s with value %s but is not one of the properties for %s. "
                               "Attempting to add as dynamic property.",
@@ -866,7 +866,7 @@ void YamlConfiguration::parsePropertiesNodeYaml(YAML::Node *propertiesNode, std:
   validateComponentProperties(processor, component_name, yaml_section);
 }
 
-void YamlConfiguration::validateComponentProperties(const std::shared_ptr<ConfigurableComponent> &component, const std::string &component_name, const std::string &yaml_section) const {
+void YamlConfiguration::validateComponentProperties(const org::apache::nifi::minifi::utils::debug_shared_ptr<ConfigurableComponent> &component, const std::string &component_name, const std::string &yaml_section) const {
   const auto &component_properties = component->getProperties();
 
   // Validate required properties

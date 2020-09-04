@@ -33,7 +33,7 @@ namespace nifi {
 namespace minifi {
 namespace io {
 
-HttpStream::HttpStream(std::shared_ptr<utils::HTTPClient> client)
+HttpStream::HttpStream(org::apache::nifi::minifi::utils::debug_shared_ptr<utils::HTTPClient> client)
     : http_client_(client),
       written(0),
       // given the nature of the stream we don't want to slow libCURL, we will produce

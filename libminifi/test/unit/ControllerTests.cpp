@@ -70,20 +70,20 @@ class TestStateController : public minifi::state::StateController {
 
 class TestUpdateSink : public minifi::state::StateMonitor {
  public:
-  explicit TestUpdateSink(std::shared_ptr<StateController> controller)
+  explicit TestUpdateSink(org::apache::nifi::minifi::utils::debug_shared_ptr<StateController> controller)
       : is_running(true),
         clear_calls(0),
         controller(controller),
         update_calls(0) {
   }
-  virtual std::vector<std::shared_ptr<StateController>> getComponents(const std::string &name) {
-    std::vector<std::shared_ptr<StateController>> vec;
+  virtual std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<StateController>> getComponents(const std::string &name) {
+    std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<StateController>> vec;
     vec.push_back(controller);
     return vec;
   }
 
-  virtual std::vector<std::shared_ptr<StateController>> getAllComponents() {
-    std::vector<std::shared_ptr<StateController>> vec;
+  virtual std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<StateController>> getAllComponents() {
+    std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<StateController>> vec;
     vec.push_back(controller);
     return vec;
   }
@@ -156,7 +156,7 @@ class TestUpdateSink : public minifi::state::StateMonitor {
    * Apply an update that the agent must decode. This is useful for certain operations
    * that can't be encapsulated within these definitions.
    */
-  virtual int16_t applyUpdate(const std::string &source, const std::shared_ptr<minifi::state::Update> &updateController) {
+  virtual int16_t applyUpdate(const std::string &source, const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::state::Update> &updateController) {
     return 0;
   }
 
@@ -170,7 +170,7 @@ class TestUpdateSink : public minifi::state::StateMonitor {
 
   std::atomic<bool> is_running;
   std::atomic<uint32_t> clear_calls;
-  std::shared_ptr<StateController> controller;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<StateController> controller;
   std::atomic<uint32_t> update_calls;
 };
 #ifdef WIN32
@@ -179,11 +179,11 @@ TEST_CASE("TestWindows", "[test1]") {
 }
 #else
 TEST_CASE("TestGet", "[test1]") {
-  auto controller = std::make_shared<TestStateController>();
-  std::shared_ptr<minifi::Configure> configuration = std::make_shared<minifi::Configure>();
+  auto controller = org::apache::nifi::minifi::utils::debug_make_shared<TestStateController>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> configuration = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>();
   configuration->set("controller.socket.host", "localhost");
   configuration->set("controller.socket.port", "9997");
-  auto ptr = std::make_shared<TestUpdateSink>(controller);
+  auto ptr = org::apache::nifi::minifi::utils::debug_make_shared<TestUpdateSink>(controller);
   minifi::c2::ControllerSocketProtocol protocol("testprotocol");
   protocol.initialize(nullptr, ptr, configuration);
 
@@ -212,11 +212,11 @@ TEST_CASE("TestGet", "[test1]") {
 }
 
 TEST_CASE("TestClear", "[test1]") {
-  auto controller = std::make_shared<TestStateController>();
-  std::shared_ptr<minifi::Configure> configuration = std::make_shared<minifi::Configure>();
+  auto controller = org::apache::nifi::minifi::utils::debug_make_shared<TestStateController>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> configuration = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>();
   configuration->set("controller.socket.host", "localhost");
   configuration->set("controller.socket.port", "9997");
-  auto ptr = std::make_shared<TestUpdateSink>(controller);
+  auto ptr = org::apache::nifi::minifi::utils::debug_make_shared<TestUpdateSink>(controller);
   minifi::c2::ControllerSocketProtocol protocol("testprotocol");
   protocol.initialize(nullptr, ptr, configuration);
 
@@ -248,11 +248,11 @@ TEST_CASE("TestClear", "[test1]") {
 }
 
 TEST_CASE("TestUpdate", "[test1]") {
-  auto controller = std::make_shared<TestStateController>();
-  std::shared_ptr<minifi::Configure> configuration = std::make_shared<minifi::Configure>();
+  auto controller = org::apache::nifi::minifi::utils::debug_make_shared<TestStateController>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> configuration = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>();
   configuration->set("controller.socket.host", "localhost");
   configuration->set("controller.socket.port", "9997");
-  auto ptr = std::make_shared<TestUpdateSink>(controller);
+  auto ptr = org::apache::nifi::minifi::utils::debug_make_shared<TestUpdateSink>(controller);
   minifi::c2::ControllerSocketProtocol protocol("testprotocol");
   protocol.initialize(nullptr, ptr, configuration);
 

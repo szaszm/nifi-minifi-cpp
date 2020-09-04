@@ -194,7 +194,7 @@ void CollectorInitiatedSubscription::initialize() {
   setSupportedRelationships({s_success});
 }
 
-void CollectorInitiatedSubscription::onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
+void CollectorInitiatedSubscription::onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
   if (subscriptionHandle_) {
     logger_->log_error("Processor already subscribed to Event Log, expected cleanup to unsubscribe.");
   } else {
@@ -209,7 +209,7 @@ void CollectorInitiatedSubscription::onSchedule(const std::shared_ptr<core::Proc
   }
 }
 
-void CollectorInitiatedSubscription::onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
+void CollectorInitiatedSubscription::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   if (!subscriptionHandle_) {
     if (!subscribe(context)) {
       context->yield();
@@ -440,7 +440,7 @@ bool CollectorInitiatedSubscription::getSubscriptionProperty(EC_HANDLE hSubscrip
   return true;
 }
 
-bool CollectorInitiatedSubscription::createSubscription(const std::shared_ptr<core::ProcessContext>& context) {
+bool CollectorInitiatedSubscription::createSubscription(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>& context) {
   supportedProperties_.init(context);
 
   // If subcription already exists, delete it.
@@ -557,7 +557,7 @@ bool CollectorInitiatedSubscription::createSubscription(const std::shared_ptr<co
   return true;
 }
 
-bool CollectorInitiatedSubscription::subscribe(const std::shared_ptr<core::ProcessContext> &context) {
+bool CollectorInitiatedSubscription::subscribe(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context) {
   logger_->log_debug("CollectorInitiatedSubscription: maxBufferSize_ %lld", maxBufferSize_.value());
 
   provenanceUri_ = "winlog://" + computerName_ + "/" + to_string(channel_.value().c_str()) + "?" + to_string(query_.value().c_str());
@@ -626,14 +626,14 @@ void CollectorInitiatedSubscription::unsubscribe() {
   }
 }
 
-int CollectorInitiatedSubscription::processQueue(const std::shared_ptr<core::ProcessSession> &session) {
+int CollectorInitiatedSubscription::processQueue(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   struct WriteCallback: public OutputStreamCallback {
     WriteCallback(const std::string& str)
       : str_(str) {
       status_ = 0;
     }
 
-    int64_t process(std::shared_ptr<io::BaseStream> stream) {
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
       return stream->writeData((uint8_t*)&str_[0], str_.size());
     }
 

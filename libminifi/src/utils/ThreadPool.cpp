@@ -25,7 +25,7 @@ namespace minifi {
 namespace utils {
 
 template<typename T>
-void ThreadPool<T>::run_tasks(std::shared_ptr<WorkerThread> thread) {
+void ThreadPool<T>::run_tasks(org::apache::nifi::minifi::utils::debug_shared_ptr<WorkerThread> thread) {
   thread->is_running_ = true;
   while (running_.load()) {
     if (UNLIKELY(thread_reduction_count_ > 0)) {
@@ -116,8 +116,8 @@ void ThreadPool<T>::manageWorkers() {
   for (int i = 0; i < max_worker_threads_; i++) {
     std::stringstream thread_name;
     thread_name << name_ << " #" << i;
-    auto worker_thread = std::make_shared<WorkerThread>(thread_name.str());
-    worker_thread->thread_ = createThread(std::bind(&ThreadPool::run_tasks, this, worker_thread));
+    auto worker_thread = org::apache::nifi::minifi::utils::debug_make_shared<WorkerThread>(thread_name.str());
+    worker_thread->thread_ = createThread([this, worker_thread]{ this->run_tasks(worker_thread); });
     thread_queue_.push_back(worker_thread);
     current_workers_++;
   }
@@ -147,7 +147,7 @@ void ThreadPool<T>::manageWorkers() {
           thread_manager_->reduce();
         } else if (thread_manager_->canIncrease() && max_worker_threads_ > current_workers_) {  // increase slowly
           std::unique_lock<std::mutex> lock(worker_queue_mutex_);
-          auto worker_thread = std::make_shared<WorkerThread>();
+          auto worker_thread = org::apache::nifi::minifi::utils::debug_make_shared<WorkerThread>();
           worker_thread->thread_ = createThread(std::bind(&ThreadPool::run_tasks, this, worker_thread));
           if (daemon_threads_) {
             worker_thread->thread_.detach();
@@ -155,7 +155,7 @@ void ThreadPool<T>::manageWorkers() {
           thread_queue_.push_back(worker_thread);
           current_workers_++;
         }
-        std::shared_ptr<WorkerThread> thread_ref;
+        org::apache::nifi::minifi::utils::debug_shared_ptr<WorkerThread> thread_ref;
         while (deceased_thread_queue_.tryDequeue(thread_ref)) {
           std::unique_lock<std::mutex> lock(worker_queue_mutex_);
           if (thread_ref->thread_.joinable())
@@ -177,7 +177,7 @@ template<typename T>
 void ThreadPool<T>::start() {
   if (nullptr != controller_service_provider_) {
     auto thread_man = controller_service_provider_->getControllerService("ThreadPoolManager");
-    thread_manager_ = thread_man != nullptr ? std::dynamic_pointer_cast<controllers::ThreadManagementService>(thread_man) : nullptr;
+    thread_manager_ = thread_man != nullptr ? dynamic_pointer_cast<controllers::ThreadManagementService>(thread_man) : nullptr;
   } else {
     thread_manager_ = nullptr;
   }

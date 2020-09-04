@@ -202,7 +202,7 @@ class FileReaderCallback : public OutputStreamCallback {
     openFile(file_name, offset, input_stream_, logger_);
   }
 
-  int64_t process(std::shared_ptr<io::BaseStream> output_stream) override {
+  int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> output_stream) override {
     io::CRCStream<io::BaseStream> crc_stream{output_stream.get(), checksum_};
 
     uint64_t num_bytes_written = 0;
@@ -281,7 +281,7 @@ class WholeFileReaderCallback : public OutputStreamCallback {
     return checksum_;
   }
 
-  int64_t process(std::shared_ptr<io::BaseStream> output_stream) override {
+  int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> output_stream) override {
     std::array<char, BUFFER_SIZE> buffer;
 
     io::CRCStream<io::BaseStream> crc_stream{output_stream.get(), checksum_};
@@ -330,7 +330,7 @@ void TailFile::initialize() {
   setSupportedRelationships(relationships);
 }
 
-void TailFile::onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
+void TailFile::onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
   std::lock_guard<std::mutex> tail_lock(tail_file_mutex_);
 
   tail_states_.clear();
@@ -465,7 +465,7 @@ void TailFile::parseStateFileLine(char *buf, std::map<std::string, TailState> &s
   }
 }
 
-bool TailFile::recoverState(const std::shared_ptr<core::ProcessContext>& context) {
+bool TailFile::recoverState(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>& context) {
   std::map<std::string, TailState> new_tail_states;
   bool state_load_success = getStateFromStateManager(new_tail_states) ||
                             getStateFromLegacyStateFile(context, new_tail_states);
@@ -534,7 +534,7 @@ bool TailFile::getStateFromStateManager(std::map<std::string, TailState> &new_ta
   return false;
 }
 
-bool TailFile::getStateFromLegacyStateFile(const std::shared_ptr<core::ProcessContext>& context,
+bool TailFile::getStateFromLegacyStateFile(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>& context,
                                            std::map<std::string, TailState> &new_tail_states) const {
   std::string state_file_name_property;
   context->getProperty(StateFile.getName(), state_file_name_property);
@@ -636,7 +636,7 @@ std::vector<TailState> TailFile::findRotatedFiles(const TailState &state) const 
   return matched_files;
 }
 
-void TailFile::onTrigger(const std::shared_ptr<core::ProcessContext> &, const std::shared_ptr<core::ProcessSession> &session) {
+void TailFile::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   std::lock_guard<std::mutex> tail_lock(tail_file_mutex_);
 
   if (tail_mode_ == Mode::MULTIPLE) {
@@ -658,7 +658,7 @@ void TailFile::onTrigger(const std::shared_ptr<core::ProcessContext> &, const st
   }
 }
 
-void TailFile::processFile(const std::shared_ptr<core::ProcessSession> &session,
+void TailFile::processFile(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session,
                            const std::string &full_file_name,
                            TailState &state) {
   uint64_t fsize = utils::file::FileUtils::file_size(full_file_name);
@@ -672,7 +672,7 @@ void TailFile::processFile(const std::shared_ptr<core::ProcessSession> &session,
   processSingleFile(session, full_file_name, state);
 }
 
-void TailFile::processRotatedFiles(const std::shared_ptr<core::ProcessSession> &session, TailState &state) {
+void TailFile::processRotatedFiles(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session, TailState &state) {
     std::vector<TailState> rotated_file_states = findRotatedFiles(state);
     for (TailState &file_state : rotated_file_states) {
       processSingleFile(session, file_state.fileNameWithPath(), file_state);
@@ -681,7 +681,7 @@ void TailFile::processRotatedFiles(const std::shared_ptr<core::ProcessSession> &
     state.checksum_ = 0;
 }
 
-void TailFile::processSingleFile(const std::shared_ptr<core::ProcessSession> &session,
+void TailFile::processSingleFile(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session,
                                  const std::string &full_file_name,
                                  TailState &state) {
   std::string fileName = state.file_name_;
@@ -705,7 +705,7 @@ void TailFile::processSingleFile(const std::shared_ptr<core::ProcessSession> &se
     TailState state_copy{state};
 
     while (file_reader.hasMoreToRead()) {
-      auto flow_file = std::static_pointer_cast<FlowFileRecord>(session->create());
+      auto flow_file = static_pointer_cast<FlowFileRecord>(session->create());
       session->write(flow_file, &file_reader);
 
       if (file_reader.useLatestFlowFile()) {
@@ -727,7 +727,7 @@ void TailFile::processSingleFile(const std::shared_ptr<core::ProcessSession> &se
 
   } else {
     WholeFileReaderCallback file_reader{full_file_name, state.position_, state.checksum_};
-    auto flow_file = std::static_pointer_cast<FlowFileRecord>(session->create());
+    auto flow_file = static_pointer_cast<FlowFileRecord>(session->create());
     session->write(flow_file, &file_reader);
 
     updateFlowFileAttributes(full_file_name, state, fileName, baseName, extension, flow_file);
@@ -741,7 +741,7 @@ void TailFile::processSingleFile(const std::shared_ptr<core::ProcessSession> &se
 void TailFile::updateFlowFileAttributes(const std::string &full_file_name, const TailState &state,
                                         const std::string &fileName, const std::string &baseName,
                                         const std::string &extension,
-                                        std::shared_ptr<FlowFileRecord> &flow_file) const {
+                                        org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> &flow_file) const {
   logger_->log_info("TailFile %s for %" PRIu64 " bytes", fileName, flow_file->getSize());
   std::string logName = baseName + "." + std::to_string(state.position_) + "-" +
                         std::to_string(state.position_ + flow_file->getSize() - 1) + "." + extension;

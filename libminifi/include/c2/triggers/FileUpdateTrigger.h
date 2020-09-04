@@ -48,7 +48,7 @@ class FileUpdateTrigger : public C2Trigger {
         logger_(logging::LoggerFactory<FileUpdateTrigger>::getLogger()) {
   }
 
-  void initialize(const std::shared_ptr<minifi::Configure> &configuration) {
+  void initialize(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> &configuration) {
     if (nullptr != configuration) {
       if (configuration->get(minifi::Configure::nifi_c2_file_watch, "c2.file.watch", file_)) {
         last_update_ = utils::file::FileUtils::last_write_time(file_);

@@ -32,8 +32,8 @@ namespace apache {
 namespace nifi {
 namespace minifi {
 
-utils::TaskRescheduleInfo CronDrivenSchedulingAgent::run(const std::shared_ptr<core::Processor> &processor, const std::shared_ptr<core::ProcessContext> &processContext,
-                                        const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
+utils::TaskRescheduleInfo CronDrivenSchedulingAgent::run(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> &processor, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &processContext,
+                                        const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
   if (this->running_ && processor->isRunning()) {
     auto uuidStr = processor->getUUIDStr();
     std::chrono::system_clock::time_point result;

@@ -31,7 +31,7 @@ namespace minifi {
 namespace controllers {
 
 AbstractCoreComponentStateManagerProvider::AbstractCoreComponentStateManager::AbstractCoreComponentStateManager(
-    std::shared_ptr<AbstractCoreComponentStateManagerProvider> provider,
+    org::apache::nifi::minifi::utils::debug_shared_ptr<AbstractCoreComponentStateManagerProvider> provider,
     const std::string& id)
     : provider_(std::move(provider))
     , id_(id)
@@ -82,8 +82,8 @@ bool AbstractCoreComponentStateManagerProvider::AbstractCoreComponentStateManage
 
 AbstractCoreComponentStateManagerProvider::~AbstractCoreComponentStateManagerProvider() = default;
 
-std::shared_ptr<core::CoreComponentStateManager> AbstractCoreComponentStateManagerProvider::getCoreComponentStateManager(const std::string& uuid) {
-  return std::make_shared<AbstractCoreComponentStateManager>(shared_from_this(), uuid);
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::CoreComponentStateManager> AbstractCoreComponentStateManagerProvider::getCoreComponentStateManager(const std::string& uuid) {
+  return org::apache::nifi::minifi::utils::debug_make_shared<AbstractCoreComponentStateManager>(shared_from_this(), uuid);
 }
 
 std::unordered_map<std::string, std::unordered_map<std::string, std::string>> AbstractCoreComponentStateManagerProvider::getAllCoreComponentStates() {

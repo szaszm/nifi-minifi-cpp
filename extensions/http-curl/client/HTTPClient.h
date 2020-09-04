@@ -78,7 +78,7 @@ class HTTPClient : public BaseHTTPClient, public core::Connectable {
 
   HTTPClient(std::string name, utils::Identifier uuid);
 
-  explicit HTTPClient(const std::string &url, const std::shared_ptr<minifi::controllers::SSLContextService> ssl_context_service = nullptr);
+  explicit HTTPClient(const std::string &url, const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::controllers::SSLContextService> ssl_context_service = nullptr);
 
   ~HTTPClient();
 
@@ -88,7 +88,7 @@ class HTTPClient : public BaseHTTPClient, public core::Connectable {
 
   void forceClose();
 
-  void initialize(const std::string &method, const std::string url = "", const std::shared_ptr<minifi::controllers::SSLContextService> ssl_context_service = nullptr) override;
+  void initialize(const std::string &method, const std::string url = "", const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::controllers::SSLContextService> ssl_context_service = nullptr) override;
 
   // This is a bad API and deprecated. Use the std::chrono variant of this
   // It is assumed that the value of timeout provided to this function
@@ -268,7 +268,7 @@ class HTTPClient : public BaseHTTPClient, public core::Connectable {
 
   HTTPReadCallback content_;
 
-  std::shared_ptr<minifi::controllers::SSLContextService> ssl_context_service_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::controllers::SSLContextService> ssl_context_service_;
   std::string url_;
   std::chrono::milliseconds connect_timeout_ms_{30000};
   // read timeout.

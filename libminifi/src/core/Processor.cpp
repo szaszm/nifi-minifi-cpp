@@ -1,4 +1,5 @@
 /**
+ *
  * @file Processor.cpp
  * Processor class implementation
  *
@@ -101,7 +102,7 @@ void Processor::setScheduledState(ScheduledState state) {
   }
 }
 
-bool Processor::addConnection(std::shared_ptr<Connectable> conn) {
+bool Processor::addConnection(org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable> conn) {
   enum class SetAs{
     NONE,
     OUTPUT,
@@ -113,7 +114,7 @@ bool Processor::addConnection(std::shared_ptr<Connectable> conn) {
     logger_->log_warn("Can not add connection while the process %s is running", name_);
     return false;
   }
-  std::shared_ptr<Connection> connection = std::static_pointer_cast<Connection>(conn);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Connection> connection = static_pointer_cast<Connection>(conn);
   std::lock_guard<std::mutex> lock(getGraphMutex());
 
   auto updateGraph = gsl::finally([&] {
@@ -150,7 +151,7 @@ bool Processor::addConnection(std::shared_ptr<Connectable> conn) {
       auto &&it = out_going_connections_.find(relationship);
       if (it != out_going_connections_.end()) {
         // We already has connection for this relationship
-        std::set<std::shared_ptr<Connectable>> existedConnection = it->second;
+        std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable>> existedConnection = it->second;
         if (existedConnection.find(connection) == existedConnection.end()) {
           // We do not have the same connection for this relationship yet
           existedConnection.insert(connection);
@@ -161,7 +162,7 @@ bool Processor::addConnection(std::shared_ptr<Connectable> conn) {
         }
       } else {
         // We do not have any outgoing connection for this relationship yet
-        std::set<std::shared_ptr<Connectable>> newConnection;
+        std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable>> newConnection;
         newConnection.insert(connection);
         connection->setSource(shared_from_this());
         out_going_connections_[relationship] = newConnection;
@@ -173,7 +174,7 @@ bool Processor::addConnection(std::shared_ptr<Connectable> conn) {
   return result != SetAs::NONE;
 }
 
-void Processor::removeConnection(std::shared_ptr<Connectable> conn) {
+void Processor::removeConnection(org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable> conn) {
   if (isRunning()) {
     logger_->log_warn("Can not remove connection while the process %s is running", name_);
     return;
@@ -184,7 +185,7 @@ void Processor::removeConnection(std::shared_ptr<Connectable> conn) {
   utils::Identifier srcUUID;
   utils::Identifier destUUID;
 
-  std::shared_ptr<Connection> connection = std::static_pointer_cast<Connection>(conn);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Connection> connection = static_pointer_cast<Connection>(conn);
 
   connection->getSourceUUID(srcUUID);
   connection->getDestinationUUID(destUUID);
@@ -223,7 +224,7 @@ bool Processor::flowFilesQueued() {
     return false;
 
   for (auto &&conn : _incomingConnections) {
-    std::shared_ptr<Connection> connection = std::static_pointer_cast<Connection>(conn);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<Connection> connection = static_pointer_cast<Connection>(conn);
     if (connection->getQueueSize() > 0)
       return true;
   }
@@ -236,9 +237,9 @@ bool Processor::flowFilesOutGoingFull() {
 
   for (const auto& connection_pair : out_going_connections_) {
     // We already has connection for this relationship
-    std::set<std::shared_ptr<Connectable>> existedConnection = connection_pair.second;
-    const bool has_full_connection = std::any_of(begin(existedConnection), end(existedConnection), [](const std::shared_ptr<Connectable>& conn) {
-      auto connection = std::dynamic_pointer_cast<Connection>(conn);
+    std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable>> existedConnection = connection_pair.second;
+    const bool has_full_connection = std::any_of(begin(existedConnection), end(existedConnection), [](const org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable>& conn) {
+      auto connection = dynamic_pointer_cast<Connection>(conn);
       return connection && connection->isFull();
     });
     if (has_full_connection) { return true; }
@@ -265,7 +266,7 @@ void Processor::onTrigger(ProcessContext *context, ProcessSessionFactory *sessio
   }
 }
 
-void Processor::onTrigger(const std::shared_ptr<ProcessContext> &context, const std::shared_ptr<ProcessSessionFactory> &sessionFactory) {
+void Processor::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessSessionFactory> &sessionFactory) {
   auto session = sessionFactory->createSession();
 
   try {
@@ -290,7 +291,7 @@ bool Processor::isWorkAvailable() {
 
   try {
     for (const auto &conn : _incomingConnections) {
-      std::shared_ptr<Connection> connection = std::static_pointer_cast<Connection>(conn);
+      org::apache::nifi::minifi::utils::debug_shared_ptr<Connection> connection = static_pointer_cast<Connection>(conn);
       if (connection->getQueueSize() > 0) {
         hasWork = true;
         break;
@@ -309,11 +310,11 @@ void Processor::updateReachability(const std::lock_guard<std::mutex>& graph_lock
   bool didChange = force;
   for (auto& outIt : out_going_connections_) {
     for (auto& outConn : outIt.second) {
-      auto connection = std::dynamic_pointer_cast<Connection>(outConn);
+      auto connection = dynamic_pointer_cast<Connection>(outConn);
       if (!connection) {
         continue;
       }
-      auto dest = std::dynamic_pointer_cast<const Processor>(connection->getDestination());
+      auto dest = dynamic_pointer_cast<const Processor>(connection->getDestination());
       if (!dest) {
         continue;
       }
@@ -332,11 +333,11 @@ void Processor::updateReachability(const std::lock_guard<std::mutex>& graph_lock
   if (didChange) {
     // propagate the change to sources
     for (auto& inConn : _incomingConnections) {
-      auto connection = std::dynamic_pointer_cast<Connection>(inConn);
+      auto connection = dynamic_pointer_cast<Connection>(inConn);
       if (!connection) {
         continue;
       }
-      auto source = std::dynamic_pointer_cast<Processor>(connection->getSource());
+      auto source = dynamic_pointer_cast<Processor>(connection->getSource());
       if (!source) {
         continue;
       }
@@ -345,8 +346,8 @@ void Processor::updateReachability(const std::lock_guard<std::mutex>& graph_lock
   }
 }
 
-bool Processor::partOfCycle(const std::shared_ptr<Connection>& conn) {
-  auto source = std::dynamic_pointer_cast<Processor>(conn->getSource());
+bool Processor::partOfCycle(const org::apache::nifi::minifi::utils::debug_shared_ptr<Connection>& conn) {
+  auto source = dynamic_pointer_cast<Processor>(conn->getSource());
   if (!source) {
     return false;
   }
@@ -361,7 +362,7 @@ bool Processor::isThrottledByBackpressure() const {
   bool isThrottledByOutgoing = ([&] {
     for (auto &outIt : out_going_connections_) {
       for (auto &out : outIt.second) {
-        auto connection = std::dynamic_pointer_cast<Connection>(out);
+        auto connection = dynamic_pointer_cast<Connection>(out);
         if (!connection) {
           continue;
         }
@@ -374,7 +375,7 @@ bool Processor::isThrottledByBackpressure() const {
   })();
   bool isForcedByIncomingCycle = ([&] {
     for (auto &inConn : _incomingConnections) {
-      auto connection = std::dynamic_pointer_cast<Connection>(inConn);
+      auto connection = dynamic_pointer_cast<Connection>(inConn);
       if (!connection) {
         continue;
       }
@@ -387,14 +388,14 @@ bool Processor::isThrottledByBackpressure() const {
   return isThrottledByOutgoing && !isForcedByIncomingCycle;
 }
 
-std::shared_ptr<Connectable> Processor::pickIncomingConnection() {
+org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable> Processor::pickIncomingConnection() {
   std::lock_guard<std::mutex> rel_guard(relationship_mutex_);
 
   auto beginIt = incoming_connections_Iter;
-  std::shared_ptr<Connectable> inConn;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable> inConn;
   do {
     inConn = getNextIncomingConnectionImpl(rel_guard);
-    auto connection = std::dynamic_pointer_cast<Connection>(inConn);
+    auto connection = dynamic_pointer_cast<Connection>(inConn);
     if (!connection) {
       continue;
     }

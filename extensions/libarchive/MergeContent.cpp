@@ -170,7 +170,7 @@ void MergeContent::onSchedule(core::ProcessContext *context, core::ProcessSessio
   }
 }
 
-std::string MergeContent::getGroupId(core::ProcessContext *context, std::shared_ptr<core::FlowFile> flow) {
+std::string MergeContent::getGroupId(core::ProcessContext *context, org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow) {
   std::string groupId = "";
   std::string value;
   if (!correlationAttributeName_.empty()) {
@@ -185,9 +185,9 @@ std::string MergeContent::getGroupId(core::ProcessContext *context, std::shared_
 }
 
 bool MergeContent::checkDefragment(std::unique_ptr<Bin> &bin) {
-  std::deque<std::shared_ptr<core::FlowFile>> &flows = bin->getFlowFile();
+  std::deque<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> &flows = bin->getFlowFile();
   if (!flows.empty()) {
-    std::shared_ptr<core::FlowFile> front = flows.front();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> front = flows.front();
     std::string fragId;
     if (!front->getAttribute(BinFiles::FRAGMENT_ID_ATTRIBUTE, fragId))
       return false;
@@ -244,8 +244,8 @@ bool MergeContent::processBin(core::ProcessContext *context, core::ProcessSessio
       return false;
     }
     // sort the flowfile fragment index
-    std::deque<std::shared_ptr<core::FlowFile>> &flows = bin->getFlowFile();
-    std::sort(flows.begin(), flows.end(), [] (const std::shared_ptr<core::FlowFile> &first, const std::shared_ptr<core::FlowFile> &second)
+    std::deque<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> &flows = bin->getFlowFile();
+    std::sort(flows.begin(), flows.end(), [] (const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &first, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &second)
         {std::string value;
          first->getAttribute(BinFiles::FRAGMENT_INDEX_ATTRIBUTE, value);
          int indexFirst = std::stoi(value);
@@ -270,7 +270,7 @@ bool MergeContent::processBin(core::ProcessContext *context, core::ProcessSessio
     return false;
   }
 
-  std::shared_ptr<core::FlowFile> mergeFlow;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> mergeFlow;
   try {
     mergeFlow = mergeBin->merge(context, session, bin->getFlowFile(), headerContent_, footerContent_, demarcatorContent_);
   } catch (...) {
@@ -290,7 +290,7 @@ bool MergeContent::processBin(core::ProcessContext *context, core::ProcessSessio
 
   // we successfully merge the flow
   session->transfer(mergeFlow, Merge);
-  std::deque<std::shared_ptr<core::FlowFile>> &flows = bin->getFlowFile();
+  std::deque<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> &flows = bin->getFlowFile();
   for (auto flow : flows) {
     session->transfer(flow, Original);
   }
@@ -299,9 +299,9 @@ bool MergeContent::processBin(core::ProcessContext *context, core::ProcessSessio
   return true;
 }
 
-std::shared_ptr<core::FlowFile> BinaryConcatenationMerge::merge(core::ProcessContext *context, core::ProcessSession *session,
-        std::deque<std::shared_ptr<core::FlowFile>> &flows, std::string &header, std::string &footer, std::string &demarcator) {
-  std::shared_ptr<FlowFileRecord> flowFile = std::static_pointer_cast < FlowFileRecord > (session->create());
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> BinaryConcatenationMerge::merge(core::ProcessContext *context, core::ProcessSession *session,
+        std::deque<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> &flows, std::string &header, std::string &footer, std::string &demarcator) {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> flowFile = static_pointer_cast < FlowFileRecord > (session->create());
   BinaryConcatenationMerge::WriteCallback callback(header, footer, demarcator, flows, session);
   session->write(flowFile, &callback);
   session->putAttribute(flowFile, FlowAttributeKey(MIME_TYPE), getMergedContentType());
@@ -316,9 +316,9 @@ std::shared_ptr<core::FlowFile> BinaryConcatenationMerge::merge(core::ProcessCon
   return flowFile;
 }
 
-std::shared_ptr<core::FlowFile> TarMerge::merge(core::ProcessContext *context, core::ProcessSession *session, std::deque<std::shared_ptr<core::FlowFile>> &flows, std::string &header,
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> TarMerge::merge(core::ProcessContext *context, core::ProcessSession *session, std::deque<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> &flows, std::string &header,
     std::string &footer, std::string &demarcator) {
-  std::shared_ptr<FlowFileRecord> flowFile = std::static_pointer_cast < FlowFileRecord > (session->create());
+  org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> flowFile = static_pointer_cast < FlowFileRecord > (session->create());
   ArchiveMerge::WriteCallback callback(std::string(merge_content_options::MERGE_FORMAT_TAR_VALUE), flows, session);
   session->write(flowFile, &callback);
   session->putAttribute(flowFile, FlowAttributeKey(MIME_TYPE), getMergedContentType());
@@ -336,9 +336,9 @@ std::shared_ptr<core::FlowFile> TarMerge::merge(core::ProcessContext *context, c
   return flowFile;
 }
 
-std::shared_ptr<core::FlowFile> ZipMerge::merge(core::ProcessContext *context, core::ProcessSession *session, std::deque<std::shared_ptr<core::FlowFile>> &flows, std::string &header,
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> ZipMerge::merge(core::ProcessContext *context, core::ProcessSession *session, std::deque<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> &flows, std::string &header,
     std::string &footer, std::string &demarcator) {
-  std::shared_ptr<FlowFileRecord> flowFile = std::static_pointer_cast < FlowFileRecord > (session->create());
+  org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> flowFile = static_pointer_cast < FlowFileRecord > (session->create());
   ArchiveMerge::WriteCallback callback(std::string(merge_content_options::MERGE_FORMAT_ZIP_VALUE), flows, session);
   session->write(flowFile, &callback);
   session->putAttribute(flowFile, FlowAttributeKey(MIME_TYPE), getMergedContentType());
@@ -356,7 +356,7 @@ std::shared_ptr<core::FlowFile> ZipMerge::merge(core::ProcessContext *context, c
   return flowFile;
 }
 
-void AttributeMerger::mergeAttributes(core::ProcessSession *session, std::shared_ptr<core::FlowFile> &merge_flow) {
+void AttributeMerger::mergeAttributes(core::ProcessSession *session, org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &merge_flow) {
   for (const auto& pair : getMergedAttributes()) {
     session->putAttribute(merge_flow, pair.first, pair.second);
   }
@@ -365,14 +365,14 @@ void AttributeMerger::mergeAttributes(core::ProcessSession *session, std::shared
 std::map<std::string, std::string> AttributeMerger::getMergedAttributes() {
   if (flows_.empty()) return {};
   std::map<std::string, std::string> sum{ flows_.front()->getAttributes() };
-  const auto merge_attributes = [this](std::map<std::string, std::string>* const merged_attributes, const std::shared_ptr<core::FlowFile>& flow) {
+  const auto merge_attributes = [this](std::map<std::string, std::string>* const merged_attributes, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>& flow) {
     processFlowFile(flow, *merged_attributes);
     return merged_attributes;
   };
   return *std::accumulate(std::next(flows_.cbegin()), flows_.cend(), &sum, merge_attributes);
 }
 
-void KeepOnlyCommonAttributesMerger::processFlowFile(const std::shared_ptr<core::FlowFile> &flow_file, std::map<std::string, std::string>& merged_attributes) {
+void KeepOnlyCommonAttributesMerger::processFlowFile(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow_file, std::map<std::string, std::string>& merged_attributes) {
   auto flow_attributes = flow_file->getAttributes();
   std::map<std::string, std::string> tmp_merged;
   std::set_intersection(std::make_move_iterator(merged_attributes.begin()), std::make_move_iterator(merged_attributes.end()),
@@ -380,7 +380,7 @@ void KeepOnlyCommonAttributesMerger::processFlowFile(const std::shared_ptr<core:
   merged_attributes = std::move(tmp_merged);
 }
 
-void KeepAllUniqueAttributesMerger::processFlowFile(const std::shared_ptr<core::FlowFile> &flow_file, std::map<std::string, std::string>& merged_attributes) {
+void KeepAllUniqueAttributesMerger::processFlowFile(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow_file, std::map<std::string, std::string>& merged_attributes) {
   auto flow_attributes = flow_file->getAttributes();
   for (auto&& attr : flow_attributes) {
     if(std::find(removed_attributes_.cbegin(), removed_attributes_.cend(), attr.first) != removed_attributes_.cend()) {

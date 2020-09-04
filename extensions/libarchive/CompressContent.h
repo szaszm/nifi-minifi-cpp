@@ -81,11 +81,11 @@ public:
   // Nest Callback Class for read stream from flow for compress
   class ReadCallbackCompress: public InputStreamCallback {
   public:
-    ReadCallbackCompress(std::shared_ptr<core::FlowFile> &flow, struct archive *arch, struct archive_entry *entry) :
+    ReadCallbackCompress(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow, struct archive *arch, struct archive_entry *entry) :
         flow_(flow), arch_(arch), entry_(entry), status_(0), logger_(logging::LoggerFactory<CompressContent>::getLogger()) {
     }
     ~ReadCallbackCompress() = default;
-    int64_t process(std::shared_ptr<io::BaseStream> stream) {
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
       uint8_t buffer[4096U];
       int64_t ret = 0;
       uint64_t read_size = 0;
@@ -116,7 +116,7 @@ public:
       }
       return read_size;
     }
-    std::shared_ptr<core::FlowFile> flow_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow_;
     struct archive *arch_;
     struct archive_entry *entry_;
     int status_;
@@ -125,12 +125,12 @@ public:
   // Nest Callback Class for read stream from flow for decompress
   class ReadCallbackDecompress: public InputStreamCallback {
   public:
-    ReadCallbackDecompress(std::shared_ptr<core::FlowFile> &flow) :
+    ReadCallbackDecompress(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow) :
         read_size_(0), offset_(0), flow_(flow) {
       origin_offset_ = flow_->getOffset();
     }
     ~ReadCallbackDecompress() = default;
-    int64_t process(std::shared_ptr<io::BaseStream> stream) {
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
       read_size_ = 0;
       stream->seek(offset_);
       int readRet = stream->read(buffer_, sizeof(buffer_));
@@ -144,13 +144,13 @@ public:
     uint8_t buffer_[8192];
     uint64_t offset_;
     uint64_t origin_offset_;
-    std::shared_ptr<core::FlowFile> flow_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow_;
   };
   // Nest Callback Class for write stream
   class WriteCallback: public OutputStreamCallback {
   public:
     WriteCallback(std::string &compress_mode, int compress_level, std::string &compress_format,
-        std::shared_ptr<core::FlowFile> &flow, const std::shared_ptr<core::ProcessSession> &session) :
+        org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) :
         compress_mode_(compress_mode), compress_level_(compress_level), compress_format_(compress_format),
         flow_(flow), session_(session),
         logger_(logging::LoggerFactory<CompressContent>::getLogger()),
@@ -164,9 +164,9 @@ public:
     std::string compress_mode_;
     int compress_level_;
     std::string compress_format_;
-    std::shared_ptr<core::FlowFile> flow_;
-    std::shared_ptr<core::ProcessSession> session_;
-    std::shared_ptr<io::BaseStream> stream_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> session_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream_;
     int64_t size_;
     std::shared_ptr<logging::Logger> logger_;
     CompressContent::ReadCallbackDecompress readDecompressCb_;
@@ -208,7 +208,7 @@ public:
       archive_read_free(arch);
     }
 
-    int64_t process(std::shared_ptr<io::BaseStream> stream) {
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
       struct archive *arch;
       int r;
 
@@ -346,7 +346,7 @@ public:
 
   class GzipWriteCallback : public OutputStreamCallback {
    public:
-    GzipWriteCallback(std::string compress_mode, int compress_level, std::shared_ptr<core::FlowFile> flow, std::shared_ptr<core::ProcessSession> session)
+    GzipWriteCallback(std::string compress_mode, int compress_level, org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow, org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> session)
       : logger_(logging::LoggerFactory<CompressContent>::getLogger())
       , compress_mode_(std::move(compress_mode))
       , compress_level_(compress_level)
@@ -357,19 +357,19 @@ public:
     std::shared_ptr<logging::Logger> logger_;
     std::string compress_mode_;
     int compress_level_;
-    std::shared_ptr<core::FlowFile> flow_;
-    std::shared_ptr<core::ProcessSession> session_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> session_;
     bool success_{false};
 
-    int64_t process(std::shared_ptr<io::BaseStream> outputStream) override {
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> outputStream) override {
       class ReadCallback : public InputStreamCallback {
        public:
-        ReadCallback(GzipWriteCallback& writer, std::shared_ptr<io::BaseStream> outputStream)
+        ReadCallback(GzipWriteCallback& writer, org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> outputStream)
           : writer_(writer)
           , outputStream_(std::move(outputStream)) {
         }
 
-        int64_t process(std::shared_ptr<io::BaseStream> inputStream) override {
+        int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> inputStream) override {
           std::vector<uint8_t> buffer(16 * 1024U);
           int64_t read_size = 0;
           while (read_size < gsl::narrow<int64_t>(writer_.flow_->getSize())) {
@@ -390,14 +390,14 @@ public:
         }
 
         GzipWriteCallback& writer_;
-        std::shared_ptr<io::BaseStream> outputStream_;
+        org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> outputStream_;
       };
 
-      std::shared_ptr<io::ZlibBaseStream> filterStream;
+      org::apache::nifi::minifi::utils::debug_shared_ptr<io::ZlibBaseStream> filterStream;
       if (compress_mode_ == MODE_COMPRESS) {
-        filterStream = std::make_shared<io::ZlibCompressStream>(outputStream.get(), io::ZlibCompressionFormat::GZIP, compress_level_);
+        filterStream = utils::debug_make_shared<io::ZlibCompressStream>(outputStream.get(), io::ZlibCompressionFormat::GZIP, compress_level_);
       } else {
-        filterStream = std::make_shared<io::ZlibDecompressStream>(outputStream.get(), io::ZlibCompressionFormat::GZIP);
+        filterStream = utils::debug_make_shared<io::ZlibDecompressStream>(outputStream.get(), io::ZlibCompressionFormat::GZIP);
       }
       ReadCallback readCb(*this, filterStream);
       session_->read(flow_, &readCb);
@@ -420,7 +420,7 @@ public:
   virtual void onTrigger(core::ProcessContext *context, core::ProcessSession *session) {
   }
   // OnTrigger method, implemented by NiFi CompressContent
-  virtual void onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session);
+  virtual void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session);
   // Initialize, over write by NiFi CompressContent
   virtual void initialize(void);
 

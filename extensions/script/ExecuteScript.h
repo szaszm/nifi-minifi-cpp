@@ -55,8 +55,8 @@ class ExecuteScript : public core::Processor {
   void onTrigger(core::ProcessContext *context, core::ProcessSession *session) override {
     logger_->log_error("onTrigger invocation with raw pointers is not implemented");
   }
-  void onTrigger(const std::shared_ptr<core::ProcessContext> &context,
-                 const std::shared_ptr<core::ProcessSession> &session) override;
+  void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context,
+                 const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) override;
 
  private:
   std::shared_ptr<logging::Logger> logger_;
@@ -66,11 +66,11 @@ class ExecuteScript : public core::Processor {
   std::string script_body_;
   std::string module_directory_;
 
-  moodycamel::ConcurrentQueue<std::shared_ptr<script::ScriptEngine>> script_engine_q_;
+  moodycamel::ConcurrentQueue<org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptEngine>> script_engine_q_;
 
   template<typename T>
-  std::shared_ptr<T> createEngine() const {
-    auto engine = std::make_shared<T>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<T> createEngine() const {
+    auto engine = utils::debug_make_shared<T>();
 
     engine->bind("log", logger_);
     engine->bind("REL_SUCCESS", Success);
@@ -80,10 +80,10 @@ class ExecuteScript : public core::Processor {
   }
 
   template<typename T>
-  void triggerEngineProcessor(const std::shared_ptr<script::ScriptEngine> &engine,
-                              const std::shared_ptr<core::ProcessContext> &context,
-                              const std::shared_ptr<core::ProcessSession> &session) const {
-    auto typed_engine = std::static_pointer_cast<T>(engine);
+  void triggerEngineProcessor(const org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptEngine> &engine,
+                              const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context,
+                              const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) const {
+    auto typed_engine = static_pointer_cast<T>(engine);
     typed_engine->onTrigger(context, session);
   }
 };

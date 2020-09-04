@@ -270,7 +270,7 @@ class ProvenanceEventRecord : public core::SerializableComponent {
       _parentUuids.push_back(uuid);
   }
   // Add Parent Flow File
-  void addParentFlowFile(std::shared_ptr<core::FlowFile> flow) {
+  void addParentFlowFile(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow) {
     addParentUuid(flow->getUUIDStr());
     return;
   }
@@ -279,7 +279,7 @@ class ProvenanceEventRecord : public core::SerializableComponent {
     _parentUuids.erase(std::remove(_parentUuids.begin(), _parentUuids.end(), uuid), _parentUuids.end());
   }
   // Remove Parent Flow File
-  void removeParentFlowFile(std::shared_ptr<core::FlowFile> flow) {
+  void removeParentFlowFile(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow) {
     removeParentUuid(flow->getUUIDStr());
     return;
   }
@@ -295,7 +295,7 @@ class ProvenanceEventRecord : public core::SerializableComponent {
       _childrenUuids.push_back(uuid);
   }
   // Add Child Flow File
-  void addChildFlowFile(std::shared_ptr<core::FlowFile> flow) {
+  void addChildFlowFile(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow) {
     addChildUuid(flow->getUUIDStr());
     return;
   }
@@ -304,7 +304,7 @@ class ProvenanceEventRecord : public core::SerializableComponent {
     _childrenUuids.erase(std::remove(_childrenUuids.begin(), _childrenUuids.end(), uuid), _childrenUuids.end());
   }
   // Remove Child Flow File
-  void removeChildFlowFile(std::shared_ptr<core::FlowFile> flow) {
+  void removeChildFlowFile(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow) {
     removeChildUuid(flow->getUUIDStr());
     return;
   }
@@ -333,7 +333,7 @@ class ProvenanceEventRecord : public core::SerializableComponent {
     _sourceQueueIdentifier = identifier;
   }
   // fromFlowFile
-  void fromFlowFile(std::shared_ptr<core::FlowFile> &flow) {
+  void fromFlowFile(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow) {
     _entryDate = flow->getEntryDate();
     _lineageStartDate = flow->getlineageStartDate();
     _lineageIdentifiers = flow->getlineageIdentifiers();
@@ -353,7 +353,7 @@ class ProvenanceEventRecord : public core::SerializableComponent {
   bool Serialize(org::apache::nifi::minifi::io::DataStream& outStream);
 
   // Serialize and Persistent to the repository
-  bool Serialize(const std::shared_ptr<core::SerializableComponent> &repo);
+  bool Serialize(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent> &repo);
   // DeSerialize
   bool DeSerialize(const uint8_t *buffer, const size_t bufferSize);
   // DeSerialize
@@ -361,7 +361,7 @@ class ProvenanceEventRecord : public core::SerializableComponent {
     return DeSerialize(stream.getBuffer(), stream.getSize());
   }
   // DeSerialize
-  bool DeSerialize(const std::shared_ptr<core::SerializableComponent> &repo);
+  bool DeSerialize(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent> &repo);
 
   uint64_t getEventTime(const uint8_t *buffer, const size_t bufferSize) {
     int size = bufferSize > 72 ? 72 : bufferSize;
@@ -440,7 +440,7 @@ class ProvenanceEventRecord : public core::SerializableComponent {
   ProvenanceEventRecord(const ProvenanceEventRecord &parent);
   ProvenanceEventRecord &operator=(const ProvenanceEventRecord &parent);
   static std::shared_ptr<logging::Logger> logger_;
-  static std::shared_ptr<utils::IdGenerator> id_generator_;
+  static org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> id_generator_;
 };
 
 // Provenance Reporter
@@ -450,7 +450,7 @@ class ProvenanceReporter {
   /*!
    * Create a new provenance reporter associated with the process session
    */
-  ProvenanceReporter(std::shared_ptr<core::Repository> repo, std::string componentId, std::string componentType)
+  ProvenanceReporter(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> repo, std::string componentId, std::string componentType)
       : logger_(logging::LoggerFactory<ProvenanceReporter>::getLogger()) {
     _componentId = componentId;
     _componentType = componentType;
@@ -462,15 +462,15 @@ class ProvenanceReporter {
     clear();
   }
   // Get events
-  std::set<std::shared_ptr<ProvenanceEventRecord>> getEvents() {
+  std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<ProvenanceEventRecord>> getEvents() {
     return _events;
   }
   // Add event
-  void add(const std::shared_ptr<ProvenanceEventRecord> &event) {
+  void add(const org::apache::nifi::minifi::utils::debug_shared_ptr<ProvenanceEventRecord> &event) {
     _events.insert(event);
   }
   // Remove event
-  void remove(const std::shared_ptr<ProvenanceEventRecord> &event) {
+  void remove(const org::apache::nifi::minifi::utils::debug_shared_ptr<ProvenanceEventRecord> &event) {
     if (_events.find(event) != _events.end()) {
       _events.erase(event);
     }
@@ -483,38 +483,38 @@ class ProvenanceReporter {
   // commit
   void commit();
   // create
-  void create(std::shared_ptr<core::FlowFile> flow, std::string detail);
+  void create(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow, std::string detail);
   // route
-  void route(std::shared_ptr<core::FlowFile> flow, core::Relationship relation, std::string detail, uint64_t processingDuration);
+  void route(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow, core::Relationship relation, std::string detail, uint64_t processingDuration);
   // modifyAttributes
-  void modifyAttributes(std::shared_ptr<core::FlowFile> flow, std::string detail);
+  void modifyAttributes(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow, std::string detail);
   // modifyContent
-  void modifyContent(std::shared_ptr<core::FlowFile> flow, std::string detail, uint64_t processingDuration);
+  void modifyContent(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow, std::string detail, uint64_t processingDuration);
   // clone
-  void clone(std::shared_ptr<core::FlowFile> parent, std::shared_ptr<core::FlowFile> child);
+  void clone(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> parent, org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> child);
   // join
-  void join(std::vector<std::shared_ptr<core::FlowFile> > parents, std::shared_ptr<core::FlowFile> child, std::string detail, uint64_t processingDuration);
+  void join(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> > parents, org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> child, std::string detail, uint64_t processingDuration);
   // fork
-  void fork(std::vector<std::shared_ptr<core::FlowFile> > child, std::shared_ptr<core::FlowFile> parent, std::string detail, uint64_t processingDuration);
+  void fork(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> > child, org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> parent, std::string detail, uint64_t processingDuration);
   // expire
-  void expire(std::shared_ptr<core::FlowFile> flow, std::string detail);
+  void expire(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow, std::string detail);
   // drop
-  void drop(std::shared_ptr<core::FlowFile> flow, std::string reason);
+  void drop(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow, std::string reason);
   // send
-  void send(std::shared_ptr<core::FlowFile> flow, std::string transitUri, std::string detail, uint64_t processingDuration, bool force);
+  void send(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow, std::string transitUri, std::string detail, uint64_t processingDuration, bool force);
   // fetch
-  void fetch(std::shared_ptr<core::FlowFile> flow, std::string transitUri, std::string detail, uint64_t processingDuration);
+  void fetch(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow, std::string transitUri, std::string detail, uint64_t processingDuration);
   // receive
-  void receive(std::shared_ptr<core::FlowFile> flow, std::string transitUri, std::string sourceSystemFlowFileIdentifier, std::string detail, uint64_t processingDuration);
+  void receive(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow, std::string transitUri, std::string sourceSystemFlowFileIdentifier, std::string detail, uint64_t processingDuration);
 
  protected:
   // allocate
-  std::shared_ptr<ProvenanceEventRecord> allocate(ProvenanceEventRecord::ProvenanceEventType eventType, std::shared_ptr<core::FlowFile> flow) {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ProvenanceEventRecord> allocate(ProvenanceEventRecord::ProvenanceEventType eventType, org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow) {
     if (repo_->isNoop()) {
       return nullptr;
     }
 
-    auto event = std::make_shared<ProvenanceEventRecord>(eventType, _componentId, _componentType);
+    auto event = org::apache::nifi::minifi::utils::debug_make_shared<ProvenanceEventRecord>(eventType, _componentId, _componentType);
     if (event)
       event->fromFlowFile(flow);
 
@@ -529,9 +529,9 @@ class ProvenanceReporter {
  private:
   std::shared_ptr<logging::Logger> logger_;
   // Incoming connection Iterator
-  std::set<std::shared_ptr<ProvenanceEventRecord>> _events;
+  std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<ProvenanceEventRecord>> _events;
   // provenance repository.
-  std::shared_ptr<core::Repository> repo_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> repo_;
 
   // Prevent default copy constructor and assignment operation
   // Only support pass by reference or pointer

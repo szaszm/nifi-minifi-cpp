@@ -98,7 +98,7 @@ void sigHandler(int signal) {
   }
 }
 
-void dumpDocs(const std::shared_ptr<minifi::Configure> &configuration, const std::string &dir, std::ostream &out) {
+void dumpDocs(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> &configuration, const std::string &dir, std::ostream &out) {
   auto pythoncreator = core::ClassLoader::getDefaultClassLoader().instantiate("PythonCreator", "PythonCreator");
   if (nullptr != pythoncreator) {
     pythoncreator->configure(configuration);
@@ -191,12 +191,12 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  std::shared_ptr<logging::LoggerProperties> log_properties = std::make_shared<logging::LoggerProperties>();
+  auto log_properties = std::make_shared<logging::LoggerProperties>();
   log_properties->setHome(minifiHome);
   log_properties->loadConfigureFile(DEFAULT_LOG_PROPERTIES_FILE);
   logging::LoggerConfiguration::getConfiguration().initialize(log_properties);
 
-  std::shared_ptr<minifi::Properties> uid_properties = std::make_shared<minifi::Properties>("UID properties");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Properties> uid_properties = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Properties>("UID properties");
   uid_properties->setHome(minifiHome);
   uid_properties->loadConfigureFile(DEFAULT_UID_PROPERTIES_FILE);
   utils::IdGenerator::getIdGenerator()->initialize(uid_properties);
@@ -204,7 +204,7 @@ int main(int argc, char **argv) {
   // Make a record of minifi home in the configured log file.
   logger->log_info("MINIFI_HOME=%s", minifiHome);
 
-  std::shared_ptr<minifi::Configure> configure = std::make_shared<minifi::Configure>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> configure = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>();
   configure->setHome(minifiHome);
   configure->loadConfigureFile(DEFAULT_NIFI_PROPERTIES_FILE);
 
@@ -249,7 +249,7 @@ int main(int argc, char **argv) {
 
   configure->get(minifi::Configure::nifi_provenance_repository_class_name, prov_repo_class);
   // Create repos for flow record and provenance
-  std::shared_ptr<core::Repository> prov_repo = core::createRepository(prov_repo_class, true, "provenance");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> prov_repo = core::createRepository(prov_repo_class, true, "provenance");
 
   if (!prov_repo->initialize(configure)) {
     logger->log_error("Provenance repository failed to initialize, exiting..");
@@ -258,7 +258,7 @@ int main(int argc, char **argv) {
 
   configure->get(minifi::Configure::nifi_flow_repository_class_name, flow_repo_class);
 
-  std::shared_ptr<core::Repository> flow_repo = core::createRepository(flow_repo_class, true, "flowfile");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_repo = core::createRepository(flow_repo_class, true, "flowfile");
 
   if (!flow_repo->initialize(configure)) {
     logger->log_error("Flow file repository failed to initialize, exiting..");
@@ -267,7 +267,7 @@ int main(int argc, char **argv) {
 
   configure->get(minifi::Configure::nifi_content_repository_class_name, content_repo_class);
 
-  std::shared_ptr<core::ContentRepository> content_repo = core::createContentRepository(content_repo_class, true, "content");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo = core::createContentRepository(content_repo_class, true, "content");
 
   if (!content_repo->initialize(configure)) {
     logger->log_error("Content repository failed to initialize, exiting..");
@@ -282,11 +282,11 @@ int main(int argc, char **argv) {
 
   configure->get(minifi::Configure::nifi_configuration_class_name, nifi_configuration_class_name);
 
-  std::shared_ptr<minifi::io::StreamFactory> stream_factory = minifi::io::StreamFactory::getInstance(configure);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::io::StreamFactory> stream_factory = minifi::io::StreamFactory::getInstance(configure);
 
   std::unique_ptr<core::FlowConfiguration> flow_configuration = core::createFlowConfiguration(prov_repo, flow_repo, content_repo, configure, stream_factory, nifi_configuration_class_name);
 
-  std::shared_ptr<minifi::FlowController> controller = std::unique_ptr<minifi::FlowController>(
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::FlowController> controller = std::unique_ptr<minifi::FlowController>(
     new minifi::FlowController(prov_repo, flow_repo, configure, std::move(flow_configuration), content_repo));
 
   logger->log_info("Loading FlowController");

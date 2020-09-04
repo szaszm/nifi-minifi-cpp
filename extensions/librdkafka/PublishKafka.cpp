@@ -316,7 +316,7 @@ class ReadCallback : public InputStreamCallback {
   }
 
   rd_kafka_resp_err_t produce(const size_t segment_num, std::vector<unsigned char>& buffer, const size_t buflen) const {
-    const std::shared_ptr<PublishKafka::Messages> messages_ptr_copy = this->messages_;
+    const org::apache::nifi::minifi::utils::debug_shared_ptr<PublishKafka::Messages> messages_ptr_copy = this->messages_;
     const auto flow_file_index_copy = this->flow_file_index_;
     const auto logger = logger_;
     const auto produce_callback = [messages_ptr_copy, flow_file_index_copy, segment_num, logger](rd_kafka_t * /*rk*/, const rd_kafka_message_t *rkmessage) {
@@ -358,7 +358,7 @@ class ReadCallback : public InputStreamCallback {
       rd_kafka_t* const rk,
       const core::FlowFile& flowFile,
       utils::Regex& attributeNameRegex,
-      std::shared_ptr<PublishKafka::Messages> messages,
+      org::apache::nifi::minifi::utils::debug_shared_ptr<PublishKafka::Messages> messages,
       const size_t flow_file_index,
       const bool fail_empty_flow_files,
       std::shared_ptr<logging::Logger> logger)
@@ -377,7 +377,7 @@ class ReadCallback : public InputStreamCallback {
   ReadCallback(const ReadCallback&) = delete;
   ReadCallback& operator=(ReadCallback) = delete;
 
-  int64_t process(const std::shared_ptr<io::BaseStream> stream) override {
+  int64_t process(const org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) override {
     std::vector<unsigned char> buffer;
 
     buffer.resize(max_seg_size_);
@@ -434,7 +434,7 @@ class ReadCallback : public InputStreamCallback {
   rd_kafka_topic_t* const rkt_ = nullptr;
   rd_kafka_t* const rk_ = nullptr;
   const rd_kafka_headers_unique_ptr hdrs;  // not null
-  const std::shared_ptr<PublishKafka::Messages> messages_;
+  const org::apache::nifi::minifi::utils::debug_shared_ptr<PublishKafka::Messages> messages_;
   const size_t flow_file_index_;
   int status_ = 0;
   std::string error_;
@@ -497,7 +497,7 @@ void PublishKafka::initialize() {
   setSupportedRelationships(relationships);
 }
 
-void PublishKafka::onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
+void PublishKafka::onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
   interrupted_ = false;
 
   // Try to get a KafkaConnection
@@ -550,7 +550,7 @@ void PublishKafka::notifyStop() {
 }
 
 
-bool PublishKafka::configureNewConnection(const std::shared_ptr<core::ProcessContext> &context) {
+bool PublishKafka::configureNewConnection(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context) {
   std::string value;
   int64_t valInt;
   std::string valueConf;
@@ -768,7 +768,7 @@ bool PublishKafka::configureNewConnection(const std::shared_ptr<core::ProcessCon
   return true;
 }
 
-bool PublishKafka::createNewTopic(const std::shared_ptr<core::ProcessContext> &context, const std::string& topic_name) {
+bool PublishKafka::createNewTopic(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const std::string& topic_name) {
   std::unique_ptr<rd_kafka_topic_conf_t, rd_kafka_topic_conf_deleter> topic_conf_{ rd_kafka_topic_conf_new() };
   if (topic_conf_ == nullptr) {
     logger_->log_error("Failed to create rd_kafka_topic_conf_t object");
@@ -842,13 +842,13 @@ bool PublishKafka::createNewTopic(const std::shared_ptr<core::ProcessContext> &c
     return false;
   }
 
-  const auto kafkaTopicref = std::make_shared<KafkaTopic>(topic_reference);  // KafkaTopic takes ownership of topic_reference
+  const auto kafkaTopicref = utils::debug_make_shared<KafkaTopic>(topic_reference);  // KafkaTopic takes ownership of topic_reference
   conn_->putTopic(topic_name, kafkaTopicref);
 
   return true;
 }
 
-void PublishKafka::onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
+void PublishKafka::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   // Check whether we have been interrupted
   if (interrupted_) {
     logger_->log_info("The processor has been interrupted, not running onTrigger");
@@ -861,9 +861,9 @@ void PublishKafka::onTrigger(const std::shared_ptr<core::ProcessContext> &contex
 
   // Collect FlowFiles to process
   uint64_t actual_bytes = 0U;
-  std::vector<std::shared_ptr<core::FlowFile>> flowFiles;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> flowFiles;
   for (uint32_t i = 0; i < batch_size_; i++) {
-    std::shared_ptr<core::FlowFile> flowFile = session->get();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flowFile = session->get();
     if (flowFile == nullptr) {
       break;
     }
@@ -879,7 +879,7 @@ void PublishKafka::onTrigger(const std::shared_ptr<core::ProcessContext> &contex
   }
   logger_->log_debug("Processing %lu flow files with a total size of %llu B", flowFiles.size(), actual_bytes);
 
-  auto messages = std::make_shared<Messages>(logger_);
+  auto messages = utils::debug_make_shared<Messages>(logger_);
   // We must add this to the messages set, so that it will be interrupted when notifyStop is called
   {
     std::lock_guard<std::mutex> lock(messages_mutex_);

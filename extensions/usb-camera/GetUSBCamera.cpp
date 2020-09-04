@@ -102,18 +102,18 @@ void GetUSBCamera::onFrame(uvc_frame_t *frame, void *ptr) {
     cb_data->logger->log_info("Created flow file: %s", flow_file_name);
 
     // Initialize callback according to output format
-    std::shared_ptr<OutputStreamCallback> write_cb;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<OutputStreamCallback> write_cb;
 
     if (cb_data->format == "PNG") {
-      write_cb = std::make_shared<GetUSBCamera::PNGWriteCallback>(cb_data->png_write_mtx,
+      write_cb = utils::debug_make_shared<GetUSBCamera::PNGWriteCallback>(cb_data->png_write_mtx,
                                                                   cb_data->frame_buffer,
                                                                   cb_data->device_width,
                                                                   cb_data->device_height);
     } else if (cb_data->format == "RAW") {
-      write_cb = std::make_shared<GetUSBCamera::RawWriteCallback>(cb_data->frame_buffer);
+      write_cb = utils::debug_make_shared<GetUSBCamera::RawWriteCallback>(cb_data->frame_buffer);
     } else {
       cb_data->logger->log_warn("Invalid format specified (%s); defaulting to PNG", cb_data->format);
-      write_cb = std::make_shared<GetUSBCamera::PNGWriteCallback>(cb_data->png_write_mtx,
+      write_cb = utils::debug_make_shared<GetUSBCamera::PNGWriteCallback>(cb_data->png_write_mtx,
                                                                   cb_data->frame_buffer,
                                                                   cb_data->device_width,
                                                                   cb_data->device_height);
@@ -386,7 +386,7 @@ void GetUSBCamera::onTrigger(core::ProcessContext *context, core::ProcessSession
   }
 }
 
-GetUSBCamera::PNGWriteCallback::PNGWriteCallback(std::shared_ptr<std::mutex> write_mtx,
+GetUSBCamera::PNGWriteCallback::PNGWriteCallback(org::apache::nifi::minifi::utils::debug_shared_ptr<std::mutex> write_mtx,
                                                  uvc_frame_t *frame,
                                                  uint32_t width,
                                                  uint32_t height)
@@ -397,7 +397,7 @@ GetUSBCamera::PNGWriteCallback::PNGWriteCallback(std::shared_ptr<std::mutex> wri
       logger_(logging::LoggerFactory<PNGWriteCallback>::getLogger()) {
 }
 
-int64_t GetUSBCamera::PNGWriteCallback::process(std::shared_ptr<io::BaseStream> stream) {
+int64_t GetUSBCamera::PNGWriteCallback::process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
   std::lock_guard<std::mutex> lock(*png_write_mtx_);
   logger_->log_info("Writing %d bytes of raw capture data to PNG output", frame_->data_bytes);
   png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
@@ -461,7 +461,7 @@ GetUSBCamera::RawWriteCallback::RawWriteCallback(uvc_frame_t *frame)
       logger_(logging::LoggerFactory<RawWriteCallback>::getLogger()) {
 }
 
-int64_t GetUSBCamera::RawWriteCallback::process(std::shared_ptr<io::BaseStream> stream) {
+int64_t GetUSBCamera::RawWriteCallback::process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
   logger_->log_info("Writing %d bytes of raw capture data", frame_->data_bytes);
   return stream->writeData(reinterpret_cast<uint8_t *>(frame_->data), frame_->data_bytes);
 }

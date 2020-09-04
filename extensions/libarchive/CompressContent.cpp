@@ -103,8 +103,8 @@ void CompressContent::onSchedule(core::ProcessContext *context, core::ProcessSes
   fileExtension_[COMPRESSION_FORMAT_XZ_LZMA2] = ".xz";
 }
 
-void CompressContent::onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
-  std::shared_ptr<core::FlowFile> flowFile = session->get();
+void CompressContent::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flowFile = session->get();
 
   if (!flowFile) {
     return;
@@ -168,7 +168,7 @@ void CompressContent::onTrigger(const std::shared_ptr<core::ProcessContext> &con
   if (search != fileExtension_.end()) {
     fileExtension = search->second;
   }
-  std::shared_ptr<core::FlowFile> processFlowFile = session->create(flowFile);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> processFlowFile = session->create(flowFile);
   bool success = false;
   if (encapsulateInTar_) {
     CompressContent::WriteCallback callback(compressMode_, compressLevel_, compressFormat, flowFile, session);

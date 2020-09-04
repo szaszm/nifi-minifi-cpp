@@ -81,13 +81,13 @@ void appendJsonStr(const std::string& value, rapidjson::Value& parent, rapidjson
   parent.PushBack(valueVal, alloc);
 }
 
-void SiteToSiteProvenanceReportingTask::getJsonReport(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session,
-                                                      std::vector<std::shared_ptr<core::SerializableComponent>> &records, std::string &report) {
+void SiteToSiteProvenanceReportingTask::getJsonReport(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session,
+                                                      std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent>> &records, std::string &report) {
   rapidjson::Document array(rapidjson::kArrayType);
   rapidjson::Document::AllocatorType &alloc = array.GetAllocator();
 
   for (auto sercomp : records) {
-    std::shared_ptr<provenance::ProvenanceEventRecord> record = std::dynamic_pointer_cast<provenance::ProvenanceEventRecord>(sercomp);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<provenance::ProvenanceEventRecord> record = dynamic_pointer_cast<provenance::ProvenanceEventRecord>(sercomp);
     if (nullptr == record) {
       break;
     }
@@ -144,16 +144,16 @@ void SiteToSiteProvenanceReportingTask::getJsonReport(const std::shared_ptr<core
   report = buffer.GetString();
 }
 
-void SiteToSiteProvenanceReportingTask::onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
+void SiteToSiteProvenanceReportingTask::onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
 }
 
-void SiteToSiteProvenanceReportingTask::onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
+void SiteToSiteProvenanceReportingTask::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   logger_->log_debug("SiteToSiteProvenanceReportingTask -- onTrigger");
-  std::vector<std::shared_ptr<core::SerializableComponent>> records;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent>> records;
   logging::LOG_DEBUG(logger_) << "batch size " << batch_size_ << " records";
   size_t deserialized = batch_size_;
-  std::shared_ptr<core::Repository> repo = context->getProvenanceRepository();
-  std::function<std::shared_ptr<core::SerializableComponent>()> constructor = []() {return std::make_shared<provenance::ProvenanceEventRecord>();};
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> repo = context->getProvenanceRepository();
+  std::function<org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent>()> constructor = []() {return org::apache::nifi::minifi::utils::debug_make_shared<provenance::ProvenanceEventRecord>();};
   if (!repo->DeSerialize(records, deserialized, constructor) && deserialized == 0) {
     return;
   }

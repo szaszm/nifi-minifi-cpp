@@ -38,7 +38,7 @@ namespace state {
  */
 class ProcessorController : public StateController {
  public:
-  ProcessorController(const std::shared_ptr<core::Processor> &processor, const std::shared_ptr<SchedulingAgent> &scheduler);
+  ProcessorController(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> &processor, const org::apache::nifi::minifi::utils::debug_shared_ptr<SchedulingAgent> &scheduler);
 
   virtual ~ProcessorController();
 
@@ -50,7 +50,7 @@ class ProcessorController : public StateController {
     return processor_->getUUIDStr();
   }
 
-  std::shared_ptr<core::Processor> getProcessor() {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> getProcessor() {
     return processor_;
   }
   /**
@@ -67,8 +67,8 @@ class ProcessorController : public StateController {
   virtual int16_t pause();
 
  protected:
-  std::shared_ptr<core::Processor> processor_;
-  std::shared_ptr<SchedulingAgent> scheduler_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<SchedulingAgent> scheduler_;
 };
 
 }  // namespace state

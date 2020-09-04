@@ -114,7 +114,7 @@ class PythonScriptEngine : public script::ScriptEngine {
 
   class TriggerSession {
    public:
-    TriggerSession(std::shared_ptr<script::ScriptProcessContext> script_context, std::shared_ptr<python::PyProcessSession> py_session)
+    TriggerSession(org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptProcessContext> script_context, org::apache::nifi::minifi::utils::debug_shared_ptr<python::PyProcessSession> py_session)
         : script_context_(std::move(script_context)),
           py_session_(std::move(py_session)) {
     }
@@ -125,13 +125,13 @@ class PythonScriptEngine : public script::ScriptEngine {
     }
 
    private:
-    std::shared_ptr<script::ScriptProcessContext> script_context_;
-    std::shared_ptr<python::PyProcessSession> py_session_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptProcessContext> script_context_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<python::PyProcessSession> py_session_;
   };
 
   class TriggerProcessor {
    public:
-    TriggerProcessor(std::shared_ptr<script::ScriptProcessContext> script_context, std::shared_ptr<python::PyProcessSession> py_session)
+    TriggerProcessor(org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptProcessContext> script_context, org::apache::nifi::minifi::utils::debug_shared_ptr<python::PyProcessSession> py_session)
         : script_context_(std::move(script_context)),
           py_session_(std::move(py_session)) {
     }
@@ -142,13 +142,13 @@ class PythonScriptEngine : public script::ScriptEngine {
     }
 
    private:
-    std::shared_ptr<script::ScriptProcessContext> script_context_;
-    std::shared_ptr<python::PyProcessSession> py_session_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptProcessContext> script_context_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<python::PyProcessSession> py_session_;
   };
 
   class TriggerSchedule {
    public:
-    TriggerSchedule(std::shared_ptr<script::ScriptProcessContext> script_context)
+    TriggerSchedule(org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptProcessContext> script_context)
         : script_context_(script_context) {
     }
 
@@ -157,7 +157,7 @@ class PythonScriptEngine : public script::ScriptEngine {
     }
 
    private:
-    std::shared_ptr<script::ScriptProcessContext> script_context_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptProcessContext> script_context_;
   };
 
   class TriggerInit {
@@ -167,28 +167,28 @@ class PythonScriptEngine : public script::ScriptEngine {
     ~TriggerInit() = default;
 
    private:
-    std::shared_ptr<script::ScriptProcessContext> script_context_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptProcessContext> script_context_;
   };
 
-  void onInitialize(const std::shared_ptr<core::Processor> &proc) {
+  void onInitialize(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> &proc) {
     TriggerInit trigger_session;
     auto newproc = convertProcessor(proc);
     call("onInitialize", newproc);
   }
 
-  void describe(const std::shared_ptr<core::Processor> &proc) {
+  void describe(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> &proc) {
     TriggerInit trigger_session;
     auto newproc = convertProcessor(proc);
     callRequiredFunction("describe", newproc);
   }
 
-  void onSchedule(const std::shared_ptr<core::ProcessContext> &context) {
+  void onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context) {
     auto script_context = convertContext(context);
     TriggerSchedule trigger_session(script_context);
     call("onSchedule", script_context);
   }
 
-  void onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
+  void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
     auto script_context = convertContext(context);
     auto py_session = convertSession(session);
     TriggerSession trigger_session(script_context, py_session);
@@ -213,16 +213,16 @@ class PythonScriptEngine : public script::ScriptEngine {
     return py::cast(value);
   }
 
-  std::shared_ptr<python::PyProcessSession> convertSession(const std::shared_ptr<core::ProcessSession> &session) {
-    return std::make_shared<python::PyProcessSession>(session);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<python::PyProcessSession> convertSession(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
+    return utils::debug_make_shared<python::PyProcessSession>(session);
   }
 
-  std::shared_ptr<script::ScriptProcessContext> convertContext(const std::shared_ptr<core::ProcessContext> &context) {
-    return std::make_shared<script::ScriptProcessContext>(context);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptProcessContext> convertContext(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context) {
+    return utils::debug_make_shared<script::ScriptProcessContext>(context);
   }
 
-  std::shared_ptr<python::PythonProcessor> convertProcessor(const std::shared_ptr<core::Processor> &proc) {
-    return std::make_shared<python::PythonProcessor>(proc);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<python::PythonProcessor> convertProcessor(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> &proc) {
+    return utils::debug_make_shared<python::PythonProcessor>(proc);
   }
 
  private:

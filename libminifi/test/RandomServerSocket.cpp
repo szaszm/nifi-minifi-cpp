@@ -37,7 +37,7 @@ namespace minifi {
 namespace io {
 
   RandomServerSocket::RandomServerSocket(const std::string& host, uint16_t offset, uint16_t range, uint16_t retries) :
-      ServerSocket::ServerSocket(std::make_shared<org::apache::nifi::minifi::io::SocketContext>(std::make_shared<minifi::Configure>()), host, 0, 1) {
+      ServerSocket::ServerSocket(org::apache::nifi::minifi::utils::debug_make_shared<org::apache::nifi::minifi::io::SocketContext>(org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>()), host, 0, 1) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<uint16_t> dis(offset, offset + range);

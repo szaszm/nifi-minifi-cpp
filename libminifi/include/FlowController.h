@@ -66,23 +66,23 @@ namespace minifi {
  * Flow Controller class. Generally used by FlowController factory
  * as a singleton.
  */
-class FlowController : public core::controller::ControllerServiceProvider, public state::response::NodeReporter,  public state::StateMonitor, public std::enable_shared_from_this<FlowController> {
+class FlowController : public core::controller::ControllerServiceProvider, public state::response::NodeReporter,  public state::StateMonitor, public org::apache::nifi::minifi::utils::enable_debug_shared_from_this<FlowController> {
  public:
   /**
    * Flow controller constructor
    */
-  explicit FlowController(std::shared_ptr<core::Repository> provenance_repo, std::shared_ptr<core::Repository> flow_file_repo, std::shared_ptr<Configure> configure,
-                          std::unique_ptr<core::FlowConfiguration> flow_configuration, std::shared_ptr<core::ContentRepository> content_repo, std::string name, bool headless_mode);
+  explicit FlowController(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> provenance_repo, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_file_repo, org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configure,
+                          std::unique_ptr<core::FlowConfiguration> flow_configuration, org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo, std::string name, bool headless_mode);
 
-  explicit FlowController(std::shared_ptr<core::Repository> provenance_repo, std::shared_ptr<core::Repository> flow_file_repo, std::shared_ptr<Configure> configure,
-                          std::unique_ptr<core::FlowConfiguration> flow_configuration, std::shared_ptr<core::ContentRepository> content_repo)
+  explicit FlowController(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> provenance_repo, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_file_repo, org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configure,
+                          std::unique_ptr<core::FlowConfiguration> flow_configuration, org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo)
       : FlowController(std::move(provenance_repo), std::move(flow_file_repo), std::move(configure), std::move(flow_configuration), std::move(content_repo), DEFAULT_ROOT_GROUP_NAME, false) {
   }
 
-  explicit FlowController(std::shared_ptr<core::Repository> provenance_repo, std::shared_ptr<core::Repository> flow_file_repo, std::shared_ptr<Configure> configure,
+  explicit FlowController(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> provenance_repo, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_file_repo, org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configure,
                           std::unique_ptr<core::FlowConfiguration> flow_configuration)
       : FlowController(std::move(provenance_repo), std::move(flow_file_repo), std::move(configure), std::move(flow_configuration),
-          std::make_shared<core::repository::FileSystemRepository>(), DEFAULT_ROOT_GROUP_NAME, false) {
+          org::apache::nifi::minifi::utils::debug_make_shared<core::repository::FileSystemRepository>(), DEFAULT_ROOT_GROUP_NAME, false) {
     content_repo_->initialize(configuration_);
   }
 
@@ -90,17 +90,17 @@ class FlowController : public core::controller::ControllerServiceProvider, publi
   ~FlowController() override;
 
   // Get the provenance repository
-  virtual std::shared_ptr<core::Repository> getProvenanceRepository() {
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> getProvenanceRepository() {
     return this->provenance_repo_;
   }
 
   // Get the flowfile repository
-  virtual std::shared_ptr<core::Repository> getFlowFileRepository() {
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> getFlowFileRepository() {
     return this->flow_file_repo_;
   }
 
   // Load flow xml from disk, after that, create the root process group and its children, initialize the flows
-  virtual void load(const std::shared_ptr<core::ProcessGroup> &root = nullptr, bool reload = false);
+  virtual void load(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessGroup> &root = nullptr, bool reload = false);
 
   // Whether the Flow Controller is start running
   bool isRunning() override {
@@ -123,13 +123,13 @@ class FlowController : public core::controller::ControllerServiceProvider, publi
     return -1;
   }
 
-  std::vector<std::shared_ptr<state::StateController>> getComponents(const std::string &name) override;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<state::StateController>> getComponents(const std::string &name) override;
 
-  std::vector<std::shared_ptr<state::StateController>> getAllComponents() override;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<state::StateController>> getAllComponents() override;
 
   int16_t clearConnection(const std::string &connection) override;
 
-  int16_t applyUpdate(const std::string &source, const std::shared_ptr<state::Update>&) override { return -1; }
+  int16_t applyUpdate(const std::string &source, const org::apache::nifi::minifi::utils::debug_shared_ptr<state::Update>&) override { return -1; }
   // Asynchronous function trigger unloading and wait for a period of time
   virtual void waitUnload(uint64_t timeToWaitMs);
   // Unload the current flow xml, clean the root process group and all its children
@@ -188,7 +188,7 @@ class FlowController : public core::controller::ControllerServiceProvider, publi
    * @param id service identifier
    * @param firstTimeAdded first time this CS was added
    */
-  std::shared_ptr<core::controller::ControllerServiceNode> createControllerService(const std::string &type, const std::string &fullType, const std::string &id, bool firstTimeAdded) override;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> createControllerService(const std::string &type, const std::string &fullType, const std::string &id, bool firstTimeAdded) override;
 
   /**
    * controller service provider
@@ -198,25 +198,25 @@ class FlowController : public core::controller::ControllerServiceProvider, publi
    * @param serviceNode service node to be removed.
    */
 
-  void removeControllerService(const std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) override;
+  void removeControllerService(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) override;
 
   /**
    * Enables the controller service services
    * @param serviceNode service node which will be disabled, along with linked services.
    */
-  std::future<utils::TaskRescheduleInfo> enableControllerService(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) override;
+  std::future<utils::TaskRescheduleInfo> enableControllerService(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) override;
 
   /**
    * Enables controller services
    * @param serviceNoden vector of service nodes which will be enabled, along with linked services.
    */
-  void enableControllerServices(std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> serviceNodes) override;
+  void enableControllerServices(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> serviceNodes) override;
 
   /**
    * Disables controller services
    * @param serviceNode service node which will be disabled, along with linked services.
    */
-  std::future<utils::TaskRescheduleInfo> disableControllerService(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) override;
+  std::future<utils::TaskRescheduleInfo> disableControllerService(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) override;
 
   /**
    * Removes all controller services.
@@ -226,41 +226,41 @@ class FlowController : public core::controller::ControllerServiceProvider, publi
   /**
    * Gets all controller services.
    */
-  std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> getAllControllerServices() override;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> getAllControllerServices() override;
 
-  std::shared_ptr<core::controller::ControllerService> getControllerService(const std::string &identifier) override;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerService> getControllerService(const std::string &identifier) override;
 
   /**
    * Gets controller service node specified by <code>id</code>
    * @param id service identifier
    * @return shared pointer to the controller service node or nullptr if it does not exist.
    */
-  std::shared_ptr<core::controller::ControllerServiceNode> getControllerServiceNode(const std::string &id) const override;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> getControllerServiceNode(const std::string &id) const override;
 
-  void verifyCanStopReferencingComponents(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) override;
+  void verifyCanStopReferencingComponents(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) override;
 
   /**
    * Unschedules referencing components.
    */
-  std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> unscheduleReferencingComponents(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) override;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> unscheduleReferencingComponents(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) override;
 
   /**
    * Verify can disable referencing components
    * @param serviceNode service node whose referenced components will be scheduled.
    */
-  void verifyCanDisableReferencingServices(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) override;
+  void verifyCanDisableReferencingServices(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) override;
 
   /**
    * Disables referencing components
    * @param serviceNode service node whose referenced components will be scheduled.
    */
-  std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> disableReferencingServices(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) override;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> disableReferencingServices(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) override;
 
   /**
    * Verify can enable referencing components
    * @param serviceNode service node whose referenced components will be scheduled.
    */
-  void verifyCanEnableReferencingServices(std::shared_ptr<core::controller::ControllerServiceNode>&) override;
+  void verifyCanEnableReferencingServices(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>&) override;
 
   /**
    * Determines if the controller service specified by identifier is enabled.
@@ -271,19 +271,19 @@ class FlowController : public core::controller::ControllerServiceProvider, publi
    * Enables referencing components
    * @param serviceNode service node whose referenced components will be scheduled.
    */
-  std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> enableReferencingServices(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) override;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> enableReferencingServices(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) override;
 
   /**
    * Schedules referencing components
    * @param serviceNode service node whose referenced components will be scheduled.
    */
-  std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> scheduleReferencingComponents(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) override;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> scheduleReferencingComponents(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) override;
 
   /**
    * Returns controller service components referenced by serviceIdentifier from the embedded
    * controller service provider;
    */
-  std::shared_ptr<core::controller::ControllerService> getControllerServiceForComponent(const std::string &serviceIdentifier, const std::string &componentId) override;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerService> getControllerServiceForComponent(const std::string &serviceIdentifier, const std::string &componentId) override;
 
   /**
    * Enables all controller services for the provider.
@@ -299,20 +299,20 @@ class FlowController : public core::controller::ControllerServiceProvider, publi
    * Retrieves metrics node
    * @return metrics response node
    */
-  std::shared_ptr<state::response::ResponseNode> getMetricsNode(const std::string& metricsClass) const override;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode> getMetricsNode(const std::string& metricsClass) const override;
 
   /**
    * Retrieves root nodes configured to be included in heartbeat
    * @param includeManifest -- determines if manifest is to be included
    * @return a list of response nodes
    */
-  std::vector<std::shared_ptr<state::response::ResponseNode>> getHeartbeatNodes(bool includeManifest) const override;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode>> getHeartbeatNodes(bool includeManifest) const override;
 
   /**
    * Retrieves the agent manifest to be sent as a response to C2 DESCRIBE manifest
    * @return the agent manifest response node
    */
-  std::shared_ptr<state::response::ResponseNode> getAgentManifest() const override;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode> getAgentManifest() const override;
 
   uint64_t getUptime() override;
 
@@ -324,7 +324,7 @@ class FlowController : public core::controller::ControllerServiceProvider, publi
  protected:
   void loadC2ResponseConfiguration();
   void loadC2ResponseConfiguration(const std::string &prefix);
-  std::shared_ptr<state::response::ResponseNode> loadC2ResponseConfiguration(const std::string &prefix, std::shared_ptr<state::response::ResponseNode>);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode> loadC2ResponseConfiguration(const std::string &prefix, org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode>);
 
   // function to load the flow file repo.
   void loadFlowRepo();
@@ -339,9 +339,9 @@ class FlowController : public core::controller::ControllerServiceProvider, publi
 
  private:
   template <typename T, typename = typename std::enable_if<std::is_base_of<SchedulingAgent, T>::value>::type>
-  void conditionalReloadScheduler(std::shared_ptr<T>& scheduler, const bool condition) {
+  void conditionalReloadScheduler(org::apache::nifi::minifi::utils::debug_shared_ptr<T>& scheduler, const bool condition) {
     if (condition) {
-      scheduler = std::make_shared<T>(gsl::not_null<core::controller::ControllerServiceProvider*>(this), provenance_repo_, flow_file_repo_, content_repo_, configuration_, thread_pool_);
+      scheduler = org::apache::nifi::minifi::utils::debug_make_shared<T>(gsl::not_null<core::controller::ControllerServiceProvider*>(this), provenance_repo_, flow_file_repo_, content_repo_, configuration_, thread_pool_);
     }
   }
 
@@ -350,7 +350,7 @@ class FlowController : public core::controller::ControllerServiceProvider, publi
   std::recursive_mutex mutex_;
 
   // Root Process Group
-  std::shared_ptr<core::ProcessGroup> root_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessGroup> root_;
   // Whether it is running
   std::atomic<bool> running_;
   std::atomic<bool> updating_;
@@ -363,35 +363,35 @@ class FlowController : public core::controller::ControllerServiceProvider, publi
   // Whether it has already been initialized (load the flow XML already)
   std::atomic<bool> initialized_;
   // Provenance Repo
-  std::shared_ptr<core::Repository> provenance_repo_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> provenance_repo_;
   // FlowFile Repo
-  std::shared_ptr<core::Repository> flow_file_repo_;
-  std::shared_ptr<core::ContentRepository> content_repo_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_file_repo_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo_;
   // Thread pool for schedulers
   utils::ThreadPool<utils::TaskRescheduleInfo> thread_pool_;
   // Flow Timer Scheduler
-  std::shared_ptr<TimerDrivenSchedulingAgent> timer_scheduler_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TimerDrivenSchedulingAgent> timer_scheduler_;
   // Flow Event Scheduler
-  std::shared_ptr<EventDrivenSchedulingAgent> event_scheduler_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<EventDrivenSchedulingAgent> event_scheduler_;
   // Cron Schedule
-  std::shared_ptr<CronDrivenSchedulingAgent> cron_scheduler_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<CronDrivenSchedulingAgent> cron_scheduler_;
   // FlowControl Protocol
   std::unique_ptr<FlowControlProtocol> protocol_;
-  std::shared_ptr<Configure> configuration_;
-  std::shared_ptr<core::controller::ControllerServiceMap> controller_service_map_;
-  std::shared_ptr<core::controller::ControllerServiceProvider> controller_service_provider_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configuration_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceMap> controller_service_map_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceProvider> controller_service_provider_;
   // flow configuration object.
   std::unique_ptr<core::FlowConfiguration> flow_configuration_;
   // metrics information
   std::chrono::steady_clock::time_point start_time_;
   mutable std::mutex metrics_mutex_;
   // root_nodes cache
-  std::map<std::string, std::shared_ptr<state::response::ResponseNode>> root_response_nodes_;
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode>> root_response_nodes_;
   // metrics cache
-  std::map<std::string, std::shared_ptr<state::response::ResponseNode>> device_information_;
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode>> device_information_;
   // metrics cache
-  std::map<std::string, std::shared_ptr<state::response::ResponseNode>> component_metrics_;
-  std::map<uint8_t, std::vector<std::shared_ptr<state::response::ResponseNode>>> component_metrics_by_id_;
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode>> component_metrics_;
+  std::map<uint8_t, std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode>>> component_metrics_by_id_;
   // metrics last run
   std::chrono::steady_clock::time_point last_metrics_capture_;
 

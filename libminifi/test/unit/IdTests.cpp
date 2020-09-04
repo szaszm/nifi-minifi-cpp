@@ -28,8 +28,8 @@ TEST_CASE("Test default is time", "[id]") {
   TestController test_controller;
 
   LogTestController::getInstance().setDebug<utils::IdGenerator>();
-  std::shared_ptr<utils::IdGenerator> generator = utils::IdGenerator::getIdGenerator();
-  generator->initialize(std::make_shared<minifi::Properties>());
+  org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> generator = utils::IdGenerator::getIdGenerator();
+  generator->initialize(org::apache::nifi::minifi::utils::debug_make_shared<minifi::Properties>());
 
   REQUIRE(true == LogTestController::getInstance().contains("Using uuid_generate_time implementation for uids."));
   LogTestController::getInstance().reset();
@@ -39,10 +39,10 @@ TEST_CASE("Test time", "[id]") {
   TestController test_controller;
 
   LogTestController::getInstance().setDebug<utils::IdGenerator>();
-  std::shared_ptr<minifi::Properties> id_props = std::make_shared<minifi::Properties>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Properties> id_props = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Properties>();
   id_props->set("uid.implementation", "TiMe");
 
-  std::shared_ptr<utils::IdGenerator> generator = utils::IdGenerator::getIdGenerator();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> generator = utils::IdGenerator::getIdGenerator();
   generator->initialize(id_props);
 
   REQUIRE(true == LogTestController::getInstance().contains("Using uuid_generate_time implementation for uids."));
@@ -61,10 +61,10 @@ TEST_CASE("Test Generate Move", "[id]") {
   TestController test_controller;
 
   LogTestController::getInstance().setDebug<utils::IdGenerator>();
-  std::shared_ptr<minifi::Properties> id_props = std::make_shared<minifi::Properties>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Properties> id_props = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Properties>();
   id_props->set("uid.implementation", "TiMe");
 
-  std::shared_ptr<utils::IdGenerator> generator = utils::IdGenerator::getIdGenerator();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> generator = utils::IdGenerator::getIdGenerator();
   generator->initialize(id_props);
 
   auto generated = generator->generate();
@@ -78,10 +78,10 @@ TEST_CASE("Test random", "[id]") {
   TestController test_controller;
 
   LogTestController::getInstance().setDebug<utils::IdGenerator>();
-  std::shared_ptr<minifi::Properties> id_props = std::make_shared<minifi::Properties>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Properties> id_props = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Properties>();
   id_props->set("uid.implementation", "RaNDoM");
 
-  std::shared_ptr<utils::IdGenerator> generator = utils::IdGenerator::getIdGenerator();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> generator = utils::IdGenerator::getIdGenerator();
   generator->initialize(id_props);
 
   REQUIRE(true == LogTestController::getInstance().contains("Using uuid_generate_random for uids."));
@@ -100,10 +100,10 @@ TEST_CASE("Test uuid_default", "[id]") {
   TestController test_controller;
 
   LogTestController::getInstance().setDebug<utils::IdGenerator>();
-  std::shared_ptr<minifi::Properties> id_props = std::make_shared<minifi::Properties>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Properties> id_props = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Properties>();
   id_props->set("uid.implementation", "UUID_default");
 
-  std::shared_ptr<utils::IdGenerator> generator = utils::IdGenerator::getIdGenerator();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> generator = utils::IdGenerator::getIdGenerator();
   generator->initialize(id_props);
 
   REQUIRE(true == LogTestController::getInstance().contains("Using uuid_generate for uids."));
@@ -114,10 +114,10 @@ TEST_CASE("Test invalid", "[id]") {
   TestController test_controller;
 
   LogTestController::getInstance().setDebug<utils::IdGenerator>();
-  std::shared_ptr<minifi::Properties> id_props = std::make_shared<minifi::Properties>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Properties> id_props = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Properties>();
   id_props->set("uid.implementation", "InVaLiD");
 
-  std::shared_ptr<utils::IdGenerator> generator = utils::IdGenerator::getIdGenerator();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> generator = utils::IdGenerator::getIdGenerator();
   generator->initialize(id_props);
 
   REQUIRE(true == LogTestController::getInstance().contains("Invalid value for uid.implementation (invalid). Using uuid_generate_time implementation for uids."));
@@ -128,10 +128,10 @@ TEST_CASE("Test parse", "[id]") {
   TestController test_controller;
 
   LogTestController::getInstance().setDebug<utils::IdGenerator>();
-  std::shared_ptr<minifi::Properties> id_props = std::make_shared<minifi::Properties>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Properties> id_props = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Properties>();
   id_props->set("uid.implementation", "time");
 
-  std::shared_ptr<utils::IdGenerator> generator = utils::IdGenerator::getIdGenerator();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> generator = utils::IdGenerator::getIdGenerator();
   generator->initialize(id_props);
 
   utils::Identifier id;
@@ -156,10 +156,10 @@ TEST_CASE("Test to_string", "[id]") {
   TestController test_controller;
 
   LogTestController::getInstance().setDebug<utils::IdGenerator>();
-  std::shared_ptr<minifi::Properties> id_props = std::make_shared<minifi::Properties>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Properties> id_props = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Properties>();
   id_props->set("uid.implementation", "time");
 
-  std::shared_ptr<utils::IdGenerator> generator = utils::IdGenerator::getIdGenerator();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> generator = utils::IdGenerator::getIdGenerator();
   generator->initialize(id_props);
 
   utils::Identifier id;
@@ -199,11 +199,11 @@ TEST_CASE("Test Hex Device Segment 16 bits correct digits", "[id]") {
   TestController test_controller;
 
   LogTestController::getInstance().setDebug<utils::IdGenerator>();
-  std::shared_ptr<minifi::Properties> id_props = std::make_shared<minifi::Properties>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Properties> id_props = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Properties>();
   id_props->set("uid.implementation", "minifi_uid");
   id_props->set("uid.minifi.device.segment", "09aF");
 
-  std::shared_ptr<utils::IdGenerator> generator = utils::IdGenerator::getIdGenerator();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> generator = utils::IdGenerator::getIdGenerator();
   generator->initialize(id_props);
 
   utils::Identifier uuid;
@@ -227,11 +227,11 @@ TEST_CASE("Test Hex Device Segment 16 bits too many digits", "[id]") {
   TestController test_controller;
 
   LogTestController::getInstance().setDebug<utils::IdGenerator>();
-  std::shared_ptr<minifi::Properties> id_props = std::make_shared<minifi::Properties>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Properties> id_props = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Properties>();
   id_props->set("uid.implementation", "minifi_uid");
   id_props->set("uid.minifi.device.segment", "09aFee");
 
-  std::shared_ptr<utils::IdGenerator> generator = utils::IdGenerator::getIdGenerator();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> generator = utils::IdGenerator::getIdGenerator();
   generator->initialize(id_props);
 
   utils::Identifier uuid;
@@ -257,12 +257,12 @@ TEST_CASE("Test Hex Device Segment 18 bits", "[id]") {
   TestController test_controller;
 
   LogTestController::getInstance().setDebug<utils::IdGenerator>();
-  std::shared_ptr<minifi::Properties> id_props = std::make_shared<minifi::Properties>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Properties> id_props = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Properties>();
   id_props->set("uid.implementation", "minifi_uid");
   id_props->set("uid.minifi.device.segment.bits", "18");
   id_props->set("uid.minifi.device.segment", "09aF8");
 
-  std::shared_ptr<utils::IdGenerator> generator = utils::IdGenerator::getIdGenerator();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> generator = utils::IdGenerator::getIdGenerator();
   generator->initialize(id_props);
 
   utils::Identifier uuid;
@@ -294,7 +294,7 @@ TEST_CASE("Collision", "[collision]") {
   TestController test_controller;
 
   LogTestController::getInstance().setDebug<utils::IdGenerator>();
-  std::shared_ptr<minifi::Properties> id_props = std::make_shared<minifi::Properties>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Properties> id_props = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Properties>();
   SECTION("random") {
     id_props->set("uid.implementation", "random");
   }
@@ -305,7 +305,7 @@ TEST_CASE("Collision", "[collision]") {
     id_props->set("uid.implementation", "uuid_default");
   }
 
-  std::shared_ptr<utils::IdGenerator> generator = utils::IdGenerator::getIdGenerator();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> generator = utils::IdGenerator::getIdGenerator();
   generator->initialize(id_props);
 
   std::vector<utils::Identifier> uuids(16 * 1024U);
@@ -333,7 +333,7 @@ TEST_CASE("Speed", "[speed]") {
   TestController test_controller;
 
   LogTestController::getInstance().setDebug<utils::IdGenerator>();
-  std::shared_ptr<minifi::Properties> id_props = std::make_shared<minifi::Properties>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Properties> id_props = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Properties>();
   std::string implementation;
   SECTION("random") {
     implementation = "random";
@@ -346,7 +346,7 @@ TEST_CASE("Speed", "[speed]") {
   }
   id_props->set("uid.implementation", implementation);
 
-  std::shared_ptr<utils::IdGenerator> generator = utils::IdGenerator::getIdGenerator();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> generator = utils::IdGenerator::getIdGenerator();
   generator->initialize(id_props);
 
   std::vector<utils::Identifier> uuids(128U * 1024U);

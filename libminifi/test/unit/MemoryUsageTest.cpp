@@ -26,3 +26,11 @@ TEST_CASE("Test memory usage", "[testmemoryusage]") {
   REQUIRE(memoryUsage > v.size());
   REQUIRE(memoryUsage < 2 * v.size());
 }
+
+TEST_CASE("sptr", "[sptr]") {
+  auto sptr = utils::debug_make_shared<int>(5);
+  auto sptr2 = sptr;
+  auto sptr3 = sptr;
+  sptr3 = std::move(sptr2);
+  sptr2 = utils::debug_make_shared<int>(42);
+}

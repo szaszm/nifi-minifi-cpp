@@ -91,9 +91,9 @@ public:
   * @param sessionFactory process session factory that is used when creating
   * ProcessSession objects.
   */
-  void onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
+  void onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
   //! OnTrigger method, implemented by NiFi ConsumeWindowsEventLog
-  virtual void onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) override;
+  virtual void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) override;
   //! Initialize, overwrite by NiFi ConsumeWindowsEventLog
   virtual void initialize(void) override;
   void notifyStop() override;
@@ -115,7 +115,7 @@ protected:
 private:
   // Logger
   std::shared_ptr<logging::Logger> logger_;
-  std::shared_ptr<core::CoreComponentStateManager> state_manager_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::CoreComponentStateManager> state_manager_;
   wel::METADATA_NAMES header_names_;
   std::string header_delimiter_;
   std::string channel_;

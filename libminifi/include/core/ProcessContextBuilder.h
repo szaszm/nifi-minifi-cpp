@@ -54,7 +54,7 @@ namespace core {
  * While this incurs a tiny cost to look up, it allows us to have a replaceable builder that erases the type we are
  * constructing.
  */
-class ProcessContextBuilder : public core::CoreComponent, public std::enable_shared_from_this<ProcessContextBuilder> {
+class ProcessContextBuilder : public core::CoreComponent, public org::apache::nifi::minifi::utils::enable_debug_shared_from_this<ProcessContextBuilder> {
  public:
   ProcessContextBuilder(const std::string &name, minifi::utils::Identifier &uuid);
 
@@ -62,24 +62,24 @@ class ProcessContextBuilder : public core::CoreComponent, public std::enable_sha
 
   virtual ~ProcessContextBuilder() = default;
 
-  std::shared_ptr<ProcessContextBuilder> withProvider(core::controller::ControllerServiceProvider* controller_service_provider);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessContextBuilder> withProvider(core::controller::ControllerServiceProvider* controller_service_provider);
 
-  std::shared_ptr<ProcessContextBuilder> withProvenanceRepository(const std::shared_ptr<core::Repository> &repo);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessContextBuilder> withProvenanceRepository(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> &repo);
 
-  std::shared_ptr<ProcessContextBuilder> withFlowFileRepository(const std::shared_ptr<core::Repository> &repo);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessContextBuilder> withFlowFileRepository(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> &repo);
 
-  std::shared_ptr<ProcessContextBuilder> withContentRepository(const std::shared_ptr<core::ContentRepository> &repo);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessContextBuilder> withContentRepository(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> &repo);
 
-  std::shared_ptr<ProcessContextBuilder> withConfiguration(const std::shared_ptr<minifi::Configure> &configuration);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessContextBuilder> withConfiguration(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> &configuration);
 
-  virtual std::shared_ptr<core::ProcessContext> build(const std::shared_ptr<ProcessorNode> &processor);
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> build(const org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessorNode> &processor);
 
  protected:
-  std::shared_ptr<minifi::Configure> configuration_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> configuration_;
   core::controller::ControllerServiceProvider* controller_service_provider_;
-  std::shared_ptr<core::Repository> prov_repo_;
-  std::shared_ptr<core::Repository> flow_repo_;
-  std::shared_ptr<core::ContentRepository> content_repo_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> prov_repo_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_repo_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo_;
 };
 
 }  // namespace core

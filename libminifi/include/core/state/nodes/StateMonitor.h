@@ -54,11 +54,11 @@ class StateMonitorNode : public DeviceInformation {
         monitor_(nullptr) {
   }
 
-  void setStateMonitor(const std::shared_ptr<state::StateMonitor> &monitor) {
+  void setStateMonitor(const org::apache::nifi::minifi::utils::debug_shared_ptr<state::StateMonitor> &monitor) {
     monitor_ = monitor;
   }
  protected:
-  std::shared_ptr<state::StateMonitor> monitor_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<state::StateMonitor> monitor_;
 };
 
 }  // namespace response

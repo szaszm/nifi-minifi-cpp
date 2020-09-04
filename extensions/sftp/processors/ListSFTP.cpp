@@ -193,7 +193,7 @@ ListSFTP::ListSFTP(std::string name, utils::Identifier uuid /*= utils::Identifie
 
 ListSFTP::~ListSFTP() = default;
 
-void ListSFTP::onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
+void ListSFTP::onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
   parseCommonPropertiesOnSchedule(context);
 
   state_manager_ = context->getStateManager();
@@ -418,7 +418,7 @@ bool ListSFTP::filterDirectory(const std::string& parent_path, const std::string
 }
 
 bool ListSFTP::createAndTransferFlowFileFromChild(
-    const std::shared_ptr<core::ProcessSession>& session,
+    const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession>& session,
     const std::string& hostname,
     uint16_t port,
     const std::string& username,
@@ -435,7 +435,7 @@ bool ListSFTP::createAndTransferFlowFileFromChild(
   }
 
   /* Create FlowFile */
-  std::shared_ptr<FlowFileRecord> flow_file = std::static_pointer_cast<FlowFileRecord>(session->create());
+  org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> flow_file = static_pointer_cast<FlowFileRecord>(session->create());
   if (flow_file == nullptr) {
     logger_->log_error("Failed to create FlowFileRecord");
     return false;
@@ -479,7 +479,7 @@ ListSFTP::ListedEntity::ListedEntity(uint64_t timestamp_, uint64_t size_)
     , size(size_) {
 }
 
-bool ListSFTP::persistTrackingTimestampsCache(const std::shared_ptr<core::ProcessContext>& context, const std::string& hostname, const std::string& username, const std::string& remote_path) {
+bool ListSFTP::persistTrackingTimestampsCache(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>& context, const std::string& hostname, const std::string& username, const std::string& remote_path) {
   std::unordered_map<std::string, std::string> state;
   state["listing_strategy"] = LISTING_STRATEGY_TRACKING_TIMESTAMPS;
   state["hostname"] = hostname;
@@ -495,7 +495,7 @@ bool ListSFTP::persistTrackingTimestampsCache(const std::shared_ptr<core::Proces
   return state_manager_->set(state);
 }
 
-bool ListSFTP::updateFromTrackingTimestampsCache(const std::shared_ptr<core::ProcessContext>& context, const std::string& hostname, const std::string& username, const std::string& remote_path) {
+bool ListSFTP::updateFromTrackingTimestampsCache(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>& context, const std::string& hostname, const std::string& username, const std::string& remote_path) {
   std::string state_listing_strategy;
   std::string state_hostname;
   std::string state_username;
@@ -577,8 +577,8 @@ bool ListSFTP::updateFromTrackingTimestampsCache(const std::shared_ptr<core::Pro
 }
 
 void ListSFTP::listByTrackingTimestamps(
-    const std::shared_ptr<core::ProcessContext>& context,
-    const std::shared_ptr<core::ProcessSession>& session,
+    const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>& context,
+    const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession>& session,
     const std::string& hostname,
     uint16_t port,
     const std::string& username,
@@ -738,7 +738,7 @@ void ListSFTP::listByTrackingTimestamps(
   }
 }
 
-bool ListSFTP::persistTrackingEntitiesCache(const std::shared_ptr<core::ProcessContext>& context, const std::string& hostname, const std::string& username, const std::string& remote_path) {
+bool ListSFTP::persistTrackingEntitiesCache(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>& context, const std::string& hostname, const std::string& username, const std::string& remote_path) {
   std::unordered_map<std::string, std::string> state;
   state["listing_strategy"] = listing_strategy_;
   state["hostname"] = hostname;
@@ -754,7 +754,7 @@ bool ListSFTP::persistTrackingEntitiesCache(const std::shared_ptr<core::ProcessC
   return state_manager_->set(state);
 }
 
-bool ListSFTP::updateFromTrackingEntitiesCache(const std::shared_ptr<core::ProcessContext>& context, const std::string& hostname, const std::string& username, const std::string& remote_path) {
+bool ListSFTP::updateFromTrackingEntitiesCache(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>& context, const std::string& hostname, const std::string& username, const std::string& remote_path) {
   std::string state_listing_strategy;
   std::string state_hostname;
   std::string state_username;
@@ -834,8 +834,8 @@ bool ListSFTP::updateFromTrackingEntitiesCache(const std::shared_ptr<core::Proce
 }
 
 void ListSFTP::listByTrackingEntities(
-    const std::shared_ptr<core::ProcessContext>& context,
-    const std::shared_ptr<core::ProcessSession>& session,
+    const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>& context,
+    const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession>& session,
     const std::string& hostname,
     uint16_t port,
     const std::string& username,
@@ -940,7 +940,7 @@ void ListSFTP::listByTrackingEntities(
   persistTrackingEntitiesCache(context, hostname, username, remote_path);
 }
 
-void ListSFTP::onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
+void ListSFTP::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   /* Parse common properties */
   SFTPProcessorBase::CommonProperties common_properties;
   if (!parseCommonPropertiesOnTrigger(context, nullptr /*flow_file*/, common_properties)) {

@@ -71,7 +71,7 @@ void GetGPS::initialize() {
   setSupportedRelationships(relationships);
 }
 
-void GetGPS::onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
+void GetGPS::onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
   std::string value;
 
   if (context->getProperty(GPSDHost.getName(), value)) {
@@ -86,7 +86,7 @@ void GetGPS::onSchedule(const std::shared_ptr<core::ProcessContext> &context, co
   logger_->log_trace("GPSD client scheduled");
 }
 
-void GetGPS::onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
+void GetGPS::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   try {
     gpsmm gps_rec(gpsdHost_.c_str(), gpsdPort_.c_str());
 
@@ -116,7 +116,7 @@ void GetGPS::onTrigger(const std::shared_ptr<core::ProcessContext> &context, con
           logger_->log_debug("Longitude: %lf\nLatitude: %lf\nAltitude: %lf\nAccuracy: %lf\n\n", gpsdata->fix.latitude, gpsdata->fix.longitude, gpsdata->fix.altitude,
                              (gpsdata->fix.epx > gpsdata->fix.epy) ? gpsdata->fix.epx : gpsdata->fix.epy);
 
-          std::shared_ptr<FlowFileRecord> flowFile = std::static_pointer_cast<FlowFileRecord>(session->create());
+          org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> flowFile = static_pointer_cast<FlowFileRecord>(session->create());
           if (flowFile == nullptr)
             return;
 

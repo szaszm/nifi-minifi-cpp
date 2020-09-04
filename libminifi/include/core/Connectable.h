@@ -77,18 +77,18 @@ class Connectable : public CoreComponent {
    * Get outgoing connection based on relationship
    * @return set of outgoing connections.
    */
-  virtual std::set<std::shared_ptr<Connectable>> getOutGoingConnections(const std::string &relationship) const;
+  virtual std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable>> getOutGoingConnections(const std::string &relationship) const;
 
-  virtual void put(std::shared_ptr<Connectable> flow) {
+  virtual void put(org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable> flow) {
   }
 
   /**
    * Gets and sets next incoming connection
    * @return next incoming connection
    */
-  std::shared_ptr<Connectable> getNextIncomingConnection();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable> getNextIncomingConnection();
 
-  virtual std::shared_ptr<Connectable> pickIncomingConnection();
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable> pickIncomingConnection();
 
   /**
    * @return true if incoming connections > 0
@@ -146,7 +146,7 @@ class Connectable : public CoreComponent {
   /**
    * Sets the flow version for this connectable.
    */
-  void setFlowIdentifier(const std::shared_ptr<state::FlowIdentifier> &version) {
+  void setFlowIdentifier(const org::apache::nifi::minifi::utils::debug_shared_ptr<state::FlowIdentifier> &version) {
     connectable_version_ = version;
   }
 
@@ -154,13 +154,13 @@ class Connectable : public CoreComponent {
    * Returns theflow version
    * @returns flow version. can be null if a flow version is not tracked.
    */
-  virtual std::shared_ptr<state::FlowIdentifier> getFlowIdentifier() const {
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<state::FlowIdentifier> getFlowIdentifier() const {
     return connectable_version_;
   }
 
  protected:
   // must hold the relationship_mutex_ before calling this
-  std::shared_ptr<Connectable> getNextIncomingConnectionImpl(const std::lock_guard<std::mutex>& relationship_mutex_lock);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable> getNextIncomingConnectionImpl(const std::lock_guard<std::mutex>& relationship_mutex_lock);
   // Penalization Period in MilliSecond
   std::atomic<uint64_t> _penalizationPeriodMsec;
 
@@ -172,11 +172,11 @@ class Connectable : public CoreComponent {
   std::map<std::string, core::Relationship> auto_terminated_relationships_;
 
   // Incoming connection Iterator
-  std::set<std::shared_ptr<Connectable>>::iterator incoming_connections_Iter;
+  std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable>>::iterator incoming_connections_Iter;
   // Incoming connections
-  std::set<std::shared_ptr<Connectable>> _incomingConnections;
+  std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable>> _incomingConnections;
   // Outgoing connections map based on Relationship name
-  std::map<std::string, std::set<std::shared_ptr<Connectable>>> out_going_connections_;
+  std::map<std::string, std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable>>> out_going_connections_;
 
   // Mutex for protection
   mutable std::mutex relationship_mutex_;
@@ -192,7 +192,7 @@ class Connectable : public CoreComponent {
   // Concurrent condition variable for whether there is incoming work to do
   std::condition_variable work_condition_;
   // version under which this connectable was created.
-  std::shared_ptr<state::FlowIdentifier> connectable_version_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<state::FlowIdentifier> connectable_version_;
 
  private:
   std::shared_ptr<logging::Logger> logger_;

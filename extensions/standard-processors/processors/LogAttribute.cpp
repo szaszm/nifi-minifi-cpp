@@ -87,7 +87,7 @@ void LogAttribute::initialize() {
   setSupportedRelationships(relationships);
 }
 
-void LogAttribute::onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &factory) {
+void LogAttribute::onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &factory) {
   context->getProperty(FlowFilesToLog.getName(), flowfiles_to_log_);
   logger_->log_debug("FlowFiles To Log: %llu", flowfiles_to_log_);
 
@@ -97,7 +97,7 @@ void LogAttribute::onSchedule(const std::shared_ptr<core::ProcessContext> &conte
   logger_->log_debug("Maximum Payload Line Length: %u", max_line_length_);
 }
 // OnTrigger method, implemented by NiFi LogAttribute
-void LogAttribute::onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
+void LogAttribute::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   logger_->log_trace("enter log attribute, attempting to retrieve %u flow files", flowfiles_to_log_);
   std::string dashLine = "--------------------------------------------------";
   LogAttrLevel level = LogAttrLevelInfo;
@@ -106,7 +106,7 @@ void LogAttribute::onTrigger(const std::shared_ptr<core::ProcessContext> &contex
   uint64_t i = 0;
   const auto max = flowfiles_to_log_ == 0 ? UINT64_MAX : flowfiles_to_log_;
   for (; i < max; ++i) {
-    std::shared_ptr<core::FlowFile> flow = session->get();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow = session->get();
 
     if (!flow) {
       break;
@@ -137,7 +137,7 @@ void LogAttribute::onTrigger(const std::shared_ptr<core::ProcessContext> &contex
       message << "\n" << "key:" << it->first << " value:" << it->second;
     }
     message << "\nFlowFile Resource Claim Content";
-    std::shared_ptr<ResourceClaim> claim = flow->getResourceClaim();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim> claim = flow->getResourceClaim();
     if (claim) {
       message << "\n" << "Content Claim:" << claim->getContentFullPath();
     }

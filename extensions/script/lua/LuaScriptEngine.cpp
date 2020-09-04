@@ -45,7 +45,7 @@ LuaScriptEngine::LuaScriptEngine()
       "info", &core::logging::Logger::log_info<>);
   lua_.new_usertype<lua::LuaProcessSession>(
       "ProcessSession",
-      "create", static_cast<std::shared_ptr<script::ScriptFlowFile> (lua::LuaProcessSession::*)()>(&lua::LuaProcessSession::create),
+      "create", static_cast<org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptFlowFile> (lua::LuaProcessSession::*)()>(&lua::LuaProcessSession::create),
       "get", &lua::LuaProcessSession::get,
       "read", &lua::LuaProcessSession::read,
       "write", &lua::LuaProcessSession::write,

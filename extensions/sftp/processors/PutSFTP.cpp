@@ -168,7 +168,7 @@ PutSFTP::PutSFTP(std::string name, utils::Identifier uuid /*= utils::Identifier(
 
 PutSFTP::~PutSFTP() = default;
 
-void PutSFTP::onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
+void PutSFTP::onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
   parseCommonPropertiesOnSchedule(context);
 
   std::string value;
@@ -210,7 +210,7 @@ PutSFTP::ReadCallback::ReadCallback(const std::string& target_path,
 
 PutSFTP::ReadCallback::~ReadCallback() = default;
 
-int64_t PutSFTP::ReadCallback::process(std::shared_ptr<io::BaseStream> stream) {
+int64_t PutSFTP::ReadCallback::process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
   if (!client_.putFile(target_path_,
       *stream,
       conflict_resolution_ == CONFLICT_RESOLUTION_REPLACE /*overwrite*/,
@@ -220,8 +220,8 @@ int64_t PutSFTP::ReadCallback::process(std::shared_ptr<io::BaseStream> stream) {
   return stream->getSize();
 }
 
-bool PutSFTP::processOne(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
-  std::shared_ptr<FlowFileRecord> flow_file = std::static_pointer_cast<FlowFileRecord>(session->get());
+bool PutSFTP::processOne(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> flow_file = static_pointer_cast<FlowFileRecord>(session->get());
   if (flow_file == nullptr) {
     return false;
   }
@@ -484,7 +484,7 @@ bool PutSFTP::processOne(const std::shared_ptr<core::ProcessContext> &context, c
   return true;
 }
 
-void PutSFTP::onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
+void PutSFTP::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   const uint64_t limit = batch_size_ > 0 ? batch_size_ : std::numeric_limits<uint64_t>::max();
   for (uint64_t i = 0; i < limit; i++) {
     if (!this->processOne(context, session)) {

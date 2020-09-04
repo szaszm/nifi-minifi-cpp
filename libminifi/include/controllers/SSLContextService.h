@@ -89,7 +89,7 @@ class SSLContextService : public core::controller::ControllerService {
         logger_(logging::LoggerFactory<SSLContextService>::getLogger()) {
   }
 
-  explicit SSLContextService(const std::string &name, const std::shared_ptr<Configure> &configuration)
+  explicit SSLContextService(const std::string &name, const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configuration)
       : ControllerService(name),
         initialized_(false),
         valid_(false),

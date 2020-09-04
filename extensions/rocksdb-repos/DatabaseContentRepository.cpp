@@ -30,7 +30,7 @@ namespace minifi {
 namespace core {
 namespace repository {
 
-bool DatabaseContentRepository::initialize(const std::shared_ptr<minifi::Configure> &configuration) {
+bool DatabaseContentRepository::initialize(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> &configuration) {
   std::string value;
   if (configuration->get(Configure::nifi_dbcontent_repository_directory_default, value)) {
     directory_ = value;
@@ -64,24 +64,24 @@ void DatabaseContentRepository::stop() {
   db_.reset();
 }
 
-std::shared_ptr<io::BaseStream> DatabaseContentRepository::write(const std::shared_ptr<minifi::ResourceClaim> &claim, bool append) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> DatabaseContentRepository::write(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> &claim, bool append) {
   // the traditional approach with these has been to return -1 from the stream; however, since we have the ability here
   // we can simply return a nullptr, which is also valid from the API when this stream is not valid.
   if (nullptr == claim || !is_valid_ || !db_)
     return nullptr;
   // append is already supported in all modes
-  return std::make_shared<io::RocksDbStream>(claim->getContentFullPath(), gsl::make_not_null<minifi::internal::RocksDatabase*>(db_.get()), true);
+  return utils::debug_make_shared<io::RocksDbStream>(claim->getContentFullPath(), gsl::make_not_null<minifi::internal::RocksDatabase*>(db_.get()), true);
 }
 
-std::shared_ptr<io::BaseStream> DatabaseContentRepository::read(const std::shared_ptr<minifi::ResourceClaim> &claim) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> DatabaseContentRepository::read(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> &claim) {
   // the traditional approach with these has been to return -1 from the stream; however, since we have the ability here
   // we can simply return a nullptr, which is also valid from the API when this stream is not valid.
   if (nullptr == claim || !is_valid_ || !db_)
     return nullptr;
-  return std::make_shared<io::RocksDbStream>(claim->getContentFullPath(), gsl::make_not_null<minifi::internal::RocksDatabase*>(db_.get()), false);
+  return utils::debug_make_shared<io::RocksDbStream>(claim->getContentFullPath(), gsl::make_not_null<minifi::internal::RocksDatabase*>(db_.get()), false);
 }
 
-bool DatabaseContentRepository::exists(const std::shared_ptr<minifi::ResourceClaim> &streamId) {
+bool DatabaseContentRepository::exists(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> &streamId) {
   auto opendb = db_->open();
   if (!opendb) {
     return false;
@@ -98,7 +98,7 @@ bool DatabaseContentRepository::exists(const std::shared_ptr<minifi::ResourceCla
   }
 }
 
-bool DatabaseContentRepository::remove(const std::shared_ptr<minifi::ResourceClaim> &claim) {
+bool DatabaseContentRepository::remove(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> &claim) {
   if (nullptr == claim || !is_valid_ || !db_)
     return false;
   auto opendb = db_->open();

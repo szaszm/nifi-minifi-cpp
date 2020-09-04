@@ -52,7 +52,7 @@ class ClassRegistrar {
     return registrar;
   }
 
-  bool registerClasses(JNIEnv *env, std::shared_ptr<controllers::JavaControllerService> servicer, const std::string &className, JavaSignatures &signatures) {
+  bool registerClasses(JNIEnv *env, org::apache::nifi::minifi::utils::debug_shared_ptr<controllers::JavaControllerService> servicer, const std::string &className, JavaSignatures &signatures) {
     std::lock_guard<std::mutex> lock(mutex_);
     // load class before insertion.
     if (registered_classes_.find(className) == std::end(registered_classes_)) {

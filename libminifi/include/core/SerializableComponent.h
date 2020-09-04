@@ -51,14 +51,14 @@ class SerializableComponent : public core::Connectable, public minifi::io::Seria
    * @param store object in which we are serializing data into
    * @return status of this serialization.
    */
-  virtual bool Serialize(const std::shared_ptr<core::SerializableComponent> &store) = 0;
+  virtual bool Serialize(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent> &store) = 0;
 
   /**
    * Deserialization from the parameter store into the current object
    * @param store from which we are deserializing the current object
    * @return status of this deserialization.
    */
-  virtual bool DeSerialize(const std::shared_ptr<core::SerializableComponent> &store) = 0;
+  virtual bool DeSerialize(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent> &store) = 0;
 
   /**
    * Deserializes the current object using buffer

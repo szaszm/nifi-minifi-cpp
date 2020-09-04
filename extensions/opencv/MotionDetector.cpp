@@ -65,8 +65,8 @@ void MotionDetector::initialize() {
   setSupportedRelationships({Success, Failure});
 }
 
-void MotionDetector::onSchedule(const std::shared_ptr<core::ProcessContext> &context,
-                                  const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
+void MotionDetector::onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context,
+                                  const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
   std::string value;
 
   if (context->getProperty(ImageEncoding.getName(), value)) {
@@ -139,8 +139,8 @@ bool MotionDetector::detectAndDraw(cv::Mat &frame) {
   return moved;
 }
 
-void MotionDetector::onTrigger(const std::shared_ptr<core::ProcessContext> &context,
-                                 const std::shared_ptr<core::ProcessSession> &session) {
+void MotionDetector::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context,
+                                 const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   std::unique_lock<std::mutex> lock(mutex_, std::try_to_lock);
   if (!lock.owns_lock()) {
     logger_->log_info("Cannot process due to an unfinished onTrigger");

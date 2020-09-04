@@ -51,8 +51,8 @@ class ControllerSocketProtocol : public HeartBeatReporter {
    * @param updateSink update mechanism that will be used to stop/clear elements
    * @param configuration configuration class.
    */
-  virtual void initialize(core::controller::ControllerServiceProvider* controller, const std::shared_ptr<state::StateMonitor> &updateSink,
-                          const std::shared_ptr<Configure> &configuration);
+  virtual void initialize(core::controller::ControllerServiceProvider* controller, const org::apache::nifi::minifi::utils::debug_shared_ptr<state::StateMonitor> &updateSink,
+                          const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configuration);
 
   /**
    * Handles the heartbeat
@@ -78,7 +78,7 @@ class ControllerSocketProtocol : public HeartBeatReporter {
 
   std::unique_ptr<io::BaseServerSocket> server_socket_;
 
-  std::shared_ptr<minifi::io::StreamFactory> stream_factory_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::io::StreamFactory> stream_factory_;
 
  private:
   std::shared_ptr<logging::Logger> logger_;

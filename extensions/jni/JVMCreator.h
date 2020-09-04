@@ -62,7 +62,7 @@ class JVMCreator : public minifi::core::CoreComponent {
 
   }
 
-  virtual void configure(const std::shared_ptr<Configure> &configuration) override {
+  virtual void configure(const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configuration) override {
     std::string pathListings, jvmOptionsStr;
 
     // assuming we have the options set and can access the JVMCreator
@@ -80,7 +80,7 @@ class JVMCreator : public minifi::core::CoreComponent {
     }
     std::string nar_dir, nar_dep, nar_docs;
     if (loader_ && configuration->get("nifi.nar.directory", nar_dir) && configuration->get("nifi.nar.deploy.directory", nar_dep)) {
-      std::shared_ptr<jni::controllers::JavaControllerService> servicer = std::make_shared<jni::controllers::JavaControllerService>("BaseService");
+      org::apache::nifi::minifi::utils::debug_shared_ptr<jni::controllers::JavaControllerService> servicer = utils::debug_make_shared<jni::controllers::JavaControllerService>("BaseService");
       servicer->initialize();
       servicer->setProperty(jni::controllers::JavaControllerService::NarDirectory, nar_dir);
       servicer->setProperty(jni::controllers::JavaControllerService::NarDeploymentDirectory, nar_dep);

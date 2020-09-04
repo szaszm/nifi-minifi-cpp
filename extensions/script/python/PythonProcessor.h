@@ -40,7 +40,7 @@ namespace py = pybind11;
  */
 class PythonProcessor {
  public:
-  explicit PythonProcessor(std::shared_ptr<core::Processor> proc);
+  explicit PythonProcessor(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> proc);
 
   void setSupportsDynamicProperties();
 
@@ -59,7 +59,7 @@ class PythonProcessor {
 
  private:
 
-  std::shared_ptr<core::Processor> processor_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor_;
 };
 
 } /* namespace python */

@@ -34,8 +34,8 @@ namespace nifi {
 namespace minifi {
 namespace c2 {
 
-C2CallbackAgent::C2CallbackAgent(core::controller::ControllerServiceProvider* controller, const std::shared_ptr<state::StateMonitor> &updateSink,
-                                 const std::shared_ptr<Configure> &configuration)
+C2CallbackAgent::C2CallbackAgent(core::controller::ControllerServiceProvider* controller, const org::apache::nifi::minifi::utils::debug_shared_ptr<state::StateMonitor> &updateSink,
+                                 const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configuration)
     : C2Agent(controller, updateSink, configuration),
       stop(nullptr),
       logger_(logging::LoggerFactory<C2CallbackAgent>::getLogger()) {

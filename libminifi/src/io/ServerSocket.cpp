@@ -40,7 +40,7 @@ namespace nifi {
 namespace minifi {
 namespace io {
 
-ServerSocket::ServerSocket(const std::shared_ptr<SocketContext> &context, const std::string &hostname, const uint16_t port, const uint16_t listeners = -1)
+ServerSocket::ServerSocket(const org::apache::nifi::minifi::utils::debug_shared_ptr<SocketContext> &context, const std::string &hostname, const uint16_t port, const uint16_t listeners = -1)
     : Socket(context, hostname, port, listeners),
       running_(true),
       logger_(logging::LoggerFactory<ServerSocket>::getLogger()) {

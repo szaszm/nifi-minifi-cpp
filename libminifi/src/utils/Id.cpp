@@ -231,7 +231,7 @@ uint64_t IdGenerator::getRandomDeviceSegment(int numBits) const {
   return deviceSegment;
 }
 
-void IdGenerator::initialize(const std::shared_ptr<Properties> & properties) {
+void IdGenerator::initialize(const org::apache::nifi::minifi::utils::debug_shared_ptr<Properties> & properties) {
   std::string implementation_str;
   implementation_ = UUID_TIME_IMPL;
   if (properties->get("uid.implementation", implementation_str)) {

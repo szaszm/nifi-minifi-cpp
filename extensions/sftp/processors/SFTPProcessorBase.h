@@ -86,7 +86,7 @@ class SFTPProcessorBase : public core::Processor {
   std::string proxy_type_;
 
   void addSupportedCommonProperties(std::set<core::Property>& supported_properties);
-  void parseCommonPropertiesOnSchedule(const std::shared_ptr<core::ProcessContext>& context);
+  void parseCommonPropertiesOnSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>& context);
   struct CommonProperties {
     std::string hostname;
     uint16_t port;
@@ -102,7 +102,7 @@ class SFTPProcessorBase : public core::Processor {
 
     CommonProperties();
   };
-  bool parseCommonPropertiesOnTrigger(const std::shared_ptr<core::ProcessContext>& context, const std::shared_ptr<FlowFileRecord>& flow_file, CommonProperties& common_properties);
+  bool parseCommonPropertiesOnTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>& context, const org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord>& flow_file, CommonProperties& common_properties);
 
   static constexpr size_t CONNECTION_CACHE_MAX_SIZE = 8U;
   struct ConnectionCacheKey {

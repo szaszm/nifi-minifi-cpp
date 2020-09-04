@@ -54,7 +54,7 @@ void PublishMQTT::initialize() {
   setSupportedRelationships({Success, Failure});
 }
 
-void PublishMQTT::onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &factory) {
+void PublishMQTT::onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &factory) {
   AbstractMQTTProcessor::onSchedule(context, factory);
   std::string value;
   int64_t valInt;
@@ -69,14 +69,14 @@ void PublishMQTT::onSchedule(const std::shared_ptr<core::ProcessContext> &contex
   }
 }
 
-void PublishMQTT::onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
+void PublishMQTT::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   if (!reconnect()) {
     logger_->log_error("MQTT connect to %s failed", uri_);
     yield();
     return;
   }
   
-  std::shared_ptr<core::FlowFile> flowFile = session->get();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flowFile = session->get();
 
   if (!flowFile) {
     return;

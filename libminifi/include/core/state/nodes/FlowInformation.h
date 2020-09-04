@@ -72,7 +72,7 @@ class FlowVersion : public DeviceInformation {
     return "FlowVersion";
   }
 
-  virtual std::shared_ptr<state::FlowIdentifier> getFlowIdentifier() const {
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<state::FlowIdentifier> getFlowIdentifier() const {
     std::lock_guard<std::mutex> lock(guard);
     return identifier;
   }
@@ -98,7 +98,7 @@ class FlowVersion : public DeviceInformation {
 
   void setFlowVersion(const std::string &url, const std::string &bucket_id, const std::string &flow_id) {
     std::lock_guard<std::mutex> lock(guard);
-    identifier = std::make_shared<FlowIdentifier>(url, bucket_id, flow_id);
+    identifier = org::apache::nifi::minifi::utils::debug_make_shared<FlowIdentifier>(url, bucket_id, flow_id);
   }
 
   std::vector<SerializedResponseNode> serialize() {
@@ -130,7 +130,7 @@ class FlowVersion : public DeviceInformation {
  protected:
   mutable std::mutex guard;
 
-  std::shared_ptr<FlowIdentifier> identifier;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<FlowIdentifier> identifier;
 };
 
 class FlowMonitor : public StateMonitorNode {
@@ -143,18 +143,18 @@ class FlowMonitor : public StateMonitorNode {
       : StateMonitorNode(name) {
   }
 
-  void addConnection(const std::shared_ptr<minifi::Connection> &connection) {
+  void addConnection(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> &connection) {
     if (nullptr != connection) {
       connections_.insert(std::make_pair(connection->getUUIDStr(), connection));
     }
   }
 
-  void setFlowVersion(std::shared_ptr<state::response::FlowVersion> flow_version) {
+  void setFlowVersion(org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::FlowVersion> flow_version) {
     flow_version_ = flow_version;
   }
  protected:
-  std::shared_ptr<state::response::FlowVersion> flow_version_;
-  std::map<std::string, std::shared_ptr<minifi::Connection>> connections_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::FlowVersion> flow_version_;
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection>> connections_;
 };
 
 /**

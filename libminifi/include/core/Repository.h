@@ -88,7 +88,7 @@ class Repository : public virtual core::SerializableComponent, public core::Trac
   virtual void flush();
 
   // initialize
-  virtual bool initialize(const std::shared_ptr<Configure> &configure) {
+  virtual bool initialize(const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure) {
     return true;
   }
   // Put
@@ -105,7 +105,7 @@ class Repository : public virtual core::SerializableComponent, public core::Trac
     return true;
   }
 
-  virtual bool Delete(std::vector<std::shared_ptr<core::SerializableComponent>> &storedValues) {
+  virtual bool Delete(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent>> &storedValues) {
     bool found = true;
     for (auto storedValue : storedValues) {
       found &= Delete(storedValue->getName());
@@ -113,11 +113,11 @@ class Repository : public virtual core::SerializableComponent, public core::Trac
     return found;
   }
 
-  void setConnectionMap(std::map<std::string, std::shared_ptr<core::Connectable>> &connectionMap) {
+  void setConnectionMap(std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable>> &connectionMap) {
     this->connectionMap = connectionMap;
   }
 
-  void setContainers(std::map<std::string, std::shared_ptr<core::Connectable>> &containers) {
+  void setContainers(std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable>> &containers) {
     this->containers = containers;
   }
 
@@ -160,7 +160,7 @@ class Repository : public virtual core::SerializableComponent, public core::Trac
    *
    * Base implementation returns true;
    */
-  virtual bool Serialize(std::vector<std::shared_ptr<core::SerializableComponent>> &store, size_t max_size) {
+  virtual bool Serialize(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent>> &store, size_t max_size) {
     return true;
   }
 
@@ -173,7 +173,7 @@ class Repository : public virtual core::SerializableComponent, public core::Trac
    *
    * Base implementation returns true;
    */
-  virtual bool DeSerialize(std::vector<std::shared_ptr<core::SerializableComponent>> &store, size_t &max_size) {
+  virtual bool DeSerialize(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent>> &store, size_t &max_size) {
     return true;
   }
 
@@ -188,21 +188,21 @@ class Repository : public virtual core::SerializableComponent, public core::Trac
    *
    * Base implementation returns true;
    */
-  virtual bool DeSerialize(std::vector<std::shared_ptr<core::SerializableComponent>> &store, size_t &max_size, std::function<std::shared_ptr<core::SerializableComponent>()> lambdaConstructor) {
+  virtual bool DeSerialize(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent>> &store, size_t &max_size, std::function<org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent>()> lambdaConstructor) {
     return true;
   }
 
   /**
    * Base implementation returns true;
    */
-  virtual bool Serialize(const std::shared_ptr<core::SerializableComponent> &store) {
+  virtual bool Serialize(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent> &store) {
     return true;
   }
 
   /**
    * Base implementation returns true;
    */
-  virtual bool DeSerialize(const std::shared_ptr<core::SerializableComponent> &store) {
+  virtual bool DeSerialize(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent> &store) {
     return true;
   }
 
@@ -221,7 +221,7 @@ class Repository : public virtual core::SerializableComponent, public core::Trac
     return (repo_size_ += sb->st_size);
   }
 
-  virtual void loadComponent(const std::shared_ptr<core::ContentRepository> &content_repo) {
+  virtual void loadComponent(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> &content_repo) {
   }
 
   virtual uint64_t getRepoSize();
@@ -232,9 +232,9 @@ class Repository : public virtual core::SerializableComponent, public core::Trac
   Repository &operator=(const Repository &parent) = delete;
 
  protected:
-  std::map<std::string, std::shared_ptr<core::Connectable>> containers;
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable>> containers;
 
-  std::map<std::string, std::shared_ptr<core::Connectable>> connectionMap;
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable>> connectionMap;
   // Mutex for protection
   std::mutex mutex_;
   // repository directory

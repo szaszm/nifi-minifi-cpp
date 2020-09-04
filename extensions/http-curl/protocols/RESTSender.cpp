@@ -41,7 +41,7 @@ RESTSender::RESTSender(const std::string &name, const utils::Identifier &uuid)
       logger_(logging::LoggerFactory<Connectable>::getLogger()) {
 }
 
-void RESTSender::initialize(core::controller::ControllerServiceProvider* controller, const std::shared_ptr<Configure> &configure) {
+void RESTSender::initialize(core::controller::ControllerServiceProvider* controller, const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure) {
   C2Protocol::initialize(controller, configure);
   // base URL when one is not specified.
   if (nullptr != configure) {
@@ -51,7 +51,7 @@ void RESTSender::initialize(core::controller::ControllerServiceProvider* control
     if (configure->get("nifi.c2.rest.ssl.context.service", "c2.rest.ssl.context.service", ssl_context_service_str)) {
       auto service = controller->getControllerService(ssl_context_service_str);
       if (nullptr != service) {
-        ssl_context_service_ = std::static_pointer_cast<minifi::controllers::SSLContextService>(service);
+        ssl_context_service_ = static_pointer_cast<minifi::controllers::SSLContextService>(service);
       }
     }
     configure->get("nifi.c2.rest.heartbeat.minimize.updates", "c2.rest.heartbeat.minimize.updates", update_str);
@@ -76,7 +76,7 @@ C2Payload RESTSender::consumePayload(const C2Payload &payload, Direction directi
   return consumePayload(rest_uri_, payload, direction, async);
 }
 
-void RESTSender::update(const std::shared_ptr<Configure> &configure) {
+void RESTSender::update(const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure) {
   std::string url;
   configure->get("nifi.c2.rest.url", "c2.rest.url", url);
   configure->get("nifi.c2.rest.url.ack", "c2.rest.url.ack", url);
@@ -84,7 +84,7 @@ void RESTSender::update(const std::shared_ptr<Configure> &configure) {
 
 void RESTSender::setSecurityContext(utils::HTTPClient &client, const std::string &type, const std::string &url) {
   // only use the SSL Context if we have a secure URL.
-  auto generatedService = std::make_shared<minifi::controllers::SSLContextService>("Service", configuration_);
+  auto generatedService = utils::debug_make_shared<minifi::controllers::SSLContextService>("Service", configuration_);
   generatedService->onEnable();
   client.initialize(type, url, generatedService);
 }

@@ -28,7 +28,7 @@
 
 TEST_CASE("Empty file", "[t1]") {
   minifi::c2::FileUpdateTrigger trigger("test");
-  std::shared_ptr<minifi::Configure> configuration = std::make_shared<minifi::Configure>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> configuration = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>();
   trigger.initialize(configuration);
 
   REQUIRE(false == trigger.triggered());
@@ -37,7 +37,7 @@ TEST_CASE("Empty file", "[t1]") {
 
 TEST_CASE("invalidfile file", "[t2]") {
   minifi::c2::FileUpdateTrigger trigger("test");
-  std::shared_ptr<minifi::Configure> configuration = std::make_shared<minifi::Configure>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> configuration = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>();
   configuration->set(minifi::Configure::nifi_c2_file_watch, "/tmp/blahblahblhalbha");
   trigger.initialize(configuration);
 
@@ -60,7 +60,7 @@ TEST_CASE("test valid  file no update", "[t3]") {
   file.close();
 
   minifi::c2::FileUpdateTrigger trigger("test");
-  std::shared_ptr<minifi::Configure> configuration = std::make_shared<minifi::Configure>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> configuration = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>();
   configuration->set(minifi::Configure::nifi_c2_file_watch, path);
   trigger.initialize(configuration);
 
@@ -83,7 +83,7 @@ TEST_CASE("test valid file update", "[t4]") {
   file.close();
 
   minifi::c2::FileUpdateTrigger trigger("test");
-  std::shared_ptr<minifi::Configure> configuration = std::make_shared<minifi::Configure>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> configuration = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>();
   configuration->set(minifi::Configure::nifi_c2_file_watch, path);
   trigger.initialize(configuration);
 

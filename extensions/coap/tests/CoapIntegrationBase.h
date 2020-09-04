@@ -47,30 +47,30 @@ class CoapIntegrationBase : public IntegrationBase {
   virtual void run(std::string test_file_location) override {
     testSetup();
 
-    std::shared_ptr<core::Repository> test_repo = std::make_shared<TestRepository>();
-    std::shared_ptr<core::Repository> test_flow_repo = std::make_shared<TestFlowRepository>();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> test_repo = utils::debug_make_shared<TestRepository>();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> test_flow_repo = utils::debug_make_shared<TestFlowRepository>();
 
     configuration->set(minifi::Configure::nifi_flow_configuration_file, test_file_location);
     configuration->set("c2.agent.heartbeat.period", "200");
 
-    std::shared_ptr<core::ContentRepository> content_repo = std::make_shared<core::repository::VolatileContentRepository>();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo = utils::debug_make_shared<core::repository::VolatileContentRepository>();
     content_repo->initialize(configuration);
-    std::shared_ptr<minifi::io::StreamFactory> stream_factory = minifi::io::StreamFactory::getInstance(configuration);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::io::StreamFactory> stream_factory = minifi::io::StreamFactory::getInstance(configuration);
     std::unique_ptr<core::FlowConfiguration> yaml_ptr = std::unique_ptr<core::YamlConfiguration>(
         new core::YamlConfiguration(test_repo, test_repo, content_repo, stream_factory, configuration, test_file_location));
 
     core::YamlConfiguration yaml_config(test_repo, test_repo, content_repo, stream_factory, configuration, test_file_location);
 
     std::unique_ptr<core::ProcessGroup> ptr = yaml_config.getRoot(test_file_location);
-    std::shared_ptr<core::ProcessGroup> pg = std::shared_ptr<core::ProcessGroup>(ptr.get());
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessGroup> pg = org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessGroup>(ptr.get());
 
     queryRootProcessGroup(pg);
 
     ptr.release();
 
-    std::shared_ptr<TestRepository> repo = std::static_pointer_cast<TestRepository>(test_repo);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<TestRepository> repo = static_pointer_cast<TestRepository>(test_repo);
 
-    std::shared_ptr<minifi::FlowController> controller = std::make_shared<minifi::FlowController>(test_repo, test_flow_repo, configuration, std::move(yaml_ptr), content_repo, DEFAULT_ROOT_GROUP_NAME,
+    org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::FlowController> controller = utils::debug_make_shared<minifi::FlowController>(test_repo, test_flow_repo, configuration, std::move(yaml_ptr), content_repo, DEFAULT_ROOT_GROUP_NAME,
                                                                                                   true);
 
     controller->load();

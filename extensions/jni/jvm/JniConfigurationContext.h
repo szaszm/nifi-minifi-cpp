@@ -48,7 +48,7 @@ class ConfigurationContext : public core::controller::ControllerService {
 
 struct JniConfigurationContext {
 
-  std::shared_ptr<ConfigurationContext> service_reference_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ConfigurationContext> service_reference_;
 };
 
 } /* namespace jni */

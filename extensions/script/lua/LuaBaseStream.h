@@ -30,7 +30,7 @@ namespace lua {
 
 class LuaBaseStream {
  public:
-  explicit LuaBaseStream(std::shared_ptr<io::BaseStream> stream);
+  explicit LuaBaseStream(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream);
 
   /**
    * Read n bytes of data (returns string, to follow Lua idioms)
@@ -46,7 +46,7 @@ class LuaBaseStream {
   size_t write(std::string buf);
 
  private:
-  std::shared_ptr<io::BaseStream> stream_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream_;
 };
 
 } /* namespace lua */

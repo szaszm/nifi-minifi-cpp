@@ -63,11 +63,11 @@ class PythonCreator : public minifi::core::CoreComponent {
 
   }
 
-  virtual void configure(const std::shared_ptr<Configure> &configuration) override {
+  virtual void configure(const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configuration) override {
 
     python::PythonScriptEngine::initialize();
 
-    auto engine = std::make_shared<python::PythonScriptEngine>();
+    auto engine = utils::debug_make_shared<python::PythonScriptEngine>();
     std::string pathListings;
 
     // assuming we have the options set and can access the PythonCreator
@@ -103,11 +103,11 @@ class PythonCreator : public minifi::core::CoreComponent {
         if (!package.empty())
           loadName = "org.apache.nifi.minifi.processors." + package + "." + scriptName;
 
-        auto processor = std::dynamic_pointer_cast<core::Processor>(core::ClassLoader::getDefaultClassLoader().instantiate(loadName, uuid));
+        auto processor = dynamic_pointer_cast<core::Processor>(core::ClassLoader::getDefaultClassLoader().instantiate(loadName, uuid));
         if (processor) {
           try {
             processor->initialize();
-            auto proc = std::dynamic_pointer_cast<python::processors::ExecutePythonProcessor>(processor);
+            auto proc = dynamic_pointer_cast<python::processors::ExecutePythonProcessor>(processor);
             minifi::BundleDetails details;
             const auto &package = getPackage(pathListings, path);
             std::string script_with_package = "org.apache.nifi.minifi.processors.";

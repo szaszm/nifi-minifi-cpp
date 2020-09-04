@@ -50,7 +50,7 @@ class ControllerServiceLookup {
    * @param identifier reference string for controller service.
    * @return controller service reference.
    */
-  virtual std::shared_ptr<ControllerService> getControllerService(const std::string &identifier) = 0;
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerService> getControllerService(const std::string &identifier) = 0;
 
   /**
    * Detects if controller service is enabled.

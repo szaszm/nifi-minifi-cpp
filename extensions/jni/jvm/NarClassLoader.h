@@ -38,7 +38,7 @@ class NarClassLoader {
 
  public:
 
-  NarClassLoader(std::shared_ptr<minifi::jni::JavaServicer> servicer, JavaClass &clazz, const std::string &dir_name, const std::string &scratch_nar_dir, const std::string &docs_dir)
+  NarClassLoader(org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::jni::JavaServicer> servicer, JavaClass &clazz, const std::string &dir_name, const std::string &scratch_nar_dir, const std::string &docs_dir)
       : java_servicer_(servicer) {
     class_ref_ = clazz;
     auto env = java_servicer_->attach();
@@ -476,7 +476,7 @@ class NarClassLoader {
   }
 
   std::shared_ptr<logging::Logger> logger_;
-  std::shared_ptr<minifi::jni::JavaServicer> java_servicer_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::jni::JavaServicer> java_servicer_;
   JavaClass class_ref_;
   jobject class_loader_;
 };

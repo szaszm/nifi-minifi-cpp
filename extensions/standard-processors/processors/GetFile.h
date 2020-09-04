@@ -113,7 +113,7 @@ class GetFile : public core::Processor, public state::response::MetricsNodeSourc
    */
   explicit GetFile(std::string name, utils::Identifier uuid = utils::Identifier())
       : Processor(name, uuid),
-        metrics_(std::make_shared<GetFileMetrics>()),
+        metrics_(utils::debug_make_shared<GetFileMetrics>()),
         last_listing_time_(0),
         logger_(logging::LoggerFactory<GetFile>::getLogger()) {
   }
@@ -160,10 +160,10 @@ class GetFile : public core::Processor, public state::response::MetricsNodeSourc
    */
   void performListing(const GetFileRequest &request);
 
-  int16_t getMetricNodes(std::vector<std::shared_ptr<state::response::ResponseNode>> &metric_vector) override;
+  int16_t getMetricNodes(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode>> &metric_vector) override;
 
  private:
-  std::shared_ptr<GetFileMetrics> metrics_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<GetFileMetrics> metrics_;
 
   // Queue for store directory list
   std::queue<std::string> _dirList;

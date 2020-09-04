@@ -47,7 +47,7 @@ JNIEXPORT jobject JNICALL  Java_org_apache_nifi_processor_JniControllerServiceLo
   auto str = JniStringToUTF(env, cs);
   auto controller_service = ptr->cs_lookup_reference_->getControllerService(str);
   if (nullptr != controller_service) {
-    auto ecs = std::dynamic_pointer_cast<minifi::jni::controllers::ExecuteJavaControllerService>(controller_service);
+    auto ecs = dynamic_pointer_cast<minifi::jni::controllers::ExecuteJavaControllerService>(controller_service);
     if (nullptr != ecs) {
       return ecs->getClassInstance();
     }

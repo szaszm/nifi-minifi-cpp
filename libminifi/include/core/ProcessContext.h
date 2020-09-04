@@ -49,21 +49,21 @@ namespace minifi {
 namespace core {
 
 // ProcessContext Class
-class ProcessContext : public controller::ControllerServiceLookup, public core::VariableRegistry, public std::enable_shared_from_this<VariableRegistry> {
+class ProcessContext : public controller::ControllerServiceLookup, public core::VariableRegistry, public org::apache::nifi::minifi::utils::enable_debug_shared_from_this<VariableRegistry> {
  public:
   // Constructor
   /*!
    * Create a new process context associated with the processor/controller service/state manager
    */
-  ProcessContext(const std::shared_ptr<ProcessorNode> &processor, controller::ControllerServiceProvider* controller_service_provider, const std::shared_ptr<core::Repository> &repo,
-                 const std::shared_ptr<core::Repository> &flow_repo, const std::shared_ptr<core::ContentRepository> &content_repo = std::make_shared<core::repository::FileSystemRepository>())
-      : VariableRegistry(std::make_shared<minifi::Configure>()),
+  ProcessContext(const org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessorNode> &processor, controller::ControllerServiceProvider* controller_service_provider, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> &repo,
+                 const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> &flow_repo, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> &content_repo = org::apache::nifi::minifi::utils::debug_make_shared<core::repository::FileSystemRepository>())
+      : VariableRegistry(org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>()),
         controller_service_provider_(controller_service_provider),
         flow_repo_(flow_repo),
         content_repo_(content_repo),
         processor_node_(processor),
         logger_(logging::LoggerFactory<ProcessContext>::getLogger()),
-        configure_(std::make_shared<minifi::Configure>()),
+        configure_(org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>()),
         initialized_(false) {
     repo_ = repo;
     state_manager_provider_ = getStateManagerProvider(logger_, controller_service_provider_, nullptr);
@@ -73,9 +73,9 @@ class ProcessContext : public controller::ControllerServiceLookup, public core::
   /*!
    * Create a new process context associated with the processor/controller service/state manager
    */
-  ProcessContext(const std::shared_ptr<ProcessorNode> &processor, controller::ControllerServiceProvider* controller_service_provider, const std::shared_ptr<core::Repository> &repo,
-                 const std::shared_ptr<core::Repository> &flow_repo, const std::shared_ptr<minifi::Configure> &configuration, const std::shared_ptr<core::ContentRepository> &content_repo =
-                     std::make_shared<core::repository::FileSystemRepository>())
+  ProcessContext(const org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessorNode> &processor, controller::ControllerServiceProvider* controller_service_provider, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> &repo,
+                 const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> &flow_repo, const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> &configuration, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> &content_repo =
+                     org::apache::nifi::minifi::utils::debug_make_shared<core::repository::FileSystemRepository>())
       : VariableRegistry(configuration),
         controller_service_provider_(controller_service_provider),
         flow_repo_(flow_repo),
@@ -87,13 +87,13 @@ class ProcessContext : public controller::ControllerServiceLookup, public core::
     repo_ = repo;
     state_manager_provider_ = getStateManagerProvider(logger_, controller_service_provider_, configuration);
     if (!configure_) {
-      configure_ = std::make_shared<minifi::Configure>();
+      configure_ = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>();
     }
   }
   // Destructor
   virtual ~ProcessContext() = default;
   // Get Processor associated with the Process Context
-  std::shared_ptr<ProcessorNode> getProcessorNode() const {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessorNode> getProcessorNode() const {
     return processor_node_;
   }
 
@@ -102,13 +102,13 @@ class ProcessContext : public controller::ControllerServiceLookup, public core::
     return getPropertyImp<typename std::common_type<T>::type>(name, value);
   }
 
-  virtual bool getProperty(const Property &property, std::string &value, const std::shared_ptr<FlowFile> &flow_file) {
+  virtual bool getProperty(const Property &property, std::string &value, const org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFile> &flow_file) {
     return getProperty(property.getName(), value);
   }
   bool getDynamicProperty(const std::string &name, std::string &value) const {
     return processor_node_->getDynamicProperty(name, value);
   }
-  virtual bool getDynamicProperty(const Property &property, std::string &value, const std::shared_ptr<FlowFile> &flow_file) {
+  virtual bool getDynamicProperty(const Property &property, std::string &value, const org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFile> &flow_file) {
     return getDynamicProperty(property.getName(), value);
   }
   std::vector<std::string> getDynamicPropertyKeys() const {
@@ -143,7 +143,7 @@ class ProcessContext : public controller::ControllerServiceLookup, public core::
     processor_node_->yield();
   }
 
-  std::shared_ptr<core::Repository> getProvenanceRepository() {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> getProvenanceRepository() {
     return repo_;
   }
 
@@ -151,11 +151,11 @@ class ProcessContext : public controller::ControllerServiceLookup, public core::
    * Returns a reference to the content repository for the running instance.
    * @return content repository shared pointer.
    */
-  std::shared_ptr<core::ContentRepository> getContentRepository() const {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> getContentRepository() const {
     return content_repo_;
   }
 
-  std::shared_ptr<core::Repository> getFlowFileRepository() const {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> getFlowFileRepository() const {
     return flow_repo_;
   }
 
@@ -171,7 +171,7 @@ class ProcessContext : public controller::ControllerServiceLookup, public core::
    * @return the ControllerService that is registered with the given
    * identifier
    */
-  std::shared_ptr<core::controller::ControllerService> getControllerService(const std::string &identifier) {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerService> getControllerService(const std::string &identifier) {
     return controller_service_provider_ == nullptr ? nullptr : controller_service_provider_->getControllerServiceForComponent(identifier, processor_node_->getUUIDStr());
   }
 
@@ -218,24 +218,24 @@ class ProcessContext : public controller::ControllerServiceLookup, public core::
 
   static constexpr char const* DefaultStateManagerProviderName = "defaultstatemanagerprovider";
 
-  std::shared_ptr<CoreComponentStateManager> getStateManager() {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<CoreComponentStateManager> getStateManager() {
     if (state_manager_provider_ == nullptr) {
       return nullptr;
     }
     return state_manager_provider_->getCoreComponentStateManager(*processor_node_);
   }
 
-  static std::shared_ptr<core::CoreComponentStateManagerProvider> getOrCreateDefaultStateManagerProvider(
+  static org::apache::nifi::minifi::utils::debug_shared_ptr<core::CoreComponentStateManagerProvider> getOrCreateDefaultStateManagerProvider(
       controller::ControllerServiceProvider* controller_service_provider,
-      std::shared_ptr<minifi::Configure> configuration,
+      org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> configuration,
       const char *base_path = "") {
     static std::mutex mutex;
     std::lock_guard<std::mutex> lock(mutex);
 
     /* See if we have already created a default provider */
-    std::shared_ptr<core::controller::ControllerServiceNode> node = controller_service_provider->getControllerServiceNode(DefaultStateManagerProviderName);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> node = controller_service_provider->getControllerServiceNode(DefaultStateManagerProviderName);
     if (node != nullptr) {
-      return std::dynamic_pointer_cast<core::CoreComponentStateManagerProvider>(node->getControllerServiceImplementation());
+      return dynamic_pointer_cast<core::CoreComponentStateManagerProvider>(node->getControllerServiceImplementation());
     }
 
     /* Try to get configuration options for default provider */
@@ -247,7 +247,7 @@ class ProcessContext : public controller::ControllerServiceLookup, public core::
     auto create_provider = [&](
         const std::string& type,
         const std::string& longType,
-        const std::unordered_map<std::string, std::string>& extraProperties) -> std::shared_ptr<core::CoreComponentStateManagerProvider> {
+        const std::unordered_map<std::string, std::string>& extraProperties) -> org::apache::nifi::minifi::utils::debug_shared_ptr<core::CoreComponentStateManagerProvider> {
       node = controller_service_provider->createControllerService(type, longType, DefaultStateManagerProviderName, true /*firstTimeAdded*/);
       if (node == nullptr) {
         return nullptr;
@@ -273,7 +273,7 @@ class ProcessContext : public controller::ControllerServiceLookup, public core::
       if (!node->enable()) {
         return nullptr;
       }
-      return std::dynamic_pointer_cast<core::CoreComponentStateManagerProvider>(provider);
+      return dynamic_pointer_cast<core::CoreComponentStateManagerProvider>(provider);
     };
 
     /* Try to create a RocksDB-backed provider */
@@ -296,10 +296,10 @@ class ProcessContext : public controller::ControllerServiceLookup, public core::
     return nullptr;
   }
 
-  static std::shared_ptr<core::CoreComponentStateManagerProvider> getStateManagerProvider(
+  static org::apache::nifi::minifi::utils::debug_shared_ptr<core::CoreComponentStateManagerProvider> getStateManagerProvider(
       std::shared_ptr<logging::Logger> logger,
       controller::ControllerServiceProvider* controller_service_provider,
-      std::shared_ptr<minifi::Configure> configuration) {
+      org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> configuration) {
     if (controller_service_provider == nullptr) {
       return nullptr;
     }
@@ -310,7 +310,7 @@ class ProcessContext : public controller::ControllerServiceLookup, public core::
         logger->log_error("Failed to find the CoreComponentStateManagerProvider %s defined by %s", id, minifi::Configure::nifi_state_management_provider_local);
         return nullptr;
       } else {
-        return std::dynamic_pointer_cast<core::CoreComponentStateManagerProvider>(node->getControllerServiceImplementation());
+        return dynamic_pointer_cast<core::CoreComponentStateManagerProvider>(node->getControllerServiceImplementation());
       }
     } else {
       auto state_manager_provider = getOrCreateDefaultStateManagerProvider(controller_service_provider, configuration);
@@ -330,19 +330,19 @@ class ProcessContext : public controller::ControllerServiceLookup, public core::
   // controller service provider.
   controller::ControllerServiceProvider* controller_service_provider_;
   // state manager provider
-  std::shared_ptr<core::CoreComponentStateManagerProvider> state_manager_provider_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::CoreComponentStateManagerProvider> state_manager_provider_;
   // repository shared pointer.
-  std::shared_ptr<core::Repository> repo_;
-  std::shared_ptr<core::Repository> flow_repo_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> repo_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_repo_;
 
   // repository shared pointer.
-  std::shared_ptr<core::ContentRepository> content_repo_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo_;
   // Processor
-  std::shared_ptr<ProcessorNode> processor_node_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessorNode> processor_node_;
 
   // Logger
   std::shared_ptr<logging::Logger> logger_;
-  std::shared_ptr<Configure> configure_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configure_;
 
   bool initialized_;
 };

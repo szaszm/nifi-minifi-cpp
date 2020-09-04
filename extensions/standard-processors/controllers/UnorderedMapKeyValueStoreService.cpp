@@ -33,7 +33,7 @@ UnorderedMapKeyValueStoreService::UnorderedMapKeyValueStoreService(const std::st
     , logger_(logging::LoggerFactory<UnorderedMapKeyValueStoreService>::getLogger()) {
 }
 
-UnorderedMapKeyValueStoreService::UnorderedMapKeyValueStoreService(const std::string& name, const std::shared_ptr<Configure> &configuration)
+UnorderedMapKeyValueStoreService::UnorderedMapKeyValueStoreService(const std::string& name, const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configuration)
     : KeyValueStoreService(name)
     , logger_(logging::LoggerFactory<UnorderedMapKeyValueStoreService>::getLogger())  {
   setConfiguration(configuration);

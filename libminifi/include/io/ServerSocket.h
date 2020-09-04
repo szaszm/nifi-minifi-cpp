@@ -44,7 +44,7 @@ class BaseServerSocket  {
  */
 class ServerSocket : public BaseServerSocket, public Socket {
  public:
-  explicit ServerSocket(const std::shared_ptr<SocketContext> &context, const std::string &hostname, uint16_t port, uint16_t listeners);
+  explicit ServerSocket(const org::apache::nifi::minifi::utils::debug_shared_ptr<SocketContext> &context, const std::string &hostname, uint16_t port, uint16_t listeners);
 
   virtual ~ServerSocket();
 

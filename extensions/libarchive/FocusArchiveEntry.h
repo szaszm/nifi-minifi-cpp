@@ -61,7 +61,7 @@ class FocusArchiveEntry : public core::Processor {
   //! Supported Relationships
   static core::Relationship Success;
 
-  bool set_or_update_attr(std::shared_ptr<core::FlowFile>, const std::string&, const std::string&) const;
+  bool set_or_update_attr(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>, const std::string&, const std::string&) const;
 
   //! OnTrigger method, implemented by NiFi FocusArchiveEntry
   virtual void onTrigger(core::ProcessContext *context,
@@ -73,7 +73,7 @@ class FocusArchiveEntry : public core::Processor {
    public:
     explicit ReadCallback(core::Processor*, fileutils::FileManager *file_man, ArchiveMetadata *archiveMetadata);
     ~ReadCallback();
-    virtual int64_t process(std::shared_ptr<io::BaseStream> stream);
+    virtual int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream);
     bool isRunning() {return proc_->isRunning();}
 
    private:
@@ -88,7 +88,7 @@ class FocusArchiveEntry : public core::Processor {
  private:
   //! Logger
   std::shared_ptr<logging::Logger> logger_;
-  static std::shared_ptr<utils::IdGenerator> id_generator_;
+  static org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> id_generator_;
 };
 
 REGISTER_RESOURCE(FocusArchiveEntry, "Allows manipulation of entries within an archive (e.g. TAR) by focusing on one entry within the archive at a time. "

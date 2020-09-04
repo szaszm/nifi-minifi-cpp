@@ -40,10 +40,10 @@ namespace minifi {
 namespace core {
 namespace controller {
 
-class StandardControllerServiceProvider : public ControllerServiceProvider, public std::enable_shared_from_this<StandardControllerServiceProvider> {
+class StandardControllerServiceProvider : public ControllerServiceProvider, public org::apache::nifi::minifi::utils::enable_debug_shared_from_this<StandardControllerServiceProvider> {
  public:
-  explicit StandardControllerServiceProvider(std::shared_ptr<ControllerServiceMap> services, std::shared_ptr<ProcessGroup> root_group, std::shared_ptr<Configure> configuration,
-                                             std::shared_ptr<minifi::SchedulingAgent> agent, ClassLoader &loader = ClassLoader::getDefaultClassLoader())
+  explicit StandardControllerServiceProvider(org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerServiceMap> services, org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessGroup> root_group, org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configuration,
+                                             org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::SchedulingAgent> agent, ClassLoader &loader = ClassLoader::getDefaultClassLoader())
       : ControllerServiceProvider(services),
         agent_(agent),
         extension_loader_(loader),
@@ -52,7 +52,7 @@ class StandardControllerServiceProvider : public ControllerServiceProvider, publ
         logger_(logging::LoggerFactory<StandardControllerServiceProvider>::getLogger()) {
   }
 
-  explicit StandardControllerServiceProvider(std::shared_ptr<ControllerServiceMap> services, std::shared_ptr<ProcessGroup> root_group, std::shared_ptr<Configure> configuration, ClassLoader &loader =
+  explicit StandardControllerServiceProvider(org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerServiceMap> services, org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessGroup> root_group, org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configuration, ClassLoader &loader =
                                                  ClassLoader::getDefaultClassLoader())
       : ControllerServiceProvider(services),
         agent_(nullptr),
@@ -71,16 +71,16 @@ class StandardControllerServiceProvider : public ControllerServiceProvider, publ
         logger_(logging::LoggerFactory<StandardControllerServiceProvider>::getLogger()) {
   }
 
-  void setRootGroup(std::shared_ptr<ProcessGroup> rg) {
+  void setRootGroup(org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessGroup> rg) {
     root_group_ = rg;
   }
 
-  void setSchedulingAgent(std::shared_ptr<minifi::SchedulingAgent> agent) {
+  void setSchedulingAgent(org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::SchedulingAgent> agent) {
     agent_ = agent;
   }
 
-  std::shared_ptr<ControllerServiceNode> createControllerService(const std::string &type, const std::string &fullType, const std::string &id, bool firstTimeAdded) {
-    std::shared_ptr<ControllerService> new_controller_service = extension_loader_.instantiate<ControllerService>(type, id);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerServiceNode> createControllerService(const std::string &type, const std::string &fullType, const std::string &id, bool firstTimeAdded) {
+    org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerService> new_controller_service = extension_loader_.instantiate<ControllerService>(type, id);
 
     if (nullptr == new_controller_service) {
       new_controller_service = extension_loader_.instantiate<ControllerService>("ExecuteJavaControllerService", id);
@@ -92,15 +92,15 @@ class StandardControllerServiceProvider : public ControllerServiceProvider, publ
       }
     }
 
-    std::shared_ptr<ControllerServiceNode> new_service_node = std::make_shared<StandardControllerServiceNode>(new_controller_service,
-                                                                                                              std::static_pointer_cast<ControllerServiceProvider>(shared_from_this()), id,
+    org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerServiceNode> new_service_node = org::apache::nifi::minifi::utils::debug_make_shared<StandardControllerServiceNode>(new_controller_service,
+                                                                                                              static_pointer_cast<ControllerServiceProvider>(shared_from_this()), id,
                                                                                                               configuration_);
 
     controller_map_->put(id, new_service_node);
     return new_service_node;
   }
 
-  std::future<utils::TaskRescheduleInfo> enableControllerService(std::shared_ptr<ControllerServiceNode> &serviceNode) {
+  std::future<utils::TaskRescheduleInfo> enableControllerService(org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerServiceNode> &serviceNode) {
     if (serviceNode->canEnable()) {
       return agent_->enableControllerService(serviceNode);
     } else {
@@ -130,13 +130,13 @@ class StandardControllerServiceProvider : public ControllerServiceProvider, publ
     }
   }
 
-  void enableControllerServices(std::vector<std::shared_ptr<ControllerServiceNode>> serviceNodes) {
+  void enableControllerServices(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerServiceNode>> serviceNodes) {
     for (auto node : serviceNodes) {
       enableControllerService(node);
     }
   }
 
-  std::future<utils::TaskRescheduleInfo> disableControllerService(std::shared_ptr<ControllerServiceNode> &serviceNode) {
+  std::future<utils::TaskRescheduleInfo> disableControllerService(org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerServiceNode> &serviceNode) {
     if (!IsNullOrEmpty(serviceNode.get()) && serviceNode->enabled()) {
       return agent_->disableControllerService(serviceNode);
     } else {
@@ -149,19 +149,19 @@ class StandardControllerServiceProvider : public ControllerServiceProvider, publ
     controller_map_->clear();
   }
 
-  void verifyCanStopReferencingComponents(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
+  void verifyCanStopReferencingComponents(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
   }
 
-  std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> unscheduleReferencingComponents(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
-    std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> references = findLinkedComponents(serviceNode);
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> unscheduleReferencingComponents(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
+    std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> references = findLinkedComponents(serviceNode);
     for (auto ref : references) {
       agent_->disableControllerService(ref);
     }
     return references;
   }
 
-  void verifyCanDisableReferencingServices(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
-    std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> references = findLinkedComponents(serviceNode);
+  void verifyCanDisableReferencingServices(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
+    std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> references = findLinkedComponents(serviceNode);
     for (auto ref : references) {
       if (!ref->canEnable()) {
         logger_->log_info("Cannot disable %s", ref->getName());
@@ -169,8 +169,8 @@ class StandardControllerServiceProvider : public ControllerServiceProvider, publ
     }
   }
 
-  virtual std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> disableReferencingServices(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
-    std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> references = findLinkedComponents(serviceNode);
+  virtual std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> disableReferencingServices(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
+    std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> references = findLinkedComponents(serviceNode);
     for (auto ref : references) {
       agent_->disableControllerService(ref);
     }
@@ -178,16 +178,16 @@ class StandardControllerServiceProvider : public ControllerServiceProvider, publ
     return references;
   }
 
-  std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> enableReferencingServices(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
-    std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> references = findLinkedComponents(serviceNode);
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> enableReferencingServices(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
+    std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> references = findLinkedComponents(serviceNode);
     for (auto ref : references) {
       agent_->enableControllerService(ref);
     }
     return references;
   }
 
-  std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> scheduleReferencingComponents(std::shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
-    std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> references = findLinkedComponents(serviceNode);
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> scheduleReferencingComponents(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &serviceNode) {
+    std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> references = findLinkedComponents(serviceNode);
     for (auto ref : references) {
       agent_->enableControllerService(ref);
     }
@@ -199,13 +199,13 @@ class StandardControllerServiceProvider : public ControllerServiceProvider, publ
     return false;
   }
 
-  std::shared_ptr<minifi::SchedulingAgent> agent_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::SchedulingAgent> agent_;
 
   ClassLoader &extension_loader_;
 
-  std::shared_ptr<ProcessGroup> root_group_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessGroup> root_group_;
 
-  std::shared_ptr<Configure> configuration_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configuration_;
 
  private:
   std::shared_ptr<logging::Logger> logger_;

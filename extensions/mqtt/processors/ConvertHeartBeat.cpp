@@ -34,7 +34,7 @@ namespace nifi {
 namespace minifi {
 namespace processors {
 
-void ConvertHeartBeat::onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
+void ConvertHeartBeat::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   auto ff = session.get();
   if (ff != nullptr){
     logger_->log_error("ConvertHeartBeat does not receive flow files");

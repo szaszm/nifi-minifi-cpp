@@ -37,7 +37,7 @@ namespace nifi {
 namespace minifi {
 namespace processors {
 
-std::shared_ptr<utils::IdGenerator> PutFile::id_generator_ = utils::IdGenerator::getIdGenerator();
+org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> PutFile::id_generator_ = utils::IdGenerator::getIdGenerator();
 
 core::Property PutFile::Directory(
     core::PropertyBuilder::createProperty("Directory")->withDescription("The output directory to which to put files")->supportsExpressionLanguage(true)->withDefaultValue(".")->build());
@@ -93,7 +93,7 @@ void PutFile::onTrigger(core::ProcessContext *context, core::ProcessSession *ses
     return;
   }
 
-  std::shared_ptr<FlowFileRecord> flowFile = std::static_pointer_cast<FlowFileRecord>(session->get());
+  org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> flowFile = static_pointer_cast<FlowFileRecord>(session->get());
 
   // Do nothing if there are no incoming files
   if (!flowFile) {
@@ -182,7 +182,7 @@ std::string PutFile::tmpWritePath(const std::string &filename, const std::string
   return tmpFile;
 }
 
-bool PutFile::putFile(core::ProcessSession *session, std::shared_ptr<FlowFileRecord> flowFile, const std::string &tmpFile, const std::string &destFile, const std::string &destDir) {
+bool PutFile::putFile(core::ProcessSession *session, org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> flowFile, const std::string &tmpFile, const std::string &destFile, const std::string &destDir) {
   struct stat dir_stat;
 
   if (stat(destDir.c_str(), &dir_stat) && try_mkdirs_) {
@@ -243,7 +243,7 @@ PutFile::ReadCallback::ReadCallback(const std::string &tmp_file, const std::stri
 }
 
 // Copy the entire file contents to the temporary file
-int64_t PutFile::ReadCallback::process(std::shared_ptr<io::BaseStream> stream) {
+int64_t PutFile::ReadCallback::process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
   // Copy file contents into tmp file
   write_succeeded_ = false;
   size_t size = 0;

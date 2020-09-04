@@ -83,11 +83,11 @@ class SecureSocketTest : public IntegrationBase {
     assert(verifyLogLinePresenceInPollTime(std::chrono::milliseconds(wait_time_), "send succeed 20"));
   }
 
-  void queryRootProcessGroup(std::shared_ptr<core::ProcessGroup> pg) override {
-    std::shared_ptr<core::Processor> proc = pg->findProcessor("invoke");
+  void queryRootProcessGroup(org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessGroup> pg) override {
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> proc = pg->findProcessor("invoke");
     assert(proc != nullptr);
 
-    std::shared_ptr<minifi::processors::GetTCP> inv = std::dynamic_pointer_cast<minifi::processors::GetTCP>(proc);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::processors::GetTCP> inv = dynamic_pointer_cast<minifi::processors::GetTCP>(proc);
 
     assert(inv != nullptr);
     std::string url = "";
@@ -106,12 +106,12 @@ class SecureSocketTest : public IntegrationBase {
     auto endpoints = utils::StringUtils::split(endpoint, ",");
     assert(1 == endpoints.size());
     auto hostAndPort = utils::StringUtils::split(endpoint, ":");
-    std::shared_ptr<org::apache::nifi::minifi::io::TLSContext> socket_context = std::make_shared<org::apache::nifi::minifi::io::TLSContext>(configuration);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<org::apache::nifi::minifi::io::TLSContext> socket_context = utils::debug_make_shared<org::apache::nifi::minifi::io::TLSContext>(configuration);
     std::string host = hostAndPort.at(0);
     if (host == "localhost") {
       host = org::apache::nifi::minifi::io::Socket::getMyHostName();
     }
-    server_socket_ = std::make_shared<org::apache::nifi::minifi::io::TLSServerSocket>(socket_context, host, std::stoi(hostAndPort.at(1)), 3);
+    server_socket_ = utils::debug_make_shared<org::apache::nifi::minifi::io::TLSServerSocket>(socket_context, host, std::stoi(hostAndPort.at(1)), 3);
     assert(0 == server_socket_->initialize());
 
     isRunning_ = true;
@@ -137,7 +137,7 @@ class SecureSocketTest : public IntegrationBase {
   std::string dir;
   std::stringstream ss;
   TestController testController;
-  std::shared_ptr<org::apache::nifi::minifi::io::TLSServerSocket> server_socket_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<org::apache::nifi::minifi::io::TLSServerSocket> server_socket_;
 };
 
 static void sigpipe_handle(int x) {

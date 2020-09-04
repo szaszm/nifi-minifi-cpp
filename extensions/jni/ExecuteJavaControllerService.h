@@ -53,7 +53,7 @@ namespace controllers {
  * controller service within the execute java process.
  *
  */
-class ExecuteJavaControllerService : public ConfigurationContext, public std::enable_shared_from_this<ConfigurationContext> {
+class ExecuteJavaControllerService : public ConfigurationContext, public org::apache::nifi::minifi::utils::enable_debug_shared_from_this<ConfigurationContext> {
  public:
 
   // Constructor
@@ -155,7 +155,7 @@ class ExecuteJavaControllerService : public ConfigurationContext, public std::en
 
   jobject clazzInstance;
 
-  std::shared_ptr<controllers::JavaControllerService> java_servicer_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<controllers::JavaControllerService> java_servicer_;
 
   std::string class_name_;
 

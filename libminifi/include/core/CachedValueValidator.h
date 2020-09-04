@@ -67,21 +67,21 @@ class CachedValueValidator {
     return *this;
   }
 
-  explicit CachedValueValidator(const std::shared_ptr<PropertyValidator>& other) : validator_(other) {}
+  explicit CachedValueValidator(const org::apache::nifi::minifi::utils::debug_shared_ptr<PropertyValidator>& other) : validator_(other) {}
 
-  explicit CachedValueValidator(std::shared_ptr<PropertyValidator>&& other) : validator_(std::move(other)) {}
+  explicit CachedValueValidator(org::apache::nifi::minifi::utils::debug_shared_ptr<PropertyValidator>&& other) : validator_(std::move(other)) {}
 
-  CachedValueValidator& operator=(const gsl::not_null<std::shared_ptr<PropertyValidator>>& new_validator) {
+  CachedValueValidator& operator=(const gsl::not_null<org::apache::nifi::minifi::utils::debug_shared_ptr<PropertyValidator>>& new_validator) {
     setValidator(new_validator);
     return *this;
   }
 
-  CachedValueValidator& operator=(gsl::not_null<std::shared_ptr<PropertyValidator>>&& new_validator) {
+  CachedValueValidator& operator=(gsl::not_null<org::apache::nifi::minifi::utils::debug_shared_ptr<PropertyValidator>>&& new_validator) {
     setValidator(std::move(new_validator));
     return *this;
   }
 
-  const gsl::not_null<std::shared_ptr<PropertyValidator>>& operator*() const {
+  const gsl::not_null<org::apache::nifi::minifi::utils::debug_shared_ptr<PropertyValidator>>& operator*() const {
     return validator_;
   }
 
@@ -92,7 +92,7 @@ class CachedValueValidator {
     validator_ = std::forward<T>(newValidator);
   }
 
-  ValidationResult validate(const std::string& subject, const std::shared_ptr<state::response::Value>& value) const {
+  ValidationResult validate(const std::string& subject, const org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::Value>& value) const {
     if (validation_result_ == CachedValueValidator::Result::SUCCESS) {
       return ValidationResult::Builder::createBuilder().isValid(true).build();
     }
@@ -112,7 +112,7 @@ class CachedValueValidator {
     validation_result_ = Result::RECOMPUTE;
   }
 
-  gsl::not_null<std::shared_ptr<PropertyValidator>> validator_{StandardValidators::VALID_VALIDATOR()};
+  gsl::not_null<org::apache::nifi::minifi::utils::debug_shared_ptr<PropertyValidator>> validator_{StandardValidators::VALID_VALIDATOR()};
   mutable Result validation_result_{Result::RECOMPUTE};
 };
 

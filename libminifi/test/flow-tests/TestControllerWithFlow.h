@@ -38,19 +38,19 @@ class TestControllerWithFlow: public TestController{
     std::string yamlPath = utils::file::FileUtils::concat_path(dir, "config.yml");
     std::ofstream{yamlPath} << yamlConfigContent;
 
-    configuration_ = std::make_shared<minifi::Configure>();
-    std::shared_ptr<core::Repository> prov_repo = std::make_shared<TestRepository>();
-    std::shared_ptr<core::Repository> ff_repo = std::make_shared<TestFlowRepository>();
-    std::shared_ptr<core::ContentRepository> content_repo = std::make_shared<core::repository::VolatileContentRepository>();
+    configuration_ = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> prov_repo = org::apache::nifi::minifi::utils::debug_make_shared<TestRepository>();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> ff_repo = org::apache::nifi::minifi::utils::debug_make_shared<TestFlowRepository>();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo = org::apache::nifi::minifi::utils::debug_make_shared<core::repository::VolatileContentRepository>();
 
     configuration_->set(minifi::Configure::nifi_flow_configuration_file, yamlPath);
 
     REQUIRE(content_repo->initialize(configuration_));
-    std::shared_ptr<minifi::io::StreamFactory> stream_factory = minifi::io::StreamFactory::getInstance(configuration_);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::io::StreamFactory> stream_factory = minifi::io::StreamFactory::getInstance(configuration_);
 
     std::unique_ptr<core::FlowConfiguration> flow = utils::make_unique<core::YamlConfiguration>(prov_repo, ff_repo, content_repo, stream_factory, configuration_, yamlPath);
     root_ = flow->getRoot();
-    controller_ = std::make_shared<minifi::FlowController>(
+    controller_ = org::apache::nifi::minifi::utils::debug_make_shared<minifi::FlowController>(
         prov_repo, ff_repo, configuration_,
         std::move(flow),
         content_repo, DEFAULT_ROOT_GROUP_NAME, true);
@@ -67,9 +67,9 @@ class TestControllerWithFlow: public TestController{
     LogTestController::getInstance().reset();
   }
 
-  std::shared_ptr<minifi::Configure> configuration_;
-  std::shared_ptr<minifi::FlowController> controller_;
-  std::shared_ptr<core::ProcessGroup> root_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> configuration_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::FlowController> controller_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessGroup> root_;
 };
 
 #endif //NIFI_MINIFI_CPP_TESTCONTROLLERWITHFLOW_H

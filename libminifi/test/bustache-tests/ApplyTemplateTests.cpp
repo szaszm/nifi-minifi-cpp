@@ -47,7 +47,7 @@ const char* EXPECT_OUTPUT = "TemplateBegins\nExampleValue\nTemplateEnds";
 
 TEST_CASE("Test Creation of ApplyTemplate", "[ApplyTemplateCreate]") {
     TestController testController;
-    std::shared_ptr<core::Processor> processor = std::make_shared<org::apache::nifi::minifi::processors::ApplyTemplate>("processorname");
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor = org::apache::nifi::minifi::utils::debug_make_shared<org::apache::nifi::minifi::processors::ApplyTemplate>("processorname");
     REQUIRE(processor->getName() == "processorname");
     utils::Identifier processoruuid;
     REQUIRE(processor->getUUID(processoruuid));
@@ -65,8 +65,8 @@ TEST_CASE("Test usage of ApplyTemplate", "[ApplyTemplateTest]") {
     LogTestController::getInstance().setTrace<org::apache::nifi::minifi::core::Connectable>();
     LogTestController::getInstance().setTrace<org::apache::nifi::minifi::core::FlowFile>();
 
-    std::shared_ptr<TestPlan> plan = testController.createPlan();
-    std::shared_ptr<TestRepository> repo = std::make_shared<TestRepository>();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<TestRepository> repo = org::apache::nifi::minifi::utils::debug_make_shared<TestRepository>();
 
     char dir1[] = "/tmp/gt.XXXXXX";  // GetFile source
     char dir2[] = "/tmp/gt.XXXXXX";  // Template source
@@ -76,16 +76,16 @@ TEST_CASE("Test usage of ApplyTemplate", "[ApplyTemplateTest]") {
     REQUIRE(!testController.createTempDirectory(dir2).empty());
     REQUIRE(!testController.createTempDirectory(dir3).empty());
 
-    std::shared_ptr<core::Processor> getfile = plan->addProcessor("GetFile", "getFile");
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> getfile = plan->addProcessor("GetFile", "getFile");
     plan->setProperty(getfile, org::apache::nifi::minifi::processors::GetFile::Directory.getName(), dir1);
     plan->setProperty(getfile, org::apache::nifi::minifi::processors::GetFile::KeepSourceFile.getName(), "true");
 
-    std::shared_ptr<core::Processor> maprocessor = plan->addProcessor("ExtractText", "testExtractText", core::Relationship("success", "description"), true);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> maprocessor = plan->addProcessor("ExtractText", "testExtractText", core::Relationship("success", "description"), true);
     plan->setProperty(maprocessor, org::apache::nifi::minifi::processors::ExtractText::Attribute.getName(), TEST_ATTR);
 
-    std::shared_ptr<core::Processor> atprocessor = plan->addProcessor("ApplyTemplate", "testApplyTemplate", core::Relationship("success", "description"), true);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> atprocessor = plan->addProcessor("ApplyTemplate", "testApplyTemplate", core::Relationship("success", "description"), true);
 
-    std::shared_ptr<core::Processor> putfile = plan->addProcessor("PutFile", "putfile", core::Relationship("success", "description"), true);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> putfile = plan->addProcessor("PutFile", "putfile", core::Relationship("success", "description"), true);
     plan->setProperty(putfile, org::apache::nifi::minifi::processors::PutFile::Directory.getName(), dir3);
     plan->setProperty(putfile, org::apache::nifi::minifi::processors::PutFile::ConflictResolution.getName(),
                       org::apache::nifi::minifi::processors::PutFile::CONFLICT_RESOLUTION_STRATEGY_REPLACE);

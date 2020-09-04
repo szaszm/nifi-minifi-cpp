@@ -181,7 +181,7 @@ void GetFile::onTrigger(core::ProcessContext *context, core::ProcessSession *ses
         std::string fileName = list.front();
         list.pop();
         logger_->log_info("GetFile process %s", fileName);
-        std::shared_ptr<FlowFileRecord> flowFile = std::static_pointer_cast<FlowFileRecord>(session->create());
+        org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> flowFile = static_pointer_cast<FlowFileRecord>(session->create());
         if (flowFile == nullptr)
           return;
         std::size_t found = fileName.find_last_of("/\\");
@@ -277,7 +277,7 @@ void GetFile::performListing(const GetFileRequest &request) {
   utils::file::FileUtils::list_dir(request.inputDirectory, callback, logger_, request.recursive);
 }
 
-int16_t GetFile::getMetricNodes(std::vector<std::shared_ptr<state::response::ResponseNode>> &metric_vector) {
+int16_t GetFile::getMetricNodes(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode>> &metric_vector) {
   metric_vector.push_back(metrics_);
   return 0;
 }

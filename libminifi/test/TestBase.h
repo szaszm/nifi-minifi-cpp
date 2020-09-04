@@ -58,15 +58,15 @@ class LogTestController {
     return instance;
   }
 
-  static std::shared_ptr<LogTestController> getInstance(const std::shared_ptr<logging::LoggerProperties> &logger_properties) {
-    static std::map<std::shared_ptr<logging::LoggerProperties>, std::shared_ptr<LogTestController>> map;
+  static org::apache::nifi::minifi::utils::debug_shared_ptr<LogTestController> getInstance(const org::apache::nifi::minifi::utils::debug_shared_ptr<logging::LoggerProperties> &logger_properties) {
+    static std::map<org::apache::nifi::minifi::utils::debug_shared_ptr<logging::LoggerProperties>, org::apache::nifi::minifi::utils::debug_shared_ptr<LogTestController>> map;
     auto fnd = map.find(logger_properties);
     if (fnd != std::end(map)) {
       return fnd->second;
     } else {
       // in practice I'd use a derivation here or another paradigm entirely but for the purposes of this test code
       // having extra overhead is negligible. this is the most readable and least impactful way
-      auto instance = std::shared_ptr<LogTestController>(new LogTestController(logger_properties));
+      auto instance = org::apache::nifi::minifi::utils::debug_shared_ptr<LogTestController>(new LogTestController(logger_properties));
       map.insert(std::make_pair(logger_properties, instance));
       return map.find(logger_properties)->second;
     }
@@ -191,28 +191,28 @@ class LogTestController {
       : LogTestController(nullptr) {
   }
 
-  explicit LogTestController(const std::shared_ptr<logging::LoggerProperties> &loggerProps) {
+  explicit LogTestController(const org::apache::nifi::minifi::utils::debug_shared_ptr<logging::LoggerProperties> &loggerProps) {
     my_properties_ = loggerProps;
     bool initMain = false;
     if (nullptr == my_properties_) {
-      my_properties_ = std::make_shared<logging::LoggerProperties>();
+      my_properties_ = org::apache::nifi::minifi::utils::debug_make_shared<logging::LoggerProperties>();
       initMain = true;
     }
     my_properties_->set("logger.root", "ERROR,ostream");
     my_properties_->set("logger." + core::getClassName<LogTestController>(), "INFO");
     my_properties_->set("logger." + core::getClassName<logging::LoggerConfiguration>(), "DEBUG");
-    std::shared_ptr<spdlog::sinks::dist_sink_mt> dist_sink = std::make_shared<spdlog::sinks::dist_sink_mt>();
+    auto dist_sink = std::make_shared<spdlog::sinks::dist_sink_mt>();
     dist_sink->add_sink(std::make_shared<spdlog::sinks::ostream_sink_mt>(log_output, true));
     dist_sink->add_sink(spdlog::sinks::stderr_sink_mt::instance());
     my_properties_->add_sink("ostream", dist_sink);
     if (initMain) {
-      logging::LoggerConfiguration::getConfiguration().initialize(my_properties_);
+      logging::LoggerConfiguration::getConfiguration().initialize(my_properties_.sptr());
       logger_ = logging::LoggerConfiguration::getConfiguration().getLogger(core::getClassName<LogTestController>());
     } else {
       config = logging::LoggerConfiguration::newInstance();
       // create for test purposes. most tests use the main logging factory, but this exists to test the logging
       // framework itself.
-      config->initialize(my_properties_);
+      config->initialize(my_properties_.sptr());
       logger_ = config->getLogger(core::getClassName<LogTestController>());
     }
 
@@ -222,7 +222,7 @@ class LogTestController {
 
   void setLevel(const std::string name, spdlog::level::level_enum level);
 
-  std::shared_ptr<logging::LoggerProperties> my_properties_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<logging::LoggerProperties> my_properties_;
   std::unique_ptr<logging::LoggerConfiguration> config;
   std::set<std::string> modified_loggers;
 };
@@ -230,59 +230,59 @@ class LogTestController {
 class TestPlan {
  public:
 
-  explicit TestPlan(std::shared_ptr<core::ContentRepository> content_repo, std::shared_ptr<core::Repository> flow_repo, std::shared_ptr<core::Repository> prov_repo,
-                    const std::shared_ptr<minifi::state::response::FlowVersion> &flow_version, const std::shared_ptr<minifi::Configure> &configuration, const char* state_dir);
+  explicit TestPlan(org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_repo, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> prov_repo,
+                    const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::state::response::FlowVersion> &flow_version, const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> &configuration, const char* state_dir);
 
   virtual ~TestPlan();
 
-  std::shared_ptr<core::Processor> addProcessor(const std::shared_ptr<core::Processor> &processor, const std::string &name,
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> addProcessor(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> &processor, const std::string &name,
                                                 core::Relationship relationship = core::Relationship("success", "description"), bool linkToPrevious = false) {
     return addProcessor(processor, name, { relationship }, linkToPrevious);
   }
 
-  std::shared_ptr<core::Processor> addProcessor(const std::string &processor_name, const std::string &name, core::Relationship relationship = core::Relationship("success", "description"),
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> addProcessor(const std::string &processor_name, const std::string &name, core::Relationship relationship = core::Relationship("success", "description"),
                                                 bool linkToPrevious = false) {
     return addProcessor(processor_name, name, { relationship }, linkToPrevious);
   }
 
-  std::shared_ptr<core::Processor> addProcessor(const std::shared_ptr<core::Processor> &processor, const std::string &name, const std::initializer_list<core::Relationship>& relationships,
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> addProcessor(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> &processor, const std::string &name, const std::initializer_list<core::Relationship>& relationships,
                                                 bool linkToPrevious = false);
 
-  std::shared_ptr<core::Processor> addProcessor(const std::string &processor_name, const std::string &name, const std::initializer_list<core::Relationship>& relationships,
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> addProcessor(const std::string &processor_name, const std::string &name, const std::initializer_list<core::Relationship>& relationships,
                                                 bool linkToPrevious = false);
 
-  std::shared_ptr<core::Processor> addProcessor(const std::string &processor_name, utils::Identifier& uuid, const std::string &name, const std::initializer_list<core::Relationship>& relationships,
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> addProcessor(const std::string &processor_name, utils::Identifier& uuid, const std::string &name, const std::initializer_list<core::Relationship>& relationships,
                                                 bool linkToPrevious = false);
 
-  std::shared_ptr<minifi::Connection> addConnection(const std::shared_ptr<core::Processor>& source_proc, const core::Relationship& source_relationship, const std::shared_ptr<core::Processor>& destination_proc);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> addConnection(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor>& source_proc, const core::Relationship& source_relationship, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor>& destination_proc);
 
-  std::shared_ptr<core::controller::ControllerServiceNode> addController(const std::string &controller_name, const std::string &name);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> addController(const std::string &controller_name, const std::string &name);
 
-  bool setProperty(const std::shared_ptr<core::Processor> proc, const std::string &prop, const std::string &value, bool dynamic = false);
+  bool setProperty(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> proc, const std::string &prop, const std::string &value, bool dynamic = false);
 
-  bool setProperty(const std::shared_ptr<core::controller::ControllerServiceNode> controller_service_node, const std::string &prop, const std::string &value, bool dynamic = false);
+  bool setProperty(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> controller_service_node, const std::string &prop, const std::string &value, bool dynamic = false);
 
   void reset(bool reschedule = false);
 
-  bool runNextProcessor(std::function<void(const std::shared_ptr<core::ProcessContext>, const std::shared_ptr<core::ProcessSession>)> verify = nullptr);
+  bool runNextProcessor(std::function<void(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession>)> verify = nullptr);
 
-  bool runCurrentProcessor(std::function<void(const std::shared_ptr<core::ProcessContext>, const std::shared_ptr<core::ProcessSession>)> verify = nullptr);
+  bool runCurrentProcessor(std::function<void(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession>)> verify = nullptr);
 
-  std::set<std::shared_ptr<provenance::ProvenanceEventRecord>> getProvenanceRecords();
+  std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<provenance::ProvenanceEventRecord>> getProvenanceRecords();
 
-  std::shared_ptr<core::FlowFile> getCurrentFlowFile();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> getCurrentFlowFile();
 
-  std::shared_ptr<core::ProcessContext> getCurrentContext();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> getCurrentContext();
 
-  std::shared_ptr<core::Repository> getFlowRepo() {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> getFlowRepo() {
     return flow_repo_;
   }
 
-  std::shared_ptr<core::Repository> getProvenanceRepo() {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> getProvenanceRepo() {
     return prov_repo_;
   }
 
-  std::shared_ptr<core::ContentRepository> getContentRepo() {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> getContentRepo() {
     return content_repo_;
   }
 
@@ -294,7 +294,7 @@ class TestPlan {
     return state_dir_;
   }
 
-  std::shared_ptr<core::CoreComponentStateManagerProvider> getStateManagerProvider() {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::CoreComponentStateManagerProvider> getStateManagerProvider() {
     return state_manager_provider_;
   }
 
@@ -302,21 +302,21 @@ class TestPlan {
 
  protected:
 
-  std::shared_ptr<minifi::Connection> buildFinalConnection(std::shared_ptr<core::Processor> processor, bool setDest = false);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> buildFinalConnection(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor, bool setDest = false);
 
-  std::shared_ptr<org::apache::nifi::minifi::io::StreamFactory> stream_factory;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<org::apache::nifi::minifi::io::StreamFactory> stream_factory;
 
-  std::shared_ptr<minifi::Configure> configuration_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> configuration_;
 
-  std::shared_ptr<core::ContentRepository> content_repo_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo_;
 
-  std::shared_ptr<core::Repository> flow_repo_;
-  std::shared_ptr<core::Repository> prov_repo_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_repo_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> prov_repo_;
 
-  std::shared_ptr<core::controller::ControllerServiceMap> controller_services_;
-  std::shared_ptr<core::controller::ControllerServiceProvider> controller_services_provider_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceMap> controller_services_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceProvider> controller_services_provider_;
 
-  std::shared_ptr<core::CoreComponentStateManagerProvider> state_manager_provider_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::CoreComponentStateManagerProvider> state_manager_provider_;
 
   std::string state_dir_;
 
@@ -326,18 +326,18 @@ class TestPlan {
 
   int location;
 
-  std::shared_ptr<core::FlowFile> current_flowfile_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> current_flowfile_;
 
-  std::shared_ptr<minifi::state::response::FlowVersion> flow_version_;
-  std::vector<std::shared_ptr<core::controller::ControllerServiceNode>> controller_service_nodes_;
-  std::map<std::string, std::shared_ptr<core::Processor>> processor_mapping_;
-  std::vector<std::shared_ptr<core::Processor>> processor_queue_;
-  std::vector<std::shared_ptr<core::Processor>> configured_processors_;
-  std::vector<std::shared_ptr<core::ProcessorNode>> processor_nodes_;
-  std::vector<std::shared_ptr<core::ProcessContext>> processor_contexts_;
-  std::vector<std::shared_ptr<core::ProcessSession>> process_sessions_;
-  std::vector<std::shared_ptr<core::ProcessSessionFactory>> factories_;
-  std::vector<std::shared_ptr<minifi::Connection>> relationships_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::state::response::FlowVersion> flow_version_;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode>> controller_service_nodes_;
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor>> processor_mapping_;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor>> processor_queue_;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor>> configured_processors_;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessorNode>> processor_nodes_;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>> processor_contexts_;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession>> process_sessions_;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory>> factories_;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection>> relationships_;
   core::Relationship termination_;
 
  private:
@@ -353,24 +353,24 @@ class TestController {
     core::FlowConfiguration::initialize_static_functions();
     minifi::setDefaultDirectory("./");
     log.reset();
-    utils::IdGenerator::getIdGenerator()->initialize(std::make_shared<minifi::Properties>());
-    flow_version_ = std::make_shared<minifi::state::response::FlowVersion>("test", "test", "test");
+    utils::IdGenerator::getIdGenerator()->initialize(org::apache::nifi::minifi::utils::debug_make_shared<minifi::Properties>());
+    flow_version_ = org::apache::nifi::minifi::utils::debug_make_shared<minifi::state::response::FlowVersion>("test", "test", "test");
   }
 
-  std::shared_ptr<TestPlan> createPlan(std::shared_ptr<minifi::Configure> configuration = nullptr, const char* state_dir = nullptr) {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> createPlan(org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> configuration = nullptr, const char* state_dir = nullptr) {
     if (configuration == nullptr) {
-      configuration = std::make_shared<minifi::Configure>();
+      configuration = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>();
     }
-    std::shared_ptr<core::ContentRepository> content_repo = std::make_shared<core::repository::VolatileContentRepository>();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo = org::apache::nifi::minifi::utils::debug_make_shared<core::repository::VolatileContentRepository>();
 
     content_repo->initialize(configuration);
 
-    std::shared_ptr<core::Repository> flow_repo = std::make_shared<TestRepository>();
-    std::shared_ptr<core::Repository> repo = std::make_shared<TestRepository>();
-    return std::make_shared<TestPlan>(content_repo, flow_repo, repo, flow_version_, configuration, state_dir);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_repo = org::apache::nifi::minifi::utils::debug_make_shared<TestRepository>();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> repo = org::apache::nifi::minifi::utils::debug_make_shared<TestRepository>();
+    return org::apache::nifi::minifi::utils::debug_make_shared<TestPlan>(content_repo, flow_repo, repo, flow_version_, configuration, state_dir);
   }
 
-  void runSession(std::shared_ptr<TestPlan> &plan, bool runToCompletion = true, std::function<void(const std::shared_ptr<core::ProcessContext>&, const std::shared_ptr<core::ProcessSession>&)> verify =
+  void runSession(org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> &plan, bool runToCompletion = true, std::function<void(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext>&, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession>&)> verify =
                       nullptr) {
 
     while (plan->runNextProcessor(verify) && runToCompletion) {
@@ -399,7 +399,7 @@ class TestController {
 
  protected:
 
-  std::shared_ptr<minifi::state::response::FlowVersion> flow_version_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::state::response::FlowVersion> flow_version_;
 
   std::mutex test_mutex;
 

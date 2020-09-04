@@ -45,17 +45,17 @@ extern std::string default_directory_path;
 extern void setDefaultDirectory(std::string);
 
 // ResourceClaim Class
-class ResourceClaim : public std::enable_shared_from_this<ResourceClaim> {
+class ResourceClaim : public org::apache::nifi::minifi::utils::enable_debug_shared_from_this<ResourceClaim> {
  public:
   // Constructor
   /*!
    * Create a new resource claim
    */
-  // explicit ResourceClaim(std::shared_ptr<core::StreamManager<ResourceClaim>> claim_manager, const std::string contentDirectory);
+  // explicit ResourceClaim(org::apache::nifi::minifi::utils::debug_shared_ptr<core::StreamManager<ResourceClaim>> claim_manager, const std::string contentDirectory);
 
-  explicit ResourceClaim(std::shared_ptr<core::StreamManager<ResourceClaim>> claim_manager);
+  explicit ResourceClaim(org::apache::nifi::minifi::utils::debug_shared_ptr<core::StreamManager<ResourceClaim>> claim_manager);
 
-  explicit ResourceClaim(const std::string path, std::shared_ptr<core::StreamManager<ResourceClaim>> claim_manager, bool deleted = false);
+  explicit ResourceClaim(const std::string path, org::apache::nifi::minifi::utils::debug_shared_ptr<core::StreamManager<ResourceClaim>> claim_manager, bool deleted = false);
 
   // Destructor
   ~ResourceClaim() = default;
@@ -98,7 +98,7 @@ class ResourceClaim : public std::enable_shared_from_this<ResourceClaim> {
     return stream;
   }
 
-  friend std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<ResourceClaim>& claim) {
+  friend std::ostream& operator<<(std::ostream& stream, const org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim>& claim) {
     stream << claim->_contentFullPath;
     return stream;
   }
@@ -108,7 +108,7 @@ class ResourceClaim : public std::enable_shared_from_this<ResourceClaim> {
   // Full path to the content
   std::string _contentFullPath;
 
-  std::shared_ptr<core::StreamManager<ResourceClaim>> claim_manager_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::StreamManager<ResourceClaim>> claim_manager_;
 
  private:
   // Logger

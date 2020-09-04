@@ -148,9 +148,9 @@ class RawSiteToSiteClient : public sitetosite::SiteToSiteClient {
   virtual int readRequestType(RequestType &type);
 
   // read Respond
-  virtual int readRespond(const std::shared_ptr<Transaction> &transaction, RespondCode &code, std::string &message);
+  virtual int readRespond(const org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> &transaction, RespondCode &code, std::string &message);
   // write respond
-  virtual int writeRespond(const std::shared_ptr<Transaction> &transaction, RespondCode code, std::string message);
+  virtual int writeRespond(const org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> &transaction, RespondCode code, std::string message);
   // getRespondCodeContext
   virtual RespondCodeContext *getRespondCodeContext(RespondCode code) {
     return SiteToSiteClient::getRespondCodeContext(code);
@@ -158,10 +158,10 @@ class RawSiteToSiteClient : public sitetosite::SiteToSiteClient {
 
   // Creation of a new transaction, return the transaction ID if success,
   // Return NULL when any error occurs
-  virtual std::shared_ptr<Transaction> createTransaction(std::string &transactionID, TransferDirection direction);
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> createTransaction(std::string &transactionID, TransferDirection direction);
 
   //! Transfer string for the process session
-  virtual bool transmitPayload(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session, const std::string &payload,
+  virtual bool transmitPayload(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session, const std::string &payload,
                                std::map<std::string, std::string> attributes);
 
   // bootstrap the protocol to the ready for transaction state by going through the state machine
@@ -192,7 +192,7 @@ class RawSiteToSiteClient : public sitetosite::SiteToSiteClient {
   // Only support pass by reference or pointer
   RawSiteToSiteClient(const RawSiteToSiteClient &parent);
   RawSiteToSiteClient &operator=(const RawSiteToSiteClient &parent);
-  static std::shared_ptr<utils::IdGenerator> id_generator_;
+  static org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> id_generator_;
 };
 
 }  // namespace sitetosite

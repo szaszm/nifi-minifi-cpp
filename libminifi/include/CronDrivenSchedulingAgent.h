@@ -44,16 +44,16 @@ class CronDrivenSchedulingAgent : public ThreadedSchedulingAgent {
   /*!
    * Create a new event driven scheduling agent.
    */
-  CronDrivenSchedulingAgent(const gsl::not_null<core::controller::ControllerServiceProvider*> controller_service_provider, std::shared_ptr<core::Repository> repo,
-                            std::shared_ptr<core::Repository> flow_repo, std::shared_ptr<core::ContentRepository> content_repo, std::shared_ptr<Configure> configuration,
+  CronDrivenSchedulingAgent(const gsl::not_null<core::controller::ControllerServiceProvider*> controller_service_provider, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> repo,
+                            org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_repo, org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo, org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configuration,
                             utils::ThreadPool<utils::TaskRescheduleInfo> &thread_pool)
       : ThreadedSchedulingAgent(controller_service_provider, repo, flow_repo, content_repo, configuration, thread_pool) {
   }
   // Destructor
   virtual ~CronDrivenSchedulingAgent() = default;
   // Run function for the thread
-  utils::TaskRescheduleInfo run(const std::shared_ptr<core::Processor> &processor, const std::shared_ptr<core::ProcessContext> &processContext,
-      const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
+  utils::TaskRescheduleInfo run(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> &processor, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &processContext,
+      const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
 
   void stop() override {
     std::lock_guard<std::mutex> locK(mutex_);

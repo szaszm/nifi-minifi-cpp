@@ -152,7 +152,7 @@ bool valid_socket(const SocketDescriptor fd) noexcept {
 #endif /* WIN32 */
 }
 
-Socket::Socket(const std::shared_ptr<SocketContext>& /*context*/, std::string hostname, const uint16_t port, const uint16_t listeners)
+Socket::Socket(const org::apache::nifi::minifi::utils::debug_shared_ptr<SocketContext>& /*context*/, std::string hostname, const uint16_t port, const uint16_t listeners)
     : requested_hostname_(std::move(hostname)),
       port_(port),
       listeners_(listeners),
@@ -162,7 +162,7 @@ Socket::Socket(const std::shared_ptr<SocketContext>& /*context*/, std::string ho
   initialize_socket();
 }
 
-Socket::Socket(const std::shared_ptr<SocketContext>& context, std::string hostname, const uint16_t port)
+Socket::Socket(const org::apache::nifi::minifi::utils::debug_shared_ptr<SocketContext>& context, std::string hostname, const uint16_t port)
     : Socket(context, std::move(hostname), port, 0) {
 }
 

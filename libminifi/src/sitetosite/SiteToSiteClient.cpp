@@ -25,7 +25,7 @@ namespace nifi {
 namespace minifi {
 namespace sitetosite {
 
-int SiteToSiteClient::readResponse(const std::shared_ptr<Transaction> &transaction, RespondCode &code, std::string &message) {
+int SiteToSiteClient::readResponse(const org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> &transaction, RespondCode &code, std::string &message) {
   uint8_t firstByte;
 
   int ret = peer_->read(firstByte);
@@ -64,9 +64,9 @@ int SiteToSiteClient::readResponse(const std::shared_ptr<Transaction> &transacti
 }
 
 void SiteToSiteClient::deleteTransaction(std::string transactionID) {
-  std::shared_ptr<Transaction> transaction = NULL;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> transaction = NULL;
 
-  std::map<std::string, std::shared_ptr<Transaction> >::iterator it = this->known_transactions_.find(transactionID);
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> >::iterator it = this->known_transactions_.find(transactionID);
 
   if (it == known_transactions_.end()) {
     return;
@@ -78,7 +78,7 @@ void SiteToSiteClient::deleteTransaction(std::string transactionID) {
   known_transactions_.erase(transactionID);
 }
 
-int SiteToSiteClient::writeResponse(const std::shared_ptr<Transaction> &transaction, RespondCode code, std::string message) {
+int SiteToSiteClient::writeResponse(const org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> &transaction, RespondCode code, std::string message) {
   RespondCodeContext *resCode = this->getRespondCodeContext(code);
 
   if (resCode == NULL) {
@@ -108,10 +108,10 @@ int SiteToSiteClient::writeResponse(const std::shared_ptr<Transaction> &transact
   }
 }
 
-bool SiteToSiteClient::transferFlowFiles(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
-  std::shared_ptr<FlowFileRecord> flow = std::static_pointer_cast<FlowFileRecord>(session->get());
+bool SiteToSiteClient::transferFlowFiles(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> flow = static_pointer_cast<FlowFileRecord>(session->get());
 
-  std::shared_ptr<Transaction> transaction = NULL;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> transaction = NULL;
 
   if (!flow) {
     return false;
@@ -164,7 +164,7 @@ bool SiteToSiteClient::transferFlowFiles(const std::shared_ptr<core::ProcessCont
       if (transferNanos > _batchSendNanos)
         break;
 
-      flow = std::static_pointer_cast<FlowFileRecord>(session->get());
+      flow = static_pointer_cast<FlowFileRecord>(session->get());
 
       if (!flow) {
         continueTransaction = false;
@@ -201,7 +201,7 @@ bool SiteToSiteClient::transferFlowFiles(const std::shared_ptr<core::ProcessCont
 
 bool SiteToSiteClient::confirm(std::string transactionID) {
   int ret;
-  std::shared_ptr<Transaction> transaction = NULL;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> transaction = NULL;
 
   if (peer_state_ != READY) {
     bootstrap();
@@ -211,7 +211,7 @@ bool SiteToSiteClient::confirm(std::string transactionID) {
     return false;
   }
 
-  std::map<std::string, std::shared_ptr<Transaction> >::iterator it = this->known_transactions_.find(transactionID);
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> >::iterator it = this->known_transactions_.find(transactionID);
 
   if (it == known_transactions_.end()) {
     return false;
@@ -306,13 +306,13 @@ bool SiteToSiteClient::confirm(std::string transactionID) {
 }
 
 void SiteToSiteClient::cancel(std::string transactionID) {
-  std::shared_ptr<Transaction> transaction = NULL;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> transaction = NULL;
 
   if (peer_state_ != READY) {
     return;
   }
 
-  std::map<std::string, std::shared_ptr<Transaction> >::iterator it = this->known_transactions_.find(transactionID);
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> >::iterator it = this->known_transactions_.find(transactionID);
 
   if (it == known_transactions_.end()) {
     return;
@@ -332,9 +332,9 @@ void SiteToSiteClient::cancel(std::string transactionID) {
 }
 
 void SiteToSiteClient::error(std::string transactionID) {
-  std::shared_ptr<Transaction> transaction = NULL;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> transaction = NULL;
 
-  std::map<std::string, std::shared_ptr<Transaction> >::iterator it = this->known_transactions_.find(transactionID);
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> >::iterator it = this->known_transactions_.find(transactionID);
 
   if (it == known_transactions_.end()) {
     return;
@@ -350,7 +350,7 @@ void SiteToSiteClient::error(std::string transactionID) {
 // Complete the transaction
 bool SiteToSiteClient::complete(std::string transactionID) {
   int ret;
-  std::shared_ptr<Transaction> transaction = NULL;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> transaction = NULL;
 
   if (peer_state_ != READY) {
     bootstrap();
@@ -406,7 +406,7 @@ bool SiteToSiteClient::complete(std::string transactionID) {
   }
 }
 
-int16_t SiteToSiteClient::send(std::string transactionID, DataPacket *packet, const std::shared_ptr<FlowFileRecord> &flowFile, const std::shared_ptr<core::ProcessSession> &session) {
+int16_t SiteToSiteClient::send(std::string transactionID, DataPacket *packet, const org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> &flowFile, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   int ret;
 
   if (peer_state_ != READY) {
@@ -417,12 +417,12 @@ int16_t SiteToSiteClient::send(std::string transactionID, DataPacket *packet, co
     return -1;
   }
 
-  std::map<std::string, std::shared_ptr<Transaction> >::iterator it = this->known_transactions_.find(transactionID);
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> >::iterator it = this->known_transactions_.find(transactionID);
 
   if (it == known_transactions_.end()) {
     return -1;
   }
-  std::shared_ptr<Transaction> transaction = it->second;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> transaction = it->second;
 
   if (transaction->getState() != TRANSACTION_STARTED && transaction->getState() != DATA_EXCHANGED) {
     logger_->log_warn("Site2Site transaction %s is not at started or exchanged state", transactionID);
@@ -527,7 +527,7 @@ int16_t SiteToSiteClient::send(std::string transactionID, DataPacket *packet, co
 
 bool SiteToSiteClient::receive(std::string transactionID, DataPacket *packet, bool &eof) {
   int ret;
-  std::shared_ptr<Transaction> transaction = NULL;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> transaction = NULL;
 
   if (peer_state_ != READY) {
     bootstrap();
@@ -638,10 +638,10 @@ bool SiteToSiteClient::receive(std::string transactionID, DataPacket *packet, bo
   return true;
 }
 
-bool SiteToSiteClient::receiveFlowFiles(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
+bool SiteToSiteClient::receiveFlowFiles(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   uint64_t bytes = 0;
   int transfers = 0;
-  std::shared_ptr<Transaction> transaction = NULL;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> transaction = NULL;
 
   if (peer_state_ != READY) {
     if (!bootstrap()) {
@@ -680,7 +680,7 @@ bool SiteToSiteClient::receiveFlowFiles(const std::shared_ptr<core::ProcessConte
         // transaction done
         break;
       }
-      std::shared_ptr<FlowFileRecord> flowFile = std::static_pointer_cast<FlowFileRecord>(session->create());
+      org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> flowFile = static_pointer_cast<FlowFileRecord>(session->create());
 
       if (!flowFile) {
         throw Exception(SITE2SITE_EXCEPTION, "Flow File Creation Failed");

@@ -233,7 +233,7 @@ int listConnections(std::unique_ptr<minifi::io::Socket> socket, std::ostream &ou
   return 0;
 }
 
-std::shared_ptr<core::controller::ControllerService> getControllerService(const std::shared_ptr<minifi::Configure> &configuration, const std::string &service_name) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerService> getControllerService(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> &configuration, const std::string &service_name) {
 
   std::string prov_repo_class = "provenancerepository";
   std::string flow_repo_class = "flowfilerepository";
@@ -242,18 +242,18 @@ std::shared_ptr<core::controller::ControllerService> getControllerService(const 
 
   configuration->get(minifi::Configure::nifi_provenance_repository_class_name, prov_repo_class);
   // Create repos for flow record and provenance
-  std::shared_ptr<core::Repository> prov_repo = core::createRepository(prov_repo_class, true, "provenance");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> prov_repo = core::createRepository(prov_repo_class, true, "provenance");
   prov_repo->initialize(configuration);
 
   configuration->get(minifi::Configure::nifi_flow_repository_class_name, flow_repo_class);
 
-  std::shared_ptr<core::Repository> flow_repo = core::createRepository(flow_repo_class, true, "flowfile");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_repo = core::createRepository(flow_repo_class, true, "flowfile");
 
   flow_repo->initialize(configuration);
 
   configuration->get(minifi::Configure::nifi_content_repository_class_name, content_repo_class);
 
-  std::shared_ptr<core::ContentRepository> content_repo = core::createContentRepository(content_repo_class, true, "content");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo = core::createContentRepository(content_repo_class, true, "content");
 
   content_repo->initialize(configuration);
 
@@ -265,11 +265,11 @@ std::shared_ptr<core::controller::ControllerService> getControllerService(const 
 
   configuration->get(minifi::Configure::nifi_configuration_class_name, nifi_configuration_class_name);
 
-  std::shared_ptr<minifi::io::StreamFactory> stream_factory = minifi::io::StreamFactory::getInstance(configuration);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::io::StreamFactory> stream_factory = minifi::io::StreamFactory::getInstance(configuration);
 
   std::unique_ptr<core::FlowConfiguration> flow_configuration = core::createFlowConfiguration(prov_repo, flow_repo, content_repo, configuration, stream_factory, nifi_configuration_class_name);
 
-  std::shared_ptr<minifi::FlowController> controller = std::unique_ptr<minifi::FlowController>(
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::FlowController> controller = std::unique_ptr<minifi::FlowController>(
       new minifi::FlowController(prov_repo, flow_repo, configuration, std::move(flow_configuration), content_repo));
   controller->load();
   auto service = controller->getControllerService(service_name);
@@ -278,14 +278,14 @@ std::shared_ptr<core::controller::ControllerService> getControllerService(const 
   return service;
 }
 
-void printManifest(const std::shared_ptr<minifi::Configure> &configuration) {
+void printManifest(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> &configuration) {
 
   std::string prov_repo_class = "volatileprovenancerepository";
   std::string flow_repo_class = "volatileflowfilerepository";
   std::string nifi_configuration_class_name = "yamlconfiguration";
   std::string content_repo_class = "volatilecontentrepository";
 
-  std::shared_ptr<logging::LoggerProperties> log_properties = std::make_shared<logging::LoggerProperties>();
+  auto log_properties = std::make_shared<logging::LoggerProperties>();
   log_properties->setHome("./");
   log_properties->set("appender.stdout", "stdout");
   log_properties->set("logger.org::apache::nifi::minifi", "OFF,stdout");
@@ -293,18 +293,18 @@ void printManifest(const std::shared_ptr<minifi::Configure> &configuration) {
 
   configuration->get(minifi::Configure::nifi_provenance_repository_class_name, prov_repo_class);
   // Create repos for flow record and provenance
-  std::shared_ptr<core::Repository> prov_repo = core::createRepository(prov_repo_class, true, "provenance");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> prov_repo = core::createRepository(prov_repo_class, true, "provenance");
   prov_repo->initialize(configuration);
 
   configuration->get(minifi::Configure::nifi_flow_repository_class_name, flow_repo_class);
 
-  std::shared_ptr<core::Repository> flow_repo = core::createRepository(flow_repo_class, true, "flowfile");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_repo = core::createRepository(flow_repo_class, true, "flowfile");
 
   flow_repo->initialize(configuration);
 
   configuration->get(minifi::Configure::nifi_content_repository_class_name, content_repo_class);
 
-  std::shared_ptr<core::ContentRepository> content_repo = core::createContentRepository(content_repo_class, true, "content");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo = core::createContentRepository(content_repo_class, true, "content");
 
   content_repo->initialize(configuration);
 
@@ -322,11 +322,11 @@ void printManifest(const std::shared_ptr<minifi::Configure> &configuration) {
 
   configuration->get(minifi::Configure::nifi_configuration_class_name, nifi_configuration_class_name);
 
-  std::shared_ptr<minifi::io::StreamFactory> stream_factory = minifi::io::StreamFactory::getInstance(configuration);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::io::StreamFactory> stream_factory = minifi::io::StreamFactory::getInstance(configuration);
 
   std::unique_ptr<core::FlowConfiguration> flow_configuration = core::createFlowConfiguration(prov_repo, flow_repo, content_repo, configuration, stream_factory, nifi_configuration_class_name);
 
-  std::shared_ptr<minifi::FlowController> controller = std::unique_ptr<minifi::FlowController>(
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::FlowController> controller = std::unique_ptr<minifi::FlowController>(
       new minifi::FlowController(prov_repo, flow_repo, configuration, std::move(flow_configuration), content_repo, "manifest", false));
   controller->load();
   controller->start();

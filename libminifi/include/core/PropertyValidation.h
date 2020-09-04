@@ -96,14 +96,14 @@ class PropertyValidator {
     return name_;
   }
 
-  virtual ValidationResult validate(const std::string &subject, const std::shared_ptr<minifi::state::response::Value> &input) const = 0;
+  virtual ValidationResult validate(const std::string &subject, const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::state::response::Value> &input) const = 0;
 
   virtual ValidationResult validate(const std::string &subject, const std::string &input) const = 0;
 
  protected:
   template<typename T>
-  ValidationResult _validate_internal(const std::string &subject, const std::shared_ptr<minifi::state::response::Value> &input) const {
-    if (std::dynamic_pointer_cast<T>(input) != nullptr) {
+  ValidationResult _validate_internal(const std::string &subject, const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::state::response::Value> &input) const {
+    if (dynamic_pointer_cast<T>(input) != nullptr) {
       return ValidationResult::Builder::createBuilder().withSubject(subject).withInput(input->getStringValue()).isValid(true).build();
     } else {
       state::response::ValueNode vn;
@@ -125,7 +125,7 @@ class AlwaysValid : public PropertyValidator {
 
   ~AlwaysValid() override = default;
 
-  ValidationResult validate(const std::string &subject, const std::shared_ptr<minifi::state::response::Value> &input) const override {
+  ValidationResult validate(const std::string &subject, const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::state::response::Value> &input) const override {
     return ValidationResult::Builder::createBuilder().withSubject(subject).withInput(input->getStringValue()).isValid(always_valid_).build();
   }
 
@@ -142,7 +142,7 @@ class BooleanValidator : public PropertyValidator {
 
   ~BooleanValidator() override = default;
 
-  ValidationResult validate(const std::string &subject, const std::shared_ptr<minifi::state::response::Value> &input) const override {
+  ValidationResult validate(const std::string &subject, const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::state::response::Value> &input) const override {
     return PropertyValidator::_validate_internal<minifi::state::response::BoolValue>(subject, input);
   }
 
@@ -161,7 +161,7 @@ class IntegerValidator : public PropertyValidator {
   }
   ~IntegerValidator() override = default;
 
-  ValidationResult validate(const std::string &subject, const std::shared_ptr<minifi::state::response::Value> &input) const override {
+  ValidationResult validate(const std::string &subject, const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::state::response::Value> &input) const override {
     return PropertyValidator::_validate_internal<minifi::state::response::IntValue>(subject, input);
   }
 
@@ -182,7 +182,7 @@ class UnsignedIntValidator : public PropertyValidator {
   }
   ~UnsignedIntValidator() override = default;
 
-  ValidationResult validate(const std::string &subject, const std::shared_ptr<minifi::state::response::Value> &input) const override {
+  ValidationResult validate(const std::string &subject, const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::state::response::Value> &input) const override {
     return PropertyValidator::_validate_internal<minifi::state::response::UInt32Value>(subject, input);
   }
 
@@ -209,12 +209,12 @@ class LongValidator : public PropertyValidator {
   }
   ~LongValidator() override = default;
 
-  ValidationResult validate(const std::string &subject, const std::shared_ptr<minifi::state::response::Value> &input) const override {
-    auto in64 = std::dynamic_pointer_cast<minifi::state::response::Int64Value>(input);
+  ValidationResult validate(const std::string &subject, const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::state::response::Value> &input) const override {
+    auto in64 = dynamic_pointer_cast<minifi::state::response::Int64Value>(input);
     if (in64) {
       return ValidationResult::Builder::createBuilder().withSubject(subject).withInput(in64->getStringValue()).isValid(in64->getValue() >= min_ && in64->getValue() <= max_).build();
     } else {
-      auto intb = std::dynamic_pointer_cast<minifi::state::response::IntValue>(input);
+      auto intb = dynamic_pointer_cast<minifi::state::response::IntValue>(input);
       return ValidationResult::Builder::createBuilder().withSubject(subject).withInput(intb->getStringValue()).isValid(intb->getValue() >= min_ && intb->getValue() <= max_).build();
     }
   }
@@ -241,7 +241,7 @@ class UnsignedLongValidator : public PropertyValidator {
   }
   ~UnsignedLongValidator() override = default;
 
-  ValidationResult validate(const std::string &subject, const std::shared_ptr<minifi::state::response::Value> &input) const override {
+  ValidationResult validate(const std::string &subject, const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::state::response::Value> &input) const override {
     return PropertyValidator::_validate_internal<minifi::state::response::UInt64Value>(subject, input);
   }
 
@@ -266,7 +266,7 @@ class NonBlankValidator : public PropertyValidator {
   }
   ~NonBlankValidator() override = default;
 
-  ValidationResult validate(const std::string& subject, const std::shared_ptr<minifi::state::response::Value>& input) const final {
+  ValidationResult validate(const std::string& subject, const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::state::response::Value>& input) const final {
     return validate(subject, input->getStringValue());
   }
 
@@ -282,7 +282,7 @@ class DataSizeValidator : public PropertyValidator {
   }
   ~DataSizeValidator() override = default;
 
-  ValidationResult validate(const std::string &subject, const std::shared_ptr<minifi::state::response::Value> &input) const override {
+  ValidationResult validate(const std::string &subject, const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::state::response::Value> &input) const override {
     return PropertyValidator::_validate_internal<core::DataSizeValue>(subject, input);
   }
 
@@ -316,7 +316,7 @@ class TimePeriodValidator : public PropertyValidator {
   }
   ~TimePeriodValidator() override = default;
 
-  ValidationResult validate(const std::string &subject, const std::shared_ptr<minifi::state::response::Value> &input) const override {
+  ValidationResult validate(const std::string &subject, const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::state::response::Value> &input) const override {
     return PropertyValidator::_validate_internal<core::TimePeriodValue>(subject, input);
   }
 
@@ -331,56 +331,56 @@ class TimePeriodValidator : public PropertyValidator {
 
 class StandardValidators {
  public:
-  static const gsl::not_null<std::shared_ptr<PropertyValidator>> &getValidator(const std::shared_ptr<minifi::state::response::Value> &input) {
+  static const gsl::not_null<org::apache::nifi::minifi::utils::debug_shared_ptr<PropertyValidator>> &getValidator(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::state::response::Value> &input) {
     static StandardValidators init;
-    if (std::dynamic_pointer_cast<core::DataSizeValue>(input) != nullptr) {
+    if (dynamic_pointer_cast<core::DataSizeValue>(input) != nullptr) {
       return init.DATA_SIZE_VALIDATOR;
-    } else if (std::dynamic_pointer_cast<core::TimePeriodValue>(input) != nullptr) {
+    } else if (dynamic_pointer_cast<core::TimePeriodValue>(input) != nullptr) {
       return init.TIME_PERIOD_VALIDATOR;
-    } else if (std::dynamic_pointer_cast<minifi::state::response::BoolValue>(input) != nullptr) {
+    } else if (dynamic_pointer_cast<minifi::state::response::BoolValue>(input) != nullptr) {
       return init.BOOLEAN_VALIDATOR;
-    } else if (std::dynamic_pointer_cast<minifi::state::response::IntValue>(input) != nullptr) {
+    } else if (dynamic_pointer_cast<minifi::state::response::IntValue>(input) != nullptr) {
       return init.INTEGER_VALIDATOR;
-    } else if (std::dynamic_pointer_cast<minifi::state::response::UInt32Value>(input) != nullptr) {
+    } else if (dynamic_pointer_cast<minifi::state::response::UInt32Value>(input) != nullptr) {
       return init.UNSIGNED_INT_VALIDATOR;;
-    } else if (std::dynamic_pointer_cast<minifi::state::response::Int64Value>(input) != nullptr) {
+    } else if (dynamic_pointer_cast<minifi::state::response::Int64Value>(input) != nullptr) {
       return init.LONG_VALIDATOR;
-    } else if (std::dynamic_pointer_cast<minifi::state::response::UInt64Value>(input) != nullptr) {
+    } else if (dynamic_pointer_cast<minifi::state::response::UInt64Value>(input) != nullptr) {
       return init.UNSIGNED_LONG_VALIDATOR;
     } else {
       return org::apache::nifi::minifi::core::StandardValidators::VALID_VALIDATOR();
     }
   }
 
-  static const gsl::not_null<std::shared_ptr<PropertyValidator>>& NON_BLANK_VALIDATOR() {
-    static gsl::not_null<std::shared_ptr<PropertyValidator>> validator(std::make_shared<NonBlankValidator>("NON_BLANK_VALIDATOR"));
+  static const gsl::not_null<org::apache::nifi::minifi::utils::debug_shared_ptr<PropertyValidator>>& NON_BLANK_VALIDATOR() {
+    static gsl::not_null<org::apache::nifi::minifi::utils::debug_shared_ptr<PropertyValidator>> validator(org::apache::nifi::minifi::utils::debug_make_shared<NonBlankValidator>("NON_BLANK_VALIDATOR"));
     return validator;
   }
 
-  static const gsl::not_null<std::shared_ptr<PropertyValidator>>& VALID_VALIDATOR() {
-    static gsl::not_null<std::shared_ptr<PropertyValidator>> validator(std::make_shared<AlwaysValid>(true, "VALID"));
+  static const gsl::not_null<org::apache::nifi::minifi::utils::debug_shared_ptr<PropertyValidator>>& VALID_VALIDATOR() {
+    static gsl::not_null<org::apache::nifi::minifi::utils::debug_shared_ptr<PropertyValidator>> validator(org::apache::nifi::minifi::utils::debug_make_shared<AlwaysValid>(true, "VALID"));
     return validator;
   }
 
-  static gsl::not_null<std::shared_ptr<PropertyValidator>> PORT_VALIDATOR() {
-    static gsl::not_null<std::shared_ptr<PropertyValidator>> validator(std::make_shared<PortValidator>("PORT_VALIDATOR"));
+  static gsl::not_null<org::apache::nifi::minifi::utils::debug_shared_ptr<PropertyValidator>> PORT_VALIDATOR() {
+    static gsl::not_null<org::apache::nifi::minifi::utils::debug_shared_ptr<PropertyValidator>> validator(org::apache::nifi::minifi::utils::debug_make_shared<PortValidator>("PORT_VALIDATOR"));
     return validator;
   }
 
-  static gsl::not_null<std::shared_ptr<PropertyValidator>> LISTEN_PORT_VALIDATOR() {
-    static gsl::not_null<std::shared_ptr<PropertyValidator>> validator(std::make_shared<ListenPortValidator>("PORT_VALIDATOR"));
+  static gsl::not_null<org::apache::nifi::minifi::utils::debug_shared_ptr<PropertyValidator>> LISTEN_PORT_VALIDATOR() {
+    static gsl::not_null<org::apache::nifi::minifi::utils::debug_shared_ptr<PropertyValidator>> validator(org::apache::nifi::minifi::utils::debug_make_shared<ListenPortValidator>("PORT_VALIDATOR"));
     return validator;
   }
 
  private:
-  gsl::not_null<std::shared_ptr<PropertyValidator>> INVALID;
-  gsl::not_null<std::shared_ptr<PropertyValidator>> INTEGER_VALIDATOR;
-  gsl::not_null<std::shared_ptr<PropertyValidator>> UNSIGNED_INT_VALIDATOR;
-  gsl::not_null<std::shared_ptr<PropertyValidator>> LONG_VALIDATOR;
-  gsl::not_null<std::shared_ptr<PropertyValidator>> UNSIGNED_LONG_VALIDATOR;
-  gsl::not_null<std::shared_ptr<PropertyValidator>> BOOLEAN_VALIDATOR;
-  gsl::not_null<std::shared_ptr<PropertyValidator>> DATA_SIZE_VALIDATOR;
-  gsl::not_null<std::shared_ptr<PropertyValidator>> TIME_PERIOD_VALIDATOR;
+  gsl::not_null<org::apache::nifi::minifi::utils::debug_shared_ptr<PropertyValidator>> INVALID;
+  gsl::not_null<org::apache::nifi::minifi::utils::debug_shared_ptr<PropertyValidator>> INTEGER_VALIDATOR;
+  gsl::not_null<org::apache::nifi::minifi::utils::debug_shared_ptr<PropertyValidator>> UNSIGNED_INT_VALIDATOR;
+  gsl::not_null<org::apache::nifi::minifi::utils::debug_shared_ptr<PropertyValidator>> LONG_VALIDATOR;
+  gsl::not_null<org::apache::nifi::minifi::utils::debug_shared_ptr<PropertyValidator>> UNSIGNED_LONG_VALIDATOR;
+  gsl::not_null<org::apache::nifi::minifi::utils::debug_shared_ptr<PropertyValidator>> BOOLEAN_VALIDATOR;
+  gsl::not_null<org::apache::nifi::minifi::utils::debug_shared_ptr<PropertyValidator>> DATA_SIZE_VALIDATOR;
+  gsl::not_null<org::apache::nifi::minifi::utils::debug_shared_ptr<PropertyValidator>> TIME_PERIOD_VALIDATOR;
 
   StandardValidators();
 };

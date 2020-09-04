@@ -77,7 +77,7 @@ std::unique_ptr<sitetosite::SiteToSiteClient> RemoteProcessorGroupPort::getNextP
             host = org::apache::nifi::minifi::io::Socket::getMyHostName();
           }
 #endif
-          sitetosite::SiteToSiteClientConfiguration config(stream_factory_, std::make_shared<sitetosite::Peer>(protocol_uuid_, host, rpg.port_, ssl_service != nullptr), this->getInterface(),
+          sitetosite::SiteToSiteClientConfiguration config(stream_factory_, org::apache::nifi::minifi::utils::debug_make_shared<sitetosite::Peer>(protocol_uuid_, host, rpg.port_, ssl_service != nullptr), this->getInterface(),
                                                            client_type_);
           config.setHTTPProxy(this->proxy_);
           config.setIdleTimeout(idle_timeout_);
@@ -135,7 +135,7 @@ void RemoteProcessorGroupPort::initialize() {
   logger_->log_trace("Finished initialization");
 }
 
-void RemoteProcessorGroupPort::onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
+void RemoteProcessorGroupPort::onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
   std::string value;
   if (context->getProperty(portUUID.getName(), value) && !value.empty()) {
     protocol_uuid_ = value;
@@ -154,15 +154,15 @@ void RemoteProcessorGroupPort::onSchedule(const std::shared_ptr<core::ProcessCon
   if (!context->getProperty(SSLContext.getName(), context_name) || IsNullOrEmpty(context_name)) {
     context_name = RPG_SSL_CONTEXT_SERVICE_NAME;
   }
-  std::shared_ptr<core::controller::ControllerService> service = context->getControllerService(context_name);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerService> service = context->getControllerService(context_name);
   if (nullptr != service) {
-    ssl_service = std::static_pointer_cast<minifi::controllers::SSLContextService>(service);
+    ssl_service = static_pointer_cast<minifi::controllers::SSLContextService>(service);
   } else {
     std::string secureStr;
     bool is_secure = false;
     if (configure_->get(Configure::nifi_remote_input_secure, secureStr) &&
         org::apache::nifi::minifi::utils::StringUtils::StringToBool(secureStr, is_secure)) {
-      ssl_service = std::make_shared<minifi::controllers::SSLContextService>(RPG_SSL_CONTEXT_SERVICE_NAME, configure_);
+      ssl_service = org::apache::nifi::minifi::utils::debug_make_shared<minifi::controllers::SSLContextService>(RPG_SSL_CONTEXT_SERVICE_NAME, configure_);
       ssl_service->onEnable();
     }
   }
@@ -243,7 +243,7 @@ void RemoteProcessorGroupPort::notifyStop() {
   }
 }
 
-void RemoteProcessorGroupPort::onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
+void RemoteProcessorGroupPort::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   logger_->log_trace("On trigger %s", getUUIDStr());
   if (!transmitting_) {
     return;
@@ -403,7 +403,7 @@ void RemoteProcessorGroupPort::refreshPeerList() {
   this->peers_.clear();
 
   std::unique_ptr<sitetosite::SiteToSiteClient> protocol;
-  sitetosite::SiteToSiteClientConfiguration config(stream_factory_, std::make_shared<sitetosite::Peer>(protocol_uuid_, connection.first, connection.second, ssl_service != nullptr),
+  sitetosite::SiteToSiteClientConfiguration config(stream_factory_, org::apache::nifi::minifi::utils::debug_make_shared<sitetosite::Peer>(protocol_uuid_, connection.first, connection.second, ssl_service != nullptr),
                                                    this->getInterface(), client_type_);
   config.setSecurityContext(ssl_service);
   config.setHTTPProxy(this->proxy_);

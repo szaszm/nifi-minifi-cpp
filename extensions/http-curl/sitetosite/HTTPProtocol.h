@@ -98,12 +98,12 @@ class HttpSiteToSiteClient : public sitetosite::SiteToSiteClient {
     return true;
   }
 
-  virtual std::shared_ptr<Transaction> createTransaction(std::string &transactionID, TransferDirection direction) override;
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> createTransaction(std::string &transactionID, TransferDirection direction) override;
 
   // Transfer flow files for the process session
-  //virtual bool transferFlowFiles(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session);
+  //virtual bool transferFlowFiles(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session);
   //! Transfer string for the process session
-  virtual bool transmitPayload(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session, const std::string &payload,
+  virtual bool transmitPayload(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session, const std::string &payload,
                                std::map<std::string, std::string> attributes) override;
   // deleteTransaction
   virtual void deleteTransaction(std::string transactionID) override;
@@ -116,9 +116,9 @@ class HttpSiteToSiteClient : public sitetosite::SiteToSiteClient {
    */
   void closeTransaction(const std::string &transactionID);
 
-  virtual int readResponse(const std::shared_ptr<Transaction> &transaction, RespondCode &code, std::string &message) override;
+  virtual int readResponse(const org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> &transaction, RespondCode &code, std::string &message) override;
   // write respond
-  virtual int writeResponse(const std::shared_ptr<Transaction> &transaction, RespondCode code, std::string message) override;
+  virtual int writeResponse(const org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> &transaction, RespondCode code, std::string message) override;
 
   /**
    * Bootstrapping is not really required for the HTTP Site To Site so we will set the peer state and return true.
@@ -134,7 +134,7 @@ class HttpSiteToSiteClient : public sitetosite::SiteToSiteClient {
    * @param transaction transaction against which we are performing our sends
    * @return HTTP Client shared pointer.
    */
-  std::shared_ptr<minifi::utils::HTTPClient> openConnectionForSending(const std::shared_ptr<HttpTransaction> &transaction);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::utils::HTTPClient> openConnectionForSending(const org::apache::nifi::minifi::utils::debug_shared_ptr<HttpTransaction> &transaction);
 
   /**
    * Creates a connection for receiving, returning an HTTP client that is structured and configured
@@ -142,7 +142,7 @@ class HttpSiteToSiteClient : public sitetosite::SiteToSiteClient {
    * @param transaction transaction against which we are performing our reads
    * @return HTTP Client shared pointer.
    */
-  std::shared_ptr<minifi::utils::HTTPClient> openConnectionForReceive(const std::shared_ptr<HttpTransaction> &transaction);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::utils::HTTPClient> openConnectionForReceive(const org::apache::nifi::minifi::utils::debug_shared_ptr<HttpTransaction> &transaction);
 
   const std::string getBaseURI() {
     std::string uri = ssl_context_service_ != nullptr ? "https://" : "http://";
@@ -185,7 +185,7 @@ class HttpSiteToSiteClient : public sitetosite::SiteToSiteClient {
   // Only support pass by reference or pointer
   HttpSiteToSiteClient(const HttpSiteToSiteClient &parent);
   HttpSiteToSiteClient &operator=(const HttpSiteToSiteClient &parent);
-  static std::shared_ptr<utils::IdGenerator> id_generator_;
+  static org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> id_generator_;
 };
 
 } /* namespace sitetosite */

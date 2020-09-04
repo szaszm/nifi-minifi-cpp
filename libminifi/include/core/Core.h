@@ -123,16 +123,16 @@ struct class_operations {
 };
 
 template<typename T>
-typename std::enable_if<!class_operations<T>::value, std::shared_ptr<T>>::type instantiate(const std::string name = "") {
+typename std::enable_if<!class_operations<T>::value, org::apache::nifi::minifi::utils::debug_shared_ptr<T>>::type instantiate(const std::string name = "") {
   throw std::runtime_error("Cannot instantiate class");
 }
 
 template<typename T>
-typename std::enable_if<class_operations<T>::value, std::shared_ptr<T>>::type instantiate(const std::string name = "") {
+typename std::enable_if<class_operations<T>::value, org::apache::nifi::minifi::utils::debug_shared_ptr<T>>::type instantiate(const std::string name = "") {
   if (name.length() == 0) {
-    return std::make_shared<T>();
+    return org::apache::nifi::minifi::utils::debug_make_shared<T>();
   } else {
-    return std::make_shared<T>(name);
+    return org::apache::nifi::minifi::utils::debug_make_shared<T>(name);
   }
 }
 
@@ -207,7 +207,7 @@ class CoreComponent {
     return uuidStr_;
   }
 
-  virtual void configure(const std::shared_ptr<Configure> &configuration) {
+  virtual void configure(const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configuration) {
   }
 
   void loadComponent() {

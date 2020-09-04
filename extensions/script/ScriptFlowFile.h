@@ -29,16 +29,16 @@ namespace script {
 
 class ScriptFlowFile {
  public:
-  explicit ScriptFlowFile(std::shared_ptr<core::FlowFile> flow_file);
+  explicit ScriptFlowFile(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow_file);
   std::string getAttribute(const std::string &key);
   bool addAttribute(const std::string &key, const std::string &value);
   bool updateAttribute(std::string key, std::string value);
   bool removeAttribute(std::string key);
-  std::shared_ptr<core::FlowFile> getFlowFile();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> getFlowFile();
   void releaseFlowFile();
 
  private:
-  std::shared_ptr<core::FlowFile> flow_file_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow_file_;
 };
 
 } /* namespace script */

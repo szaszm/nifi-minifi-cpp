@@ -36,8 +36,8 @@ AgentPrinter::AgentPrinter(std::string name, utils::Identifier uuid)
       logger_(logging::LoggerFactory<AgentPrinter>::getLogger()) {
 }
 
-void AgentPrinter::initialize(core::controller::ControllerServiceProvider* controller, const std::shared_ptr<state::StateMonitor> &updateSink,
-                              const std::shared_ptr<Configure> &configure) {
+void AgentPrinter::initialize(core::controller::ControllerServiceProvider* controller, const org::apache::nifi::minifi::utils::debug_shared_ptr<state::StateMonitor> &updateSink,
+                              const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure) {
   HeartBeatReporter::initialize(controller, updateSink, configure);
 }
 int16_t AgentPrinter::heartbeat(const C2Payload &payload) {

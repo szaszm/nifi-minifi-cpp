@@ -48,24 +48,24 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  std::shared_ptr<minifi::Configure> configuration = std::make_shared<minifi::Configure>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> configuration = utils::debug_make_shared<minifi::Configure>();
   configuration->setHome(minifiHome);
   configuration->loadConfigureFile(DEFAULT_NIFI_PROPERTIES_FILE);
 
-  std::shared_ptr<logging::LoggerProperties> log_properties = std::make_shared<logging::LoggerProperties>();
+  auto log_properties = std::make_shared<logging::LoggerProperties>();
   log_properties->setHome(minifiHome);
   log_properties->loadConfigureFile(DEFAULT_LOG_PROPERTIES_FILE);
   logging::LoggerConfiguration::getConfiguration().initialize(log_properties);
 
   std::string context_name;
 
-  std::shared_ptr<minifi::controllers::SSLContextService> secure_context = nullptr;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::controllers::SSLContextService> secure_context = nullptr;
 
   // if the user wishes to use a controller service we need to instantiate the flow
   if (configuration->get("controller.ssl.context.service", context_name)) {
-    std::shared_ptr<core::controller::ControllerService> service = getControllerService(configuration, context_name);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerService> service = getControllerService(configuration, context_name);
     if (nullptr != service) {
-      secure_context = std::static_pointer_cast<minifi::controllers::SSLContextService>(service);
+      secure_context = static_pointer_cast<minifi::controllers::SSLContextService>(service);
     }
   }
 
@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
     std::string secureStr;
     bool is_secure = false;
     if (configuration->get(minifi::Configure::nifi_remote_input_secure, secureStr) && org::apache::nifi::minifi::utils::StringUtils::StringToBool(secureStr, is_secure)) {
-      secure_context = std::make_shared<minifi::controllers::SSLContextService>("ControllerSocketProtocolSSL", configuration);
+      secure_context = utils::debug_make_shared<minifi::controllers::SSLContextService>("ControllerSocketProtocolSSL", configuration);
       secure_context->onEnable();
     }
   }

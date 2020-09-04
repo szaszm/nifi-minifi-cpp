@@ -189,8 +189,8 @@ void TFConvertImageToTensor::onSchedule(core::ProcessContext *context, core::Pro
   }
 }
 
-void TFConvertImageToTensor::onTrigger(const std::shared_ptr<core::ProcessContext> &context,
-                                       const std::shared_ptr<core::ProcessSession> &session) {
+void TFConvertImageToTensor::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context,
+                                       const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   auto flow_file = session->get();
 
   if (!flow_file) {
@@ -199,7 +199,7 @@ void TFConvertImageToTensor::onTrigger(const std::shared_ptr<core::ProcessContex
 
   try {
     // Use an existing context, if one is available
-    std::shared_ptr<TFContext> ctx;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<TFContext> ctx;
 
     if (tf_context_q_.try_dequeue(ctx)) {
       logger_->log_debug("Using available TensorFlow context");
@@ -211,7 +211,7 @@ void TFConvertImageToTensor::onTrigger(const std::shared_ptr<core::ProcessContex
     if (!ctx) {
       logger_->log_info("Creating new TensorFlow context");
       tensorflow::SessionOptions options;
-      ctx = std::make_shared<TFContext>();
+      ctx = utils::debug_make_shared<TFContext>();
       ctx->tf_session.reset(tensorflow::NewSession(options));
 
       auto root = tensorflow::Scope::NewRootScope();
@@ -291,7 +291,7 @@ void TFConvertImageToTensor::onTrigger(const std::shared_ptr<core::ProcessContex
 
     // Create output flow file for each output tensor
     for (const auto &output : outputs) {
-      auto tensor_proto = std::make_shared<tensorflow::TensorProto>();
+      auto tensor_proto = utils::debug_make_shared<tensorflow::TensorProto>();
       output.AsProtoTensorContent(tensor_proto.get());
       logger_->log_info("Writing output tensor flow file");
       TensorWriteCallback write_cb(tensor_proto);
@@ -317,7 +317,7 @@ void TFConvertImageToTensor::onTrigger(const std::shared_ptr<core::ProcessContex
   }
 }
 
-int64_t TFConvertImageToTensor::ImageReadCallback::process(std::shared_ptr<io::BaseStream> stream) {
+int64_t TFConvertImageToTensor::ImageReadCallback::process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
   if (tensor_->AllocatedBytes() < stream->getSize()) {
     throw std::runtime_error("Tensor is not big enough to hold FlowFile bytes");
   }
@@ -332,7 +332,7 @@ int64_t TFConvertImageToTensor::ImageReadCallback::process(std::shared_ptr<io::B
   return num_read;
 }
 
-int64_t TFConvertImageToTensor::TensorWriteCallback::process(std::shared_ptr<io::BaseStream> stream) {
+int64_t TFConvertImageToTensor::TensorWriteCallback::process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
   auto tensor_proto_buf = tensor_proto_->SerializeAsString();
   auto num_wrote = stream->writeData(reinterpret_cast<uint8_t *>(&tensor_proto_buf[0]),
                                      static_cast<int>(tensor_proto_buf.size()));

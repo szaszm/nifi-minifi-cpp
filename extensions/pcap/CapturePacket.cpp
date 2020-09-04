@@ -50,7 +50,7 @@ namespace nifi {
 namespace minifi {
 namespace processors {
 
-std::shared_ptr<utils::IdGenerator> CapturePacket::id_generator_ = utils::IdGenerator::getIdGenerator();
+org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> CapturePacket::id_generator_ = utils::IdGenerator::getIdGenerator();
 core::Property CapturePacket::BaseDir(core::PropertyBuilder::createProperty("Base Directory")->withDescription("Scratch directory for PCAP files")->withDefaultValue<std::string>("/tmp/")->build());
 
 core::Property CapturePacket::BatchSize(core::PropertyBuilder::createProperty("Batch Size")->withDescription("The number of packets to combine within a given PCAP")->withDefaultValue<uint64_t>(50)->build());
@@ -125,7 +125,7 @@ void CapturePacket::initialize() {
   setSupportedRelationships(relationships);
 }
 
-void CapturePacket::onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
+void CapturePacket::onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
   std::string value;
   if (context->getProperty(BatchSize.getName(), value)) {
     core::Property::StringToInt(value, pcap_batch_size_);
@@ -215,7 +215,7 @@ void CapturePacket::onSchedule(const std::shared_ptr<core::ProcessContext> &cont
 
 CapturePacket::~CapturePacket() = default;
 
-void CapturePacket::onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
+void CapturePacket::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   CapturePacketMechanism *capture;
   if (mover->sink.try_dequeue(capture)) {
     auto ff = session->create();

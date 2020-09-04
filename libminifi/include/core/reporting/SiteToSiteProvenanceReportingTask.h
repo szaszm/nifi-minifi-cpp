@@ -44,7 +44,7 @@ class SiteToSiteProvenanceReportingTask : public minifi::RemoteProcessorGroupPor
   /*!
    * Create a new processor
    */
-  SiteToSiteProvenanceReportingTask(const std::shared_ptr<io::StreamFactory> &stream_factory, std::shared_ptr<Configure> configure)
+  SiteToSiteProvenanceReportingTask(const org::apache::nifi::minifi::utils::debug_shared_ptr<io::StreamFactory> &stream_factory, org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configure)
       : minifi::RemoteProcessorGroupPort(stream_factory, ReportTaskName, "", configure),
         logger_(logging::LoggerFactory<SiteToSiteProvenanceReportingTask>::getLogger()) {
     this->setTriggerWhenEmpty(true);
@@ -58,12 +58,12 @@ class SiteToSiteProvenanceReportingTask : public minifi::RemoteProcessorGroupPor
 
  public:
   //! Get provenance json report
-  void getJsonReport(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session, std::vector<std::shared_ptr<core::SerializableComponent>> &records, std::string &report); // NOLINT
+  void getJsonReport(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session, std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent>> &records, std::string &report); // NOLINT
 
 
-  void onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory);
+  void onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory);
   //! OnTrigger method, implemented by NiFi SiteToSiteProvenanceReportingTask
-  void onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session);
+  void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session);
 
   //! Initialize, over write by NiFi SiteToSiteProvenanceReportingTask
   virtual void initialize(void);

@@ -23,11 +23,11 @@
 #include "../TestBase.h"
 
 TEST_CASE("NoRocksDBTest1", "[NoRocksDBTest]") {
-  std::shared_ptr<core::Repository> prov_repo = core::createRepository("provenancerepository", true);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> prov_repo = core::createRepository("provenancerepository", true);
   REQUIRE(nullptr != prov_repo);
 }
 
 TEST_CASE("NoRocksDBTest2", "[NoRocksDBTest]") {
-  std::shared_ptr<core::Repository> prov_repo = core::createRepository("flowfilerepository", true);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> prov_repo = core::createRepository("flowfilerepository", true);
   REQUIRE(nullptr != prov_repo);
 }

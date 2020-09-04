@@ -58,7 +58,7 @@ class Worker {
         next_exec_time_(std::chrono::steady_clock::now()),
         task(task),
         run_determinant_(std::move(run_determinant)) {
-    promise = std::make_shared<std::promise<T>>();
+    promise = org::apache::nifi::minifi::utils::debug_make_shared<std::promise<T>>();
   }
 
   explicit Worker(const std::function<T()> &task, const std::string &identifier)
@@ -66,7 +66,7 @@ class Worker {
         next_exec_time_(std::chrono::steady_clock::now()),
         task(task),
         run_determinant_(nullptr) {
-    promise = std::make_shared<std::promise<T>>();
+    promise = org::apache::nifi::minifi::utils::debug_make_shared<std::promise<T>>();
   }
 
   explicit Worker(const std::string identifier = "")
@@ -121,7 +121,7 @@ class Worker {
 
   Worker<T>& operator= (Worker<T> &&) noexcept;
 
-  std::shared_ptr<std::promise<T>> getPromise() const;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<std::promise<T>> getPromise() const;
 
   const std::string &getIdentifier() const {
     return identifier_;
@@ -132,7 +132,7 @@ class Worker {
   std::chrono::time_point<std::chrono::steady_clock> next_exec_time_;
   std::function<T()> task;
   std::unique_ptr<AfterExecute<T>> run_determinant_;
-  std::shared_ptr<std::promise<T>> promise;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<std::promise<T>> promise;
 };
 
 template<typename T>
@@ -154,7 +154,7 @@ Worker<T>& Worker<T>::operator =(Worker<T> && other) noexcept {
 }
 
 template<typename T>
-std::shared_ptr<std::promise<T>> Worker<T>::getPromise() const {
+org::apache::nifi::minifi::utils::debug_shared_ptr<std::promise<T>> Worker<T>::getPromise() const {
   return promise;
 }
 
@@ -183,7 +183,7 @@ class WorkerThread {
 template<typename T>
 class ThreadPool {
  public:
-  ThreadPool(int max_worker_threads = 2, bool daemon_threads = false, const std::shared_ptr<core::controller::ControllerServiceProvider> &controller_service_provider = nullptr,
+  ThreadPool(int max_worker_threads = 2, bool daemon_threads = false, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceProvider> &controller_service_provider = nullptr,
              const std::string &name = "NamelessPool")
       : daemon_threads_(daemon_threads),
         thread_reduction_count_(0),
@@ -279,7 +279,7 @@ class ThreadPool {
       start();
   }
 
-  void setControllerServiceProvider(std::shared_ptr<core::controller::ControllerServiceProvider> controller_service_provider) {
+  void setControllerServiceProvider(org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceProvider> controller_service_provider) {
     std::lock_guard<std::recursive_mutex> lock(manager_mutex_);
     bool was_running = running_;
     if (was_running) {
@@ -318,7 +318,7 @@ class ThreadPool {
   std::atomic<int> current_workers_;
   std::atomic<int> task_count_;
 // thread queue
-  std::vector<std::shared_ptr<WorkerThread>> thread_queue_;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<WorkerThread>> thread_queue_;
 // manager thread
   std::thread manager_thread_;
 // the thread responsible for putting delayed tasks to the worker queue when they had to be put
@@ -328,11 +328,11 @@ class ThreadPool {
 // atomic running boolean
   std::atomic<bool> running_;
 // controller service provider
-  std::shared_ptr<core::controller::ControllerServiceProvider> controller_service_provider_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceProvider> controller_service_provider_;
 // integrated power manager
-  std::shared_ptr<controllers::ThreadManagementService> thread_manager_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<controllers::ThreadManagementService> thread_manager_;
   // thread queue for the recently deceased threads.
-  ConcurrentQueue<std::shared_ptr<WorkerThread>> deceased_thread_queue_;
+  ConcurrentQueue<org::apache::nifi::minifi::utils::debug_shared_ptr<WorkerThread>> deceased_thread_queue_;
 // worker queue of worker objects
   ConditionConcurrentQueue<Worker<T>> worker_queue_;
   std::priority_queue<Worker<T>, std::vector<Worker<T>>, DelayedTaskComparator<T>> delayed_worker_queue_;
@@ -355,7 +355,7 @@ class ThreadPool {
   /**
    * Runs worker tasks
    */
-  void run_tasks(std::shared_ptr<WorkerThread> thread);
+  void run_tasks(org::apache::nifi::minifi::utils::debug_shared_ptr<WorkerThread> thread);
 
   void manage_delayed_queue();
 };

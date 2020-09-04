@@ -116,10 +116,10 @@ class UpdatePolicyBuilder {
   UpdatePolicyBuilder(const UpdatePolicyBuilder &other) = default;
 
   explicit UpdatePolicyBuilder(bool enable_all) {
-    current_policy_ = std::make_shared<UpdatePolicy>(enable_all);
+    current_policy_ = org::apache::nifi::minifi::utils::debug_make_shared<UpdatePolicy>(enable_all);
   }
 
-  std::shared_ptr<UpdatePolicy> current_policy_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<UpdatePolicy> current_policy_;
 };
 
 }  // namespace state

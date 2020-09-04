@@ -34,8 +34,8 @@ ExpressionContextBuilder::ExpressionContextBuilder(const std::string &name)
 
 ExpressionContextBuilder::~ExpressionContextBuilder() = default;
 
-std::shared_ptr<core::ProcessContext> ExpressionContextBuilder::build(const std::shared_ptr<ProcessorNode> &processor) {
-  return std::make_shared<core::ProcessContextExpr>(processor, controller_service_provider_, prov_repo_, flow_repo_, configuration_, content_repo_);
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> ExpressionContextBuilder::build(const org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessorNode> &processor) {
+  return utils::debug_make_shared<core::ProcessContextExpr>(processor, controller_service_provider_, prov_repo_, flow_repo_, configuration_, content_repo_);
 }
 
 } /* namespace expressions */

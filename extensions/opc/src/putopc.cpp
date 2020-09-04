@@ -109,7 +109,7 @@ namespace processors {
     setSupportedRelationships({Success, Failure});
   }
 
-  void PutOPCProcessor::onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &factory) {
+  void PutOPCProcessor::onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &factory) {
     logger_->log_trace("PutOPCProcessor::onSchedule");
 
     parentExists_ = false;
@@ -153,7 +153,7 @@ namespace processors {
 
   }
 
-  void PutOPCProcessor::onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
+  void PutOPCProcessor::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
     logger_->log_trace("PutOPCProcessor::onTrigger");
 
     std::unique_lock<std::mutex> lock(onTriggerMutex_, std::try_to_lock);
@@ -201,7 +201,7 @@ namespace processors {
       }
     }
 
-    std::shared_ptr<FlowFileRecord> flowFile = std::static_pointer_cast<FlowFileRecord>(session->get());
+    org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> flowFile = static_pointer_cast<FlowFileRecord>(session->get());
 
     // Do nothing if there are no incoming files
     if (!flowFile) {
@@ -421,7 +421,7 @@ namespace processors {
     }
   }
 
-  int64_t PutOPCProcessor::ReadCallback::process(std::shared_ptr<io::BaseStream> stream) {
+  int64_t PutOPCProcessor::ReadCallback::process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
     buf_.clear();
     buf_.resize(stream->getSize());
 

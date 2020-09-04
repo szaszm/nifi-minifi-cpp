@@ -326,12 +326,12 @@ class Transaction {
   // UUID string
   std::string uuid_str_;
 
-  static std::shared_ptr<utils::IdGenerator> id_generator_;
+  static org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> id_generator_;
 };
 
 class SiteToSiteClientConfiguration {
  public:
-  SiteToSiteClientConfiguration(std::shared_ptr<io::StreamFactory> stream_factory, const std::shared_ptr<Peer> &peer, const std::string &ifc, CLIENT_TYPE type = RAW)
+  SiteToSiteClientConfiguration(org::apache::nifi::minifi::utils::debug_shared_ptr<io::StreamFactory> stream_factory, const org::apache::nifi::minifi::utils::debug_shared_ptr<Peer> &peer, const std::string &ifc, CLIENT_TYPE type = RAW)
       : stream_factory_(stream_factory),
         peer_(peer),
         local_network_interface_(ifc),
@@ -345,19 +345,19 @@ class SiteToSiteClientConfiguration {
     return client_type_;
   }
 
-  const std::shared_ptr<Peer> &getPeer() const {
+  const org::apache::nifi::minifi::utils::debug_shared_ptr<Peer> &getPeer() const {
     return peer_;
   }
 
-  void setSecurityContext(const std::shared_ptr<controllers::SSLContextService> &ssl_service) {
+  void setSecurityContext(const org::apache::nifi::minifi::utils::debug_shared_ptr<controllers::SSLContextService> &ssl_service) {
     ssl_service_ = ssl_service;
   }
 
-  const std::shared_ptr<controllers::SSLContextService> &getSecurityContext() const {
+  const org::apache::nifi::minifi::utils::debug_shared_ptr<controllers::SSLContextService> &getSecurityContext() const {
     return ssl_service_;
   }
 
-  const std::shared_ptr<io::StreamFactory> &getStreamFactory() const {
+  const org::apache::nifi::minifi::utils::debug_shared_ptr<io::StreamFactory> &getStreamFactory() const {
     return stream_factory_;
   }
 
@@ -384,9 +384,9 @@ class SiteToSiteClientConfiguration {
   }
 
  protected:
-  std::shared_ptr<io::StreamFactory> stream_factory_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<io::StreamFactory> stream_factory_;
 
-  std::shared_ptr<Peer> peer_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Peer> peer_;
 
   CLIENT_TYPE client_type_;
 
@@ -396,7 +396,7 @@ class SiteToSiteClientConfiguration {
 
   // secore comms
 
-  std::shared_ptr<controllers::SSLContextService> ssl_service_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<controllers::SSLContextService> ssl_service_;
 
   utils::HTTPProxy proxy_;
 };

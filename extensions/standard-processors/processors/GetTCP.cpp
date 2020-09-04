@@ -86,8 +86,8 @@ core::Relationship GetTCP::Success("success", "All files are routed to success")
 core::Relationship GetTCP::Partial("partial", "Indicates an incomplete message as a result of encountering the end of message byte trigger");
 
 int16_t DataHandler::handle(std::string source, uint8_t *message, size_t size, bool partial) {
-  std::shared_ptr<core::ProcessSession> my_session = sessionFactory_->createSession();
-  std::shared_ptr<core::FlowFile> flowFile = my_session->create();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> my_session = sessionFactory_->createSession();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flowFile = my_session->create();
 
   DataHandlerCallback callback(message, size);
 
@@ -123,7 +123,7 @@ void GetTCP::initialize() {
   setSupportedRelationships(relationships);
 }
 
-void GetTCP::onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
+void GetTCP::onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
   std::string value;
   stay_connected_ = true;
   if (context->getProperty(EndpointList.getName(), value)) {
@@ -219,9 +219,9 @@ void GetTCP::onSchedule(const std::shared_ptr<core::ProcessContext> &context, co
     };
 
   if (context->getProperty(SSLContextService.getName(), value)) {
-    std::shared_ptr<core::controller::ControllerService> service = context->getControllerService(value);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerService> service = context->getControllerService(value);
     if (nullptr != service) {
-      ssl_service_ = std::static_pointer_cast<minifi::controllers::SSLContextService>(service);
+      ssl_service_ = static_pointer_cast<minifi::controllers::SSLContextService>(service);
     }
   }
 
@@ -240,7 +240,7 @@ void GetTCP::notifyStop() {
     socket_ring_buffer_.try_dequeue(socket_ptr);
   }
 }
-void GetTCP::onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
+void GetTCP::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   // Perform directory list
   metrics_->iterations_++;
   std::lock_guard<std::mutex> lock(mutex_);
@@ -309,7 +309,7 @@ void GetTCP::onTrigger(const std::shared_ptr<core::ProcessContext> &context, con
   context->yield();
 }
 
-int16_t GetTCP::getMetricNodes(std::vector<std::shared_ptr<state::response::ResponseNode>> &metric_vector) {
+int16_t GetTCP::getMetricNodes(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode>> &metric_vector) {
   metric_vector.push_back(metrics_);
   return 0;
 }

@@ -66,13 +66,13 @@ void ExecuteSQL::onSchedule(core::ProcessContext *context,
   context->getProperty(SQLStatement.getName(), sql_);
 }
 
-void ExecuteSQL::onTrigger(const std::shared_ptr<core::ProcessContext> &context,
-                           const std::shared_ptr<core::ProcessSession> &session) {
-  std::shared_ptr<FlowFileRecord> flow_file = std::static_pointer_cast<FlowFileRecord>(session->get());
+void ExecuteSQL::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context,
+                           const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> flow_file = static_pointer_cast<FlowFileRecord>(session->get());
 
   try {
     // Use an existing context, if one is available
-    std::shared_ptr<minifi::sqlite::SQLiteConnection> db;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::sqlite::SQLiteConnection> db;
 
     if (conn_q_.try_dequeue(db)) {
       logger_->log_debug("Using available SQLite connection");
@@ -81,7 +81,7 @@ void ExecuteSQL::onTrigger(const std::shared_ptr<core::ProcessContext> &context,
     if (!db) {
       logger_->log_info("Creating new SQLite connection");
       if (db_url_.substr(0, 9) == "sqlite://") {
-        db = std::make_shared<minifi::sqlite::SQLiteConnection>(db_url_.substr(9));
+        db = utils::debug_make_shared<minifi::sqlite::SQLiteConnection>(db_url_.substr(9));
       } else {
         std::stringstream err_msg;
         err_msg << "Connection URL '" << db_url_ << "' is unsupported";
@@ -90,7 +90,7 @@ void ExecuteSQL::onTrigger(const std::shared_ptr<core::ProcessContext> &context,
       }
     }
 
-    auto dynamic_sql = std::make_shared<std::string>();
+    auto dynamic_sql = utils::debug_make_shared<std::string>();
 
     if (flow_file) {
       if (sql_.empty()) {
@@ -172,7 +172,7 @@ void ExecuteSQL::onTrigger(const std::shared_ptr<core::ProcessContext> &context,
   }
 }
 
-int64_t ExecuteSQL::SQLReadCallback::process(std::shared_ptr<io::BaseStream> stream) {
+int64_t ExecuteSQL::SQLReadCallback::process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
   sql_->resize(stream->getSize());
   auto num_read = static_cast<uint64_t >(stream->readData(reinterpret_cast<uint8_t *>(&(*sql_)[0]),
                                                           static_cast<int>(stream->getSize())));

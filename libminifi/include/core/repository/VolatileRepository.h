@@ -51,7 +51,7 @@ namespace repository {
  * Design: Extends Repository and implements the run function, using RocksDB as the primary substrate.
  */
 template<typename T>
-class VolatileRepository : public core::Repository, public std::enable_shared_from_this<VolatileRepository<T>> {
+class VolatileRepository : public core::Repository, public org::apache::nifi::minifi::utils::enable_debug_shared_from_this<VolatileRepository<T>> {
  public:
   static const char *volatile_repo_max_count;
   static const char *volatile_repo_max_bytes;
@@ -77,7 +77,7 @@ class VolatileRepository : public core::Repository, public std::enable_shared_fr
    * Initialize thevolatile repsitory
    **/
 
-  virtual bool initialize(const std::shared_ptr<Configure> &configure);
+  virtual bool initialize(const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure);
 
   virtual void run() = 0;
 
@@ -115,7 +115,7 @@ class VolatileRepository : public core::Repository, public std::enable_shared_fr
    * @param store vector in which we will store newly created objects.
    * @param max_size size of objects deserialized
    */
-  virtual bool DeSerialize(std::vector<std::shared_ptr<core::SerializableComponent>> &store, size_t &max_size, std::function<std::shared_ptr<core::SerializableComponent>()> lambda);
+  virtual bool DeSerialize(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent>> &store, size_t &max_size, std::function<org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent>()> lambda);
 
   /**
    * Deserializes objects into a store that contains a fixed number of objects in which
@@ -123,18 +123,18 @@ class VolatileRepository : public core::Repository, public std::enable_shared_fr
    * @param store precreated object vector
    * @param max_size size of objects deserialized
    */
-  virtual bool DeSerialize(std::vector<std::shared_ptr<core::SerializableComponent>> &store, size_t &max_size);
+  virtual bool DeSerialize(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent>> &store, size_t &max_size);
 
   /**
    * Set the connection map
    * @param connectionMap map of all connections through this repo.
    */
-  void setConnectionMap(std::map<std::string, std::shared_ptr<minifi::Connection>> &connectionMap);
+  void setConnectionMap(std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection>> &connectionMap);
 
   /**
    * Function to load this component.
    */
-  virtual void loadComponent(const std::shared_ptr<core::ContentRepository> &content_repo);
+  virtual void loadComponent(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> &content_repo);
 
   virtual void start();
 
@@ -160,7 +160,7 @@ class VolatileRepository : public core::Repository, public std::enable_shared_fr
       return false;
   }
 
-  std::map<std::string, std::shared_ptr<minifi::Connection>> connectionMap;
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection>> connectionMap;
   // current size of the volatile repo.
   std::atomic<size_t> current_size_;
   // current index.
@@ -190,7 +190,7 @@ template<typename T>
 const char *VolatileRepository<T>::volatile_repo_max_bytes = "max.bytes";
 
 template<typename T>
-void VolatileRepository<T>::loadComponent(const std::shared_ptr<core::ContentRepository> &content_repo) {
+void VolatileRepository<T>::loadComponent(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> &content_repo) {
 }
 
 // Destructor
@@ -205,7 +205,7 @@ VolatileRepository<T>::~VolatileRepository() {
  * Initialize the volatile repsitory
  **/
 template<typename T>
-bool VolatileRepository<T>::initialize(const std::shared_ptr<Configure> &configure) {
+bool VolatileRepository<T>::initialize(const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure) {
   std::string value = "";
 
   if (configure != nullptr) {
@@ -340,7 +340,7 @@ bool VolatileRepository<T>::Get(const T &key, std::string &value) {
 }
 
 template<typename T>
-bool VolatileRepository<T>::DeSerialize(std::vector<std::shared_ptr<core::SerializableComponent>> &store, size_t &max_size, std::function<std::shared_ptr<core::SerializableComponent>()> lambda) {
+bool VolatileRepository<T>::DeSerialize(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent>> &store, size_t &max_size, std::function<org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent>()> lambda) {
   size_t requested_batch = max_size;
   max_size = 0;
   for (auto ent : value_vector_) {
@@ -348,7 +348,7 @@ bool VolatileRepository<T>::DeSerialize(std::vector<std::shared_ptr<core::Serial
     RepoValue<T> repo_value;
 
     if (ent->getValue(repo_value)) {
-      std::shared_ptr<core::SerializableComponent> newComponent = lambda();
+      org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent> newComponent = lambda();
       // we've taken ownership of this repo value
       newComponent->DeSerialize(repo_value.getBuffer(), repo_value.getBufferSize());
 
@@ -369,7 +369,7 @@ bool VolatileRepository<T>::DeSerialize(std::vector<std::shared_ptr<core::Serial
 }
 
 template<typename T>
-bool VolatileRepository<T>::DeSerialize(std::vector<std::shared_ptr<core::SerializableComponent>> &store, size_t &max_size) {
+bool VolatileRepository<T>::DeSerialize(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::SerializableComponent>> &store, size_t &max_size) {
   logger_->log_debug("VolatileRepository -- DeSerialize %u", current_size_.load());
   max_size = 0;
   for (auto ent : value_vector_) {
@@ -393,7 +393,7 @@ bool VolatileRepository<T>::DeSerialize(std::vector<std::shared_ptr<core::Serial
 }
 
 template<typename T>
-void VolatileRepository<T>::setConnectionMap(std::map<std::string, std::shared_ptr<minifi::Connection>> &connectionMap) {
+void VolatileRepository<T>::setConnectionMap(std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection>> &connectionMap) {
   this->connectionMap = connectionMap;
 }
 
@@ -404,7 +404,7 @@ void VolatileRepository<T>::start() {
   if (running_)
     return;
   running_ = true;
-  thread_ = std::thread(&VolatileRepository<T>::run, std::enable_shared_from_this<VolatileRepository<T>>::shared_from_this());
+  thread_ = std::thread(&VolatileRepository<T>::run, org::apache::nifi::minifi::utils::enable_debug_shared_from_this<VolatileRepository<T>>::shared_from_this());
   logger_->log_debug("%s Repository Monitor Thread Start", name_);
 }
 #if defined(__clang__)

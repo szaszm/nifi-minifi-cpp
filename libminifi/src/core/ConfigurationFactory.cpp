@@ -34,9 +34,9 @@ namespace nifi {
 namespace minifi {
 namespace core {
 
-std::unique_ptr<core::FlowConfiguration> createFlowConfiguration(std::shared_ptr<core::Repository> repo, std::shared_ptr<core::Repository> flow_file_repo,
-                                                                 std::shared_ptr<core::ContentRepository> content_repo, std::shared_ptr<Configure> configure,
-                                                                 std::shared_ptr<io::StreamFactory> stream_factory, const std::string configuration_class_name, const std::string path,
+std::unique_ptr<core::FlowConfiguration> createFlowConfiguration(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> repo, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_file_repo,
+                                                                 org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo, org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configure,
+                                                                 org::apache::nifi::minifi::utils::debug_shared_ptr<io::StreamFactory> stream_factory, const std::string configuration_class_name, const std::string path,
                                                                  bool fail_safe) {
   std::string class_name_lc = configuration_class_name;
   std::transform(class_name_lc.begin(), class_name_lc.end(), class_name_lc.begin(), ::tolower);

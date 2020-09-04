@@ -75,7 +75,7 @@ class PublishMQTT : public processors::AbstractMQTTProcessor {
       read_size_ = 0;
     }
     ~ReadCallback() = default;
-    int64_t process(std::shared_ptr<io::BaseStream> stream) {
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
       if (flow_size_ < max_seg_size_)
         max_seg_size_ = flow_size_;
       std::vector<unsigned char> buffer;
@@ -124,9 +124,9 @@ class PublishMQTT : public processors::AbstractMQTTProcessor {
    * @param sessionFactory process session factory that is used when creating
    * ProcessSession objects.
    */
-  void onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &factory) override;
+  void onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &factory) override;
   // OnTrigger method, implemented by NiFi PublishMQTT
-  void onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) override;
+  void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) override;
   // Initialize, over write by NiFi PublishMQTT
   void initialize(void) override;
 

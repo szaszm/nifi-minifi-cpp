@@ -30,7 +30,7 @@ namespace nifi {
 namespace minifi {
 namespace python {
 
-PyBaseStream::PyBaseStream(std::shared_ptr<io::BaseStream> stream)
+PyBaseStream::PyBaseStream(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream)
     : stream_(std::move(stream)) {
 }
 

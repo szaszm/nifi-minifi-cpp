@@ -49,8 +49,8 @@ void TFExtractTopLabels::initialize() {
 void TFExtractTopLabels::onSchedule(core::ProcessContext *context, core::ProcessSessionFactory *sessionFactory) {
 }
 
-void TFExtractTopLabels::onTrigger(const std::shared_ptr<core::ProcessContext> &context,
-                                   const std::shared_ptr<core::ProcessSession> &session) {
+void TFExtractTopLabels::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context,
+                                   const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   auto flow_file = session->get();
 
   if (!flow_file) {
@@ -62,14 +62,14 @@ void TFExtractTopLabels::onTrigger(const std::shared_ptr<core::ProcessContext> &
     // Read labels
     std::string tf_type;
     flow_file->getAttribute("tf.type", tf_type);
-    std::shared_ptr<std::vector<std::string>> labels;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<std::vector<std::string>> labels;
 
     {
       std::lock_guard<std::mutex> guard(labels_mtx_);
 
       if (tf_type == "labels") {
         logger_->log_info("Reading new labels...");
-        auto new_labels = std::make_shared<std::vector<std::string>>();
+        auto new_labels = utils::debug_make_shared<std::vector<std::string>>();
         LabelsReadCallback cb(new_labels);
         session->read(flow_file, &cb);
         labels_ = new_labels;
@@ -82,7 +82,7 @@ void TFExtractTopLabels::onTrigger(const std::shared_ptr<core::ProcessContext> &
     }
 
     // Read input tensor from flow file
-    auto input_tensor_proto = std::make_shared<tensorflow::TensorProto>();
+    auto input_tensor_proto = utils::debug_make_shared<tensorflow::TensorProto>();
     TensorReadCallback tensor_cb(input_tensor_proto);
     session->read(flow_file, &tensor_cb);
 
@@ -123,7 +123,7 @@ void TFExtractTopLabels::onTrigger(const std::shared_ptr<core::ProcessContext> &
   }
 }
 
-int64_t TFExtractTopLabels::LabelsReadCallback::process(std::shared_ptr<io::BaseStream> stream) {
+int64_t TFExtractTopLabels::LabelsReadCallback::process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
   int64_t total_read = 0;
   std::string label;
   uint64_t max_label_len = 65536;
@@ -152,7 +152,7 @@ int64_t TFExtractTopLabels::LabelsReadCallback::process(std::shared_ptr<io::Base
   return total_read;
 }
 
-int64_t TFExtractTopLabels::TensorReadCallback::process(std::shared_ptr<io::BaseStream> stream) {
+int64_t TFExtractTopLabels::TensorReadCallback::process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
   std::string tensor_proto_buf;
   tensor_proto_buf.resize(stream->getSize());
   auto num_read = stream->readData(reinterpret_cast<uint8_t *>(&tensor_proto_buf[0]),

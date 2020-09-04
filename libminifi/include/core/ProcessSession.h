@@ -51,12 +51,12 @@ class ProcessSession : public ReferenceContainer {
   /*!
    * Create a new process session
    */
-  ProcessSession(std::shared_ptr<ProcessContext> processContext = nullptr) // NOLINT
+  ProcessSession(org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessContext> processContext = nullptr) // NOLINT
       : process_context_(std::move(processContext)),
         logger_(logging::LoggerFactory<ProcessSession>::getLogger()) {
     logger_->log_trace("ProcessSession created for %s", process_context_->getProcessorNode()->getName());
     auto repo = process_context_->getProvenanceRepository();
-    provenance_report_ = std::make_shared<provenance::ProvenanceReporter>(repo, process_context_->getProcessorNode()->getName(), process_context_->getProcessorNode()->getName());
+    provenance_report_ = org::apache::nifi::minifi::utils::debug_make_shared<provenance::ProvenanceReporter>(repo, process_context_->getProcessorNode()->getName(), process_context_->getProcessorNode()->getName());
   }
 
   // Destructor
@@ -67,39 +67,39 @@ class ProcessSession : public ReferenceContainer {
   // Roll Back the session
   void rollback();
   // Get Provenance Report
-  std::shared_ptr<provenance::ProvenanceReporter> getProvenanceReporter() {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<provenance::ProvenanceReporter> getProvenanceReporter() {
     return provenance_report_;
   }
   // Get the FlowFile from the highest priority queue
-  virtual std::shared_ptr<core::FlowFile> get();
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> get();
   // Create a new UUID FlowFile with no content resource claim and without parent
-  std::shared_ptr<core::FlowFile> create();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> create();
   // Create a new UUID FlowFile with no content resource claim and inherit all attributes from parent
-  // std::shared_ptr<core::FlowFile> create(std::shared_ptr<core::FlowFile> &&parent);
+  // org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> create(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &&parent);
   // Create a new UUID FlowFile with no content resource claim and inherit all attributes from parent
-  std::shared_ptr<core::FlowFile> create(const std::shared_ptr<core::FlowFile> &parent);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> create(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &parent);
   // Add a FlowFile to the session
-  virtual void add(const std::shared_ptr<core::FlowFile> &flow);
+  virtual void add(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow);
   // Clone a new UUID FlowFile from parent both for content resource claim and attributes
-  std::shared_ptr<core::FlowFile> clone(const std::shared_ptr<core::FlowFile> &parent);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> clone(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &parent);
   // Clone a new UUID FlowFile from parent for attributes and sub set of parent content resource claim
-  std::shared_ptr<core::FlowFile> clone(const std::shared_ptr<core::FlowFile> &parent, int64_t offset, int64_t size);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> clone(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &parent, int64_t offset, int64_t size);
   // Transfer the FlowFile to the relationship
-  virtual void transfer(const std::shared_ptr<core::FlowFile> &flow, Relationship relationship);
+  virtual void transfer(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow, Relationship relationship);
   // Put Attribute
-  void putAttribute(const std::shared_ptr<core::FlowFile> &flow, std::string key, std::string value);
+  void putAttribute(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow, std::string key, std::string value);
   // Remove Attribute
-  void removeAttribute(const std::shared_ptr<core::FlowFile> &flow, std::string key);
+  void removeAttribute(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow, std::string key);
   // Remove Flow File
-  void remove(const std::shared_ptr<core::FlowFile> &flow);
+  void remove(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow);
   // Execute the given read callback against the content
-  void read(const std::shared_ptr<core::FlowFile> &flow, InputStreamCallback *callback);
+  void read(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow, InputStreamCallback *callback);
   // Execute the given write callback against the content
-  void write(const std::shared_ptr<core::FlowFile> &flow, OutputStreamCallback *callback);
+  void write(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow, OutputStreamCallback *callback);
   // Execute the given write/append callback against the content
-  void append(const std::shared_ptr<core::FlowFile> &flow, OutputStreamCallback *callback);
+  void append(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow, OutputStreamCallback *callback);
   // Penalize the flow
-  void penalize(const std::shared_ptr<core::FlowFile> &flow);
+  void penalize(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow);
 
   bool outgoingConnectionsFull(const std::string& relationship);
 
@@ -108,11 +108,11 @@ class ProcessSession : public ReferenceContainer {
    * @param stream incoming data stream that contains the data to store into a file
    * @param flow flow file
    */
-  void importFrom(io::DataStream &stream, const std::shared_ptr<core::FlowFile> &flow);
+  void importFrom(io::DataStream &stream, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow);
   // import from the data source.
-  void import(std::string source, const std::shared_ptr<core::FlowFile> &flow, bool keepSource = true, uint64_t offset = 0);
-  DEPRECATED(/*deprecated in*/ 0.7.0, /*will remove in */ 2.0) void import(std::string source, std::vector<std::shared_ptr<FlowFileRecord>> &flows, bool keepSource, uint64_t offset, char inputDelimiter); // NOLINT
-  DEPRECATED(/*deprecated in*/ 0.8.0, /*will remove in */ 2.0) void import(const std::string& source, std::vector<std::shared_ptr<FlowFileRecord>> &flows, uint64_t offset, char inputDelimiter);
+  void import(std::string source, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow, bool keepSource = true, uint64_t offset = 0);
+  DEPRECATED(/*deprecated in*/ 0.7.0, /*will remove in */ 2.0) void import(std::string source, std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord>> &flows, bool keepSource, uint64_t offset, char inputDelimiter); // NOLINT
+  DEPRECATED(/*deprecated in*/ 0.8.0, /*will remove in */ 2.0) void import(const std::string& source, std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord>> &flows, uint64_t offset, char inputDelimiter);
 
   /**
    * Exports the data stream to a file
@@ -120,16 +120,16 @@ class ProcessSession : public ReferenceContainer {
    * @param flow flow file
    * @param bool whether or not to keep the content in the flow file
    */
-  bool exportContent(const std::string &destination, const std::shared_ptr<core::FlowFile> &flow,
+  bool exportContent(const std::string &destination, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow,
   bool keepContent);
 
-  bool exportContent(const std::string &destination, const std::string &tmpFileName, const std::shared_ptr<core::FlowFile> &flow,
+  bool exportContent(const std::string &destination, const std::string &tmpFileName, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow,
   bool keepContent);
 
   // Stash the content to a key
-  void stash(const std::string &key, const std::shared_ptr<core::FlowFile> &flow);
+  void stash(const std::string &key, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow);
   // Restore content previously stashed to a key
-  void restore(const std::string &key, const std::shared_ptr<core::FlowFile> &flow);
+  void restore(const std::string &key, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow);
 
   bool existsFlowFileInRelationship(const Relationship &relationship);
 
@@ -140,32 +140,32 @@ class ProcessSession : public ReferenceContainer {
 
  protected:
   // FlowFiles being modified by current process session
-  std::map<std::string, std::shared_ptr<core::FlowFile>> _updatedFlowFiles;
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> _updatedFlowFiles;
   // Copy of the original FlowFiles being modified by current process session as above
-  std::map<std::string, std::shared_ptr<core::FlowFile>> _flowFileSnapShots;
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> _flowFileSnapShots;
   // FlowFiles being added by current process session
-  std::map<std::string, std::shared_ptr<core::FlowFile>> _addedFlowFiles;
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> _addedFlowFiles;
   // FlowFiles being deleted by current process session
-  std::map<std::string, std::shared_ptr<core::FlowFile>> _deletedFlowFiles;
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> _deletedFlowFiles;
   // FlowFiles being transfered to the relationship
   std::map<std::string, Relationship> _transferRelationship;
   // FlowFiles being cloned for multiple connections per relationship
-  std::map<std::string, std::shared_ptr<core::FlowFile>> _clonedFlowFiles;
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> _clonedFlowFiles;
 
  private:
   void persistFlowFilesBeforeTransfer(
-      std::map<std::shared_ptr<Connectable>, std::vector<std::shared_ptr<core::FlowFile>>>& transactionMap,
-      const std::map<std::string, std::shared_ptr<FlowFile>>& originalFlowFileSnapShots);
+      std::map<org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable>, std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>>>& transactionMap,
+      const std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFile>>& originalFlowFileSnapShots);
   // Clone the flow file during transfer to multiple connections for a relationship
-  std::shared_ptr<core::FlowFile> cloneDuringTransfer(std::shared_ptr<core::FlowFile> &parent);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> cloneDuringTransfer(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &parent);
   // ProcessContext
-  std::shared_ptr<ProcessContext> process_context_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessContext> process_context_;
   // Logger
   std::shared_ptr<logging::Logger> logger_;
   // Provenance Report
-  std::shared_ptr<provenance::ProvenanceReporter> provenance_report_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<provenance::ProvenanceReporter> provenance_report_;
 
-  static std::shared_ptr<utils::IdGenerator> id_generator_;
+  static org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> id_generator_;
 };
 
 }  // namespace core

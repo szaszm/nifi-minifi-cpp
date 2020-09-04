@@ -604,7 +604,7 @@ SourceInitiatedSubscriptionListener::Handler::WriteCallback::WriteCallback(char*
     : text_(text) {
 }
 
-int64_t SourceInitiatedSubscriptionListener::Handler::WriteCallback::process(std::shared_ptr<io::BaseStream> stream) {
+int64_t SourceInitiatedSubscriptionListener::Handler::WriteCallback::process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
   return stream->write(reinterpret_cast<uint8_t*>(text_), strlen(text_));
 }
 
@@ -613,11 +613,11 @@ int SourceInitiatedSubscriptionListener::Handler::enumerateEventCallback(WsXmlNo
     return 1;
   }
 
-  std::shared_ptr<core::ProcessSession> session;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> session;
   std::shared_ptr<logging::Logger> logger;
   std::string machine_id;
   std::string remote_ip;
-  std::tie(session, logger, machine_id, remote_ip) = *static_cast<std::tuple<std::shared_ptr<core::ProcessSession>, std::shared_ptr<logging::Logger>, std::string, std::string>*>(data);
+  std::tie(session, logger, machine_id, remote_ip) = *static_cast<std::tuple<std::shared_ptr<core::ProcessSession>, org::apache::nifi::minifi::utils::debug_shared_ptr<logging::Logger>, std::string, std::string>*>(data);
 
   char* text = ws_xml_get_node_text(node);
   if (text == nullptr) {
@@ -627,7 +627,7 @@ int SourceInitiatedSubscriptionListener::Handler::enumerateEventCallback(WsXmlNo
 
   try {
     logger->log_trace("Found Event");
-    auto flow_file = std::static_pointer_cast<FlowFileRecord>(session->create());
+    auto flow_file = static_pointer_cast<FlowFileRecord>(session->create());
     if (flow_file == nullptr) {
       logger->log_error("Failed to create FlowFile");
       return 1;
@@ -687,7 +687,7 @@ bool SourceInitiatedSubscriptionListener::Handler::handleSubscriptions(struct mg
     const struct mg_request_info* req_info = mg_get_request_info(conn);
     // Enumare Body/Events/Event nodes
     auto session = processor_.session_factory_->createSession();
-    std::tuple<std::shared_ptr<core::ProcessSession>, std::shared_ptr<logging::Logger>, std::string, std::string> callback_args =
+    std::tuple<std::shared_ptr<core::ProcessSession>, org::apache::nifi::minifi::utils::debug_shared_ptr<logging::Logger>, std::string, std::string> callback_args =
         std::forward_as_tuple(session, processor_.logger_, machine_id, remote_ip);
     int ret = ws_xml_enum_children(events_node, &SourceInitiatedSubscriptionListener::Handler::enumerateEventCallback, &callback_args, 0 /*bRecursive*/);
     if (ret != 0) {
@@ -750,7 +750,7 @@ bool SourceInitiatedSubscriptionListener::Handler::handleSubscriptions(struct mg
   return true;
 }
 
-void SourceInitiatedSubscriptionListener::onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
+void SourceInitiatedSubscriptionListener::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   logger_->log_trace("SourceInitiatedSubscriptionListener onTrigger called");
 }
 
@@ -782,7 +782,7 @@ void SourceInitiatedSubscriptionListener::initialize() {
   setSupportedRelationships(relationships);
 }
 
-void SourceInitiatedSubscriptionListener::onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
+void SourceInitiatedSubscriptionListener::onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
   std::string ssl_certificate_file;
   std::string ssl_ca_file;
   bool verify_peer = true;

@@ -34,11 +34,11 @@ TEST_CASE("GenerateFlowFileTest", "[generateflowfiletest]") {
   char format[] = "/tmp/gt.XXXXXX";
   auto dir = testController.createTempDirectory(format);
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
 
-  std::shared_ptr<core::Processor> genfile = plan->addProcessor("GenerateFlowFile", "genfile");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> genfile = plan->addProcessor("GenerateFlowFile", "genfile");
 
-  std::shared_ptr<core::Processor> putfile = plan->addProcessor("PutFile", "putfile", core::Relationship("success", "description"), true);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> putfile = plan->addProcessor("PutFile", "putfile", core::Relationship("success", "description"), true);
 
   plan->setProperty(putfile, org::apache::nifi::minifi::processors::PutFile::Directory.getName(), dir);
 
@@ -84,11 +84,11 @@ TEST_CASE("GenerateFlowFileTestEmpty", "[generateemptyfiletest]") {
   char format[] = "/tmp/gt.XXXXXX";
   auto dir = testController.createTempDirectory(format);
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
 
-  std::shared_ptr<core::Processor> genfile = plan->addProcessor("GenerateFlowFile", "genfile");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> genfile = plan->addProcessor("GenerateFlowFile", "genfile");
 
-  std::shared_ptr<core::Processor> putfile = plan->addProcessor("PutFile", "putfile", core::Relationship("success", "description"), true);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> putfile = plan->addProcessor("PutFile", "putfile", core::Relationship("success", "description"), true);
 
   plan->setProperty(putfile, org::apache::nifi::minifi::processors::PutFile::Directory.getName(), dir);
 

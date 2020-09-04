@@ -283,7 +283,7 @@ int handShake(struct CRawSiteToSiteClient * client) {
         tearDown(this);
         return false;
       }
-      CPeerStatus status(std::make_shared<CPeer>(port_id_, host, port, secure), count, true);
+      CPeerStatus status(org::apache::nifi::minifi::utils::debug_make_shared<CPeer>(port_id_, host, port, secure), count, true);
       peers.push_back(std::move(status));
       logging::LOG_TRACE(logger_) << "Site2Site Peer host " << host << " port " << port << " Secure " << secure;
     }

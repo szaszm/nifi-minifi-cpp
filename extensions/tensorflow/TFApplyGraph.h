@@ -50,58 +50,58 @@ class TFApplyGraph : public core::Processor {
   void onTrigger(core::ProcessContext *context, core::ProcessSession *session) override {
     logger_->log_error("onTrigger invocation with raw pointers is not implemented");
   }
-  void onTrigger(const std::shared_ptr<core::ProcessContext> &context,
-                 const std::shared_ptr<core::ProcessSession> &session) override;
+  void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context,
+                 const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) override;
 
   struct TFContext {
-    std::shared_ptr<tensorflow::Session> tf_session;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<tensorflow::Session> tf_session;
     uint32_t graph_version;
   };
 
   class GraphReadCallback : public InputStreamCallback {
    public:
-    explicit GraphReadCallback(std::shared_ptr<tensorflow::GraphDef> graph_def)
+    explicit GraphReadCallback(org::apache::nifi::minifi::utils::debug_shared_ptr<tensorflow::GraphDef> graph_def)
         : graph_def_(std::move(graph_def)) {
     }
     ~GraphReadCallback() override = default;
-    int64_t process(std::shared_ptr<io::BaseStream> stream) override;
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) override;
 
    private:
-    std::shared_ptr<tensorflow::GraphDef> graph_def_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<tensorflow::GraphDef> graph_def_;
   };
 
   class TensorReadCallback : public InputStreamCallback {
    public:
-    explicit TensorReadCallback(std::shared_ptr<tensorflow::TensorProto> tensor_proto)
+    explicit TensorReadCallback(org::apache::nifi::minifi::utils::debug_shared_ptr<tensorflow::TensorProto> tensor_proto)
         : tensor_proto_(std::move(tensor_proto)) {
     }
     ~TensorReadCallback() override = default;
-    int64_t process(std::shared_ptr<io::BaseStream> stream) override;
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) override;
 
    private:
-    std::shared_ptr<tensorflow::TensorProto> tensor_proto_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<tensorflow::TensorProto> tensor_proto_;
   };
 
   class TensorWriteCallback : public OutputStreamCallback {
    public:
-    explicit TensorWriteCallback(std::shared_ptr<tensorflow::TensorProto> tensor_proto)
+    explicit TensorWriteCallback(org::apache::nifi::minifi::utils::debug_shared_ptr<tensorflow::TensorProto> tensor_proto)
         : tensor_proto_(std::move(tensor_proto)) {
     }
     ~TensorWriteCallback() override = default;
-    int64_t process(std::shared_ptr<io::BaseStream> stream) override;
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) override;
 
    private:
-    std::shared_ptr<tensorflow::TensorProto> tensor_proto_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<tensorflow::TensorProto> tensor_proto_;
   };
 
  private:
   std::shared_ptr<logging::Logger> logger_;
   std::string input_node_;
   std::string output_node_;
-  std::shared_ptr<tensorflow::GraphDef> graph_def_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<tensorflow::GraphDef> graph_def_;
   std::mutex graph_def_mtx_;
   uint32_t graph_version_ = 0;
-  moodycamel::ConcurrentQueue<std::shared_ptr<TFContext>> tf_context_q_;
+  moodycamel::ConcurrentQueue<org::apache::nifi::minifi::utils::debug_shared_ptr<TFContext>> tf_context_q_;
 };
 
 REGISTER_RESOURCE(TFApplyGraph, "Applies a TensorFlow graph to the tensor protobuf supplied as input. The tensor is fed into the node specified by the Input Node property. "

@@ -84,10 +84,10 @@ void ExecuteScript::onSchedule(core::ProcessContext *context, core::ProcessSessi
   }
 }
 
-void ExecuteScript::onTrigger(const std::shared_ptr<core::ProcessContext> &context,
-                              const std::shared_ptr<core::ProcessSession> &session) {
+void ExecuteScript::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context,
+                              const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   try {
-    std::shared_ptr<script::ScriptEngine> engine;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<script::ScriptEngine> engine;
 
     // Use an existing engine, if one is available
     if (script_engine_q_.try_dequeue(engine)) {

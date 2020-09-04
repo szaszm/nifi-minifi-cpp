@@ -75,7 +75,7 @@ void ExecuteJavaControllerService::onEnable() {
   std::string controller_service_name;
 
   auto serv_cs = JVMLoader::getInstance()->getBaseServicer();
-  java_servicer_ = std::static_pointer_cast<controllers::JavaControllerService>(serv_cs);
+  java_servicer_ = static_pointer_cast<controllers::JavaControllerService>(serv_cs);
   if (serv_cs == nullptr)
     throw std::runtime_error("Could not load controller service");
 

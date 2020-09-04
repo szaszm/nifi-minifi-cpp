@@ -71,7 +71,7 @@ TEST_CASE("Test size limit", "[sizeLimitTest]") {
   minifi::provenance::ProvenanceRepository provdb("TestProvRepo", temp_dir,
       MAX_PROVENANCE_ENTRY_LIFE_TIME, TEST_PROVENANCE_STORAGE_SIZE, 1000);
 
-  auto configuration = std::make_shared<org::apache::nifi::minifi::Configure>();
+  auto configuration = org::apache::nifi::minifi::utils::debug_make_shared<org::apache::nifi::minifi::Configure>();
   configuration->set(minifi::Configure::nifi_dbcontent_repository_directory_default, temp_dir);
 
   REQUIRE(provdb.initialize(configuration));
@@ -94,7 +94,7 @@ TEST_CASE("Test time limit", "[timeLimitTest]") {
   minifi::provenance::ProvenanceRepository provdb("TestProvRepo", temp_dir,
                                                   TEST_PROVENANCE_ENTRY_LIFE_TIME, TEST_MAX_PROVENANCE_STORAGE_SIZE, 1000);
 
-  auto configuration = std::make_shared<org::apache::nifi::minifi::Configure>();
+  auto configuration = org::apache::nifi::minifi::utils::debug_make_shared<org::apache::nifi::minifi::Configure>();
   configuration->set(minifi::Configure::nifi_dbcontent_repository_directory_default, temp_dir);
 
   REQUIRE(provdb.initialize(configuration));

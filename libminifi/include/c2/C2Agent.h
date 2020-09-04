@@ -63,8 +63,8 @@ namespace c2 {
 class C2Agent : public state::UpdateController {
  public:
   C2Agent(core::controller::ControllerServiceProvider* controller,
-          const std::shared_ptr<state::StateMonitor> &updateSink,
-          const std::shared_ptr<Configure> &configure);
+          const org::apache::nifi::minifi::utils::debug_shared_ptr<state::StateMonitor> &updateSink,
+          const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure);
   virtual ~C2Agent() noexcept {
     delete protocol_.load();
   }
@@ -104,7 +104,7 @@ class C2Agent : public state::UpdateController {
   /**
    * Configure the C2 agent
    */
-  void configure(const std::shared_ptr<Configure> &configure, bool reconfigure = true);
+  void configure(const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure, bool reconfigure = true);
 
   /**
    * Serializes metrics into a payload.
@@ -168,17 +168,17 @@ class C2Agent : public state::UpdateController {
   C2Payload prepareConfigurationOptions(const C2ContentResponse &resp) const;
 
   std::timed_mutex metrics_mutex_;
-  std::map<std::string, std::shared_ptr<state::response::ResponseNode>> metrics_map_;
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode>> metrics_map_;
 
   /**
    * Device information stored in the metrics format
    */
-  std::map<std::string, std::shared_ptr<state::response::ResponseNode>> root_response_nodes_;
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode>> root_response_nodes_;
 
   /**
    * Device information stored in the metrics format
    */
-  std::map<std::string, std::shared_ptr<state::response::ResponseNode>> device_information_;
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode>> device_information_;
 
   // responses for the the C2 agent.
   utils::ConcurrentQueue<C2Payload> responses;
@@ -202,27 +202,27 @@ class C2Agent : public state::UpdateController {
   std::function<utils::TaskRescheduleInfo()> c2_consumer_;
 
   // reference to the update sink, against which we will execute updates.
-  std::shared_ptr<state::StateMonitor> update_sink_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<state::StateMonitor> update_sink_;
 
   // functions that will be used for the udpate controller.
   std::vector<std::function<utils::TaskRescheduleInfo()>> functions_;
 
-  std::shared_ptr<controllers::UpdatePolicyControllerService> update_service_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<controllers::UpdatePolicyControllerService> update_service_;
 
   // controller service provider reference.
   core::controller::ControllerServiceProvider* controller_;
 
   // shared pointer to the configuration of this agent
-  std::shared_ptr<Configure> configuration_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configuration_;
 
   // shared pointer to the running c2 configuration.
-  std::shared_ptr<Configure> running_c2_configuration;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> running_c2_configuration;
 
   std::mutex heartbeat_mutex;
 
-  std::vector<std::shared_ptr<HeartBeatReporter>> heartbeat_protocols_;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<HeartBeatReporter>> heartbeat_protocols_;
 
-  std::vector<std::shared_ptr<C2Trigger>> triggers_;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<C2Trigger>> triggers_;
 
   std::atomic<C2Protocol*> protocol_;
 

@@ -44,7 +44,7 @@ class NetworkInterface {
  public:
   NetworkInterface() = default;
 
-  NetworkInterface(std::string ifc, std::shared_ptr<NetworkPrioritizer> prioritizer)
+  NetworkInterface(std::string ifc, org::apache::nifi::minifi::utils::debug_shared_ptr<NetworkPrioritizer> prioritizer)
       : ifc_{std::move(ifc)}, prioritizer_{std::move(prioritizer)}
   { }
 
@@ -74,15 +74,15 @@ class NetworkInterface {
   friend struct NetworkPrioritizer;
 
   std::string ifc_;
-  std::shared_ptr<NetworkPrioritizer> prioritizer_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<NetworkPrioritizer> prioritizer_;
 };
 
 class NetworkPrioritizerFactory {
  public:
   NetworkPrioritizerFactory() = default;
 
-  static std::shared_ptr<NetworkPrioritizerFactory> getInstance() {
-    static std::shared_ptr<NetworkPrioritizerFactory> fa = std::make_shared<NetworkPrioritizerFactory>();
+  static org::apache::nifi::minifi::utils::debug_shared_ptr<NetworkPrioritizerFactory> getInstance() {
+    static org::apache::nifi::minifi::utils::debug_shared_ptr<NetworkPrioritizerFactory> fa = org::apache::nifi::minifi::utils::debug_make_shared<NetworkPrioritizerFactory>();
     return fa;
   }
 
@@ -90,19 +90,19 @@ class NetworkPrioritizerFactory {
     np_ = nullptr;
   }
 
-  int setPrioritizer(const std::shared_ptr<NetworkPrioritizer> &prioritizer) {
+  int setPrioritizer(const org::apache::nifi::minifi::utils::debug_shared_ptr<NetworkPrioritizer> &prioritizer) {
     if (np_ != nullptr)
       return -1;
     np_ = prioritizer;
     return 0;
   }
 
-  std::shared_ptr<NetworkPrioritizer> getPrioritizer() {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<NetworkPrioritizer> getPrioritizer() {
     return np_;
   }
 
  private:
-  std::shared_ptr<NetworkPrioritizer> np_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<NetworkPrioritizer> np_;
 };
 
 }  // namespace io

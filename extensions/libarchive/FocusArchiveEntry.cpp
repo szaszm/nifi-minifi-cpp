@@ -41,12 +41,12 @@ namespace nifi {
 namespace minifi {
 namespace processors {
 
-std::shared_ptr<utils::IdGenerator> FocusArchiveEntry::id_generator_ = utils::IdGenerator::getIdGenerator();
+org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> FocusArchiveEntry::id_generator_ = utils::IdGenerator::getIdGenerator();
 
 core::Property FocusArchiveEntry::Path("Path", "The path within the archive to focus (\"/\" to focus the total archive)", "");
 core::Relationship FocusArchiveEntry::Success("success", "success operational on the flow record");
 
-bool FocusArchiveEntry::set_or_update_attr(std::shared_ptr<core::FlowFile> flowFile, const std::string& key, const std::string& value) const {
+bool FocusArchiveEntry::set_or_update_attr(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flowFile, const std::string& key, const std::string& value) const {
   if (flowFile->updateAttribute(key, value))
     return true;
   else
@@ -66,7 +66,7 @@ void FocusArchiveEntry::initialize() {
 
 void FocusArchiveEntry::onTrigger(core::ProcessContext *context, core::ProcessSession *session) {
   auto flowFile = session->get();
-  std::shared_ptr<FlowFileRecord> flowFileRecord = std::static_pointer_cast<FlowFileRecord>(flowFile);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> flowFileRecord = static_pointer_cast<FlowFileRecord>(flowFile);
 
   if (!flowFile) {
     return;
@@ -153,7 +153,7 @@ void FocusArchiveEntry::onTrigger(core::ProcessContext *context, core::ProcessSe
 }
 
 typedef struct {
-  std::shared_ptr<io::BaseStream> stream;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream;
   core::Processor *processor;
   char buf[8196];
 } FocusArchiveEntryReadData;
@@ -178,7 +178,7 @@ la_ssize_t FocusArchiveEntry::ReadCallback::read_cb(struct archive * a, void *d,
   return read;
 }
 
-int64_t FocusArchiveEntry::ReadCallback::process(std::shared_ptr<io::BaseStream> stream) {
+int64_t FocusArchiveEntry::ReadCallback::process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
   auto inputArchive = archive_read_new();
   struct archive_entry *entry;
   int64_t nlen = 0;

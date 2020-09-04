@@ -45,8 +45,8 @@ class AgentPrinter : public RESTProtocol, public HeartBeatReporter {
   /**
    * Initialize agent printer.
    */
-  virtual void initialize(core::controller::ControllerServiceProvider* controller, const std::shared_ptr<state::StateMonitor> &updateSink,
-                          const std::shared_ptr<Configure> &configure) override;
+  virtual void initialize(core::controller::ControllerServiceProvider* controller, const org::apache::nifi::minifi::utils::debug_shared_ptr<state::StateMonitor> &updateSink,
+                          const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure) override;
 
   /**
    * Accepts the heartbeat, only extracting AgentInformation.

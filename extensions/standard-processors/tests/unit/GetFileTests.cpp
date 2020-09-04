@@ -40,7 +40,7 @@ TEST_CASE("GetFile: MaxSize", "[getFileFifo]") {  // NOLINT
   LogTestController::getInstance().setTrace<processors::LogAttribute>();
 
   auto plan = testController.createPlan();
-  auto repo = std::make_shared<TestRepository>();
+  auto repo = utils::debug_make_shared<TestRepository>();
 
   // Define directory for input
   char in_dir[] = "/tmp/gt.XXXXXX";

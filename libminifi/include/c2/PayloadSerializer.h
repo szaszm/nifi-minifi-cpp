@@ -38,7 +38,7 @@ class PayloadSerializer {
   /**
    * Static function that serializes the value nodes
    */
-  static void serializeValueNode(state::response::ValueNode &value, std::shared_ptr<io::BaseStream> stream) {
+  static void serializeValueNode(state::response::ValueNode &value, org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
     auto base_type = value.getValue();
     if (!base_type) {
       uint8_t type = 0;
@@ -46,17 +46,17 @@ class PayloadSerializer {
       return;
     }
     uint8_t type = 0x00;
-    if (auto sub_type = std::dynamic_pointer_cast<state::response::IntValue>(base_type)) {
+    if (auto sub_type = dynamic_pointer_cast<state::response::IntValue>(base_type)) {
       type = 1;
       stream->write(&type, 1);
       uint32_t value = sub_type->getValue();
       stream->write(value);
-    } else if (auto sub_type = std::dynamic_pointer_cast<state::response::Int64Value>(base_type)) {
+    } else if (auto sub_type = dynamic_pointer_cast<state::response::Int64Value>(base_type)) {
       type = 2;
       stream->write(&type, 1);
       uint64_t value = sub_type->getValue();
       stream->write(value);
-    } else if (auto sub_type = std::dynamic_pointer_cast<state::response::BoolValue>(base_type)) {
+    } else if (auto sub_type = dynamic_pointer_cast<state::response::BoolValue>(base_type)) {
       type = 3;
       stream->write(&type, 1);
       if (sub_type->getValue()) {
@@ -72,7 +72,7 @@ class PayloadSerializer {
       stream->writeUTF(str);
     }
   }
-  static void serialize(uint16_t op, const C2Payload &payload, std::shared_ptr<io::BaseStream> stream) {
+  static void serialize(uint16_t op, const C2Payload &payload, org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
     uint8_t st;
     uint32_t size = payload.getNestedPayloads().size();
     stream->write(size);
@@ -134,8 +134,8 @@ class PayloadSerializer {
     }
     return op;
   }
-  static std::shared_ptr<io::BaseStream> serialize(uint16_t version, const C2Payload &payload) {
-    std::shared_ptr<io::BaseStream> stream = std::make_shared<io::BaseStream>();
+  static org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> serialize(uint16_t version, const C2Payload &payload) {
+    org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream = org::apache::nifi::minifi::utils::debug_make_shared<io::BaseStream>();
     uint16_t op = 0;
     uint8_t st = 0;
     op = opToInt(payload.getOperation());

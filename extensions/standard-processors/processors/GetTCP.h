@@ -92,7 +92,7 @@ class DataHandlerCallback : public OutputStreamCallback {
 
   virtual ~DataHandlerCallback() = default;
 
-  virtual int64_t process(std::shared_ptr<io::BaseStream> stream) {
+  virtual int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
     return stream->write(message_, size_);
   }
 
@@ -103,7 +103,7 @@ class DataHandlerCallback : public OutputStreamCallback {
 
 class DataHandler {
  public:
-  DataHandler(std::shared_ptr<core::ProcessSessionFactory> sessionFactory) // NOLINT
+  DataHandler(org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> sessionFactory) // NOLINT
       : sessionFactory_(sessionFactory) {
   }
   static const char *SOURCE_ENDPOINT_ATTRIBUTE;
@@ -111,7 +111,7 @@ class DataHandler {
   int16_t handle(std::string source, uint8_t *message, size_t size, bool partial);
 
  private:
-  std::shared_ptr<core::ProcessSessionFactory> sessionFactory_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> sessionFactory_;
 };
 
 class GetTCPMetrics : public state::response::ResponseNode {
@@ -184,7 +184,7 @@ class GetTCP : public core::Processor, public state::response::MetricsNodeSource
         connection_attempt_limit_(3),
         ssl_service_(nullptr),
         logger_(logging::LoggerFactory<GetTCP>::getLogger()) {
-    metrics_ = std::make_shared<GetTCPMetrics>();
+    metrics_ = utils::debug_make_shared<GetTCPMetrics>();
   }
 // Destructor
   virtual ~GetTCP() = default;
@@ -212,7 +212,7 @@ class GetTCP : public core::Processor, public state::response::MetricsNodeSource
    * @param sessionFactory process session factory that is used when creating
    * ProcessSession objects.
    */
-  virtual void onSchedule(const std::shared_ptr<core::ProcessContext> &processContext, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory);
+  virtual void onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &processContext, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory);
 
   void onSchedule(core::ProcessContext *processContext, core::ProcessSessionFactory *sessionFactory) {
     throw std::exception();
@@ -222,7 +222,7 @@ class GetTCP : public core::Processor, public state::response::MetricsNodeSource
    * @param context processor context
    * @param session processor session reference.
    */
-  virtual void onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session);
+  virtual void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session);
 
   virtual void onTrigger(core::ProcessContext *context, core::ProcessSession *session) {
     throw std::exception();
@@ -231,7 +231,7 @@ class GetTCP : public core::Processor, public state::response::MetricsNodeSource
   // Initialize, over write by NiFi GetTCP
   virtual void initialize(void);
 
-  int16_t getMetricNodes(std::vector<std::shared_ptr<state::response::ResponseNode>> &metric_vector);
+  int16_t getMetricNodes(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::ResponseNode>> &metric_vector);
 
  protected:
   virtual void notifyStop();
@@ -263,13 +263,13 @@ class GetTCP : public core::Processor, public state::response::MetricsNodeSource
 
   uint16_t connection_attempt_limit_;
 
-  std::shared_ptr<GetTCPMetrics> metrics_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<GetTCPMetrics> metrics_;
 
   // Mutex for ensuring clients are running
 
   std::mutex mutex_;
 
-  std::shared_ptr<minifi::controllers::SSLContextService> ssl_service_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::controllers::SSLContextService> ssl_service_;
 
   // last listing time for root directory ( if recursive, we will consider the root
   // as the top level time.

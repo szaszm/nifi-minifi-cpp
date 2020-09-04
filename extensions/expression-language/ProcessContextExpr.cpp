@@ -23,7 +23,7 @@ namespace nifi {
 namespace minifi {
 namespace core {
 
-bool ProcessContextExpr::getProperty(const Property &property, std::string &value, const std::shared_ptr<FlowFile> &flow_file) {
+bool ProcessContextExpr::getProperty(const Property &property, std::string &value, const org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFile> &flow_file) {
   if (!property.supportsExpressionLangauge()) {
     return ProcessContext::getProperty(property.getName(), value);
   }
@@ -40,7 +40,7 @@ bool ProcessContextExpr::getProperty(const Property &property, std::string &valu
   return true;
 }
 
-bool ProcessContextExpr::getDynamicProperty(const Property &property, std::string &value, const std::shared_ptr<FlowFile> &flow_file) {
+bool ProcessContextExpr::getDynamicProperty(const Property &property, std::string &value, const org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFile> &flow_file) {
 
   if (!property.supportsExpressionLangauge()) {
     return ProcessContext::getDynamicProperty(property.getName(), value);

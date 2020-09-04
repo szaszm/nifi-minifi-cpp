@@ -96,7 +96,7 @@ class ListenHTTPTestsFixture {
   }
 
   void create_ssl_context_service(const char* ca, const char* client_cert) {
-    auto config = std::make_shared<minifi::Configure>();
+    auto config = utils::debug_make_shared<minifi::Configure>();
     if (ca != nullptr) {
       config->set(minifi::Configure::nifi_security_client_ca_certificate, utils::file::FileUtils::get_executable_dir() + "/resources/" + ca);
     }
@@ -105,7 +105,7 @@ class ListenHTTPTestsFixture {
       config->set(minifi::Configure::nifi_security_client_private_key, utils::file::FileUtils::get_executable_dir() + "/resources/" + client_cert);
       config->set(minifi::Configure::nifi_security_client_pass_phrase, "Password12");
     }
-    ssl_context_service = std::make_shared<minifi::controllers::SSLContextService>("SSLContextService", config);
+    ssl_context_service = utils::debug_make_shared<minifi::controllers::SSLContextService>("SSLContextService", config);
     ssl_context_service->onEnable();
   }
 
@@ -170,13 +170,13 @@ class ListenHTTPTestsFixture {
  protected:
   std::string tmp_dir;
   TestController testController;
-  std::shared_ptr<TestPlan> plan;
-  std::shared_ptr<core::Processor> get_file;
-  std::shared_ptr<core::Processor> update_attribute;
-  std::shared_ptr<core::Processor> listen_http;
-  std::shared_ptr<core::Processor> log_attribute;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> get_file;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> update_attribute;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> listen_http;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> log_attribute;
 
-  std::shared_ptr<minifi::controllers::SSLContextService> ssl_context_service;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::controllers::SSLContextService> ssl_context_service;
   std::string method = "GET";
   std::map<std::string, std::string> headers;
   std::string payload;
@@ -187,8 +187,8 @@ class ListenHTTPTestsFixture {
 
 TEST_CASE("ListenHTTP creation", "[basic]") {
   TestController testController;
-  std::shared_ptr<core::Processor>
-      processor = std::make_shared<org::apache::nifi::minifi::processors::ListenHTTP>("processorname");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor>
+      processor = utils::debug_make_shared<org::apache::nifi::minifi::processors::ListenHTTP>("processorname");
   REQUIRE(processor->getName() == "processorname");
 }
 

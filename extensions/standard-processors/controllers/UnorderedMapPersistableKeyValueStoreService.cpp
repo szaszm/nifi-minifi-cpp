@@ -49,7 +49,7 @@ UnorderedMapPersistableKeyValueStoreService::UnorderedMapPersistableKeyValueStor
     , logger_(logging::LoggerFactory<UnorderedMapPersistableKeyValueStoreService>::getLogger()) {
 }
 
-UnorderedMapPersistableKeyValueStoreService::UnorderedMapPersistableKeyValueStoreService(const std::string& name, const std::shared_ptr<Configure> &configuration)
+UnorderedMapPersistableKeyValueStoreService::UnorderedMapPersistableKeyValueStoreService(const std::string& name, const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configuration)
     : KeyValueStoreService(name)
     , AbstractAutoPersistingKeyValueStoreService(name)
     , UnorderedMapKeyValueStoreService(name)

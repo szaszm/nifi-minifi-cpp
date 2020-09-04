@@ -50,31 +50,31 @@ namespace minifi {
 
 class ProcessorLink {
  public:
-  explicit ProcessorLink(const std::shared_ptr<core::Processor> &processor)
+  explicit ProcessorLink(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> &processor)
       : processor_(processor) {
 
   }
 
-  const std::shared_ptr<core::Processor> &getProcessor() {
+  const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> &getProcessor() {
     return processor_;
   }
 
  protected:
-  std::shared_ptr<core::Processor> processor_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor_;
 };
 
 class Instance {
  public:
 
   explicit Instance(const std::string &url, const std::string &port, const std::string &repo_class_name = "")
-      : no_op_repo_(std::make_shared<minifi::core::Repository>()),
+      : no_op_repo_(org::apache::nifi::minifi::utils::debug_make_shared<minifi::core::Repository>()),
         url_(url),
-        configure_(std::make_shared<Configure>()) {
+        configure_(org::apache::nifi::minifi::utils::debug_make_shared<Configure>()) {
 
     if (repo_class_name == "filesystemrepository") {
-        content_repo_ = std::make_shared<minifi::core::repository::FileSystemRepository>();
+        content_repo_ = org::apache::nifi::minifi::utils::debug_make_shared<minifi::core::repository::FileSystemRepository>();
     } else {
-        content_repo_ = std::make_shared<minifi::core::repository::VolatileContentRepository>();
+        content_repo_ = org::apache::nifi::minifi::utils::debug_make_shared<minifi::core::repository::VolatileContentRepository>();
     }
     char * cwd = get_current_working_directory();
     if (cwd) {
@@ -85,8 +85,8 @@ class Instance {
     stream_factory_ = minifi::io::StreamFactory::getInstance(configure_);
     utils::Identifier uuid;
     uuid = port;
-    rpg_ = std::make_shared<minifi::RemoteProcessorGroupPort>(stream_factory_, url, url, configure_, uuid);
-    proc_node_ = std::make_shared<core::ProcessorNode>(rpg_);
+    rpg_ = org::apache::nifi::minifi::utils::debug_make_shared<minifi::RemoteProcessorGroupPort>(stream_factory_, url, url, configure_, uuid);
+    proc_node_ = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessorNode>(rpg_);
     core::FlowConfiguration::initialize_static_functions();
     content_repo_->initialize(configure_);
   }
@@ -106,7 +106,7 @@ class Instance {
       configure_->set("c2.rest.url", server->url);
       configure_->set("c2.rest.url.ack", server->ack_url);
     }
-    agent_ = std::make_shared<c2::C2CallbackAgent>(nullptr, nullptr, configure_);
+    agent_ = org::apache::nifi::minifi::utils::debug_make_shared<c2::C2CallbackAgent>(nullptr, nullptr, configure_);
     listener_thread_pool_.start();
     registerUpdateListener(agent_, 1000);
     agent_->setStopCallback(c1);
@@ -119,25 +119,25 @@ class Instance {
     rpgInitialized_ = true;
   }
 
-  std::shared_ptr<Configure> getConfiguration() {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> getConfiguration() {
     return configure_;
   }
 
-  std::shared_ptr<minifi::core::Repository> getNoOpRepository() {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::core::Repository> getNoOpRepository() {
     return no_op_repo_;
   }
 
-  std::shared_ptr<minifi::core::ContentRepository> getContentRepository() const {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::core::ContentRepository> getContentRepository() const {
     return content_repo_;
   }
 
-  void transfer(const std::shared_ptr<FlowFileRecord> &ff, const std::shared_ptr<minifi::io::DataStream> &stream = nullptr) {
-    auto processContext = std::make_shared<core::ProcessContext>(proc_node_, nullptr, no_op_repo_, no_op_repo_, configure_, content_repo_);
-    auto sessionFactory = std::make_shared<core::ProcessSessionFactory>(processContext);
+  void transfer(const org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> &ff, const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::io::DataStream> &stream = nullptr) {
+    auto processContext = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessContext>(proc_node_, nullptr, no_op_repo_, no_op_repo_, configure_, content_repo_);
+    auto sessionFactory = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessSessionFactory>(processContext);
 
     rpg_->onSchedule(processContext, sessionFactory);
 
-    auto session = std::make_shared<core::ReflexiveSession>(processContext);
+    auto session = org::apache::nifi::minifi::utils::debug_make_shared<core::ReflexiveSession>(processContext);
 
     session->add(ff);
     if (stream) {
@@ -148,7 +148,7 @@ class Instance {
 
  protected:
 
-  bool registerUpdateListener(const std::shared_ptr<state::UpdateController> &updateController, const int64_t &delay) {
+  bool registerUpdateListener(const org::apache::nifi::minifi::utils::debug_shared_ptr<state::UpdateController> &updateController, const int64_t &delay) {
     auto functions = updateController->getFunctions();
     // run all functions independently
 
@@ -163,20 +163,20 @@ class Instance {
     return true;
   }
 
-  std::shared_ptr<c2::C2CallbackAgent> agent_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<c2::C2CallbackAgent> agent_;
 
   std::atomic<bool> running_{ false };
 
   bool rpgInitialized_{ false };
 
-  std::shared_ptr<minifi::core::Repository> no_op_repo_;
-  std::shared_ptr<minifi::core::ContentRepository> content_repo_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::core::Repository> no_op_repo_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::core::ContentRepository> content_repo_;
 
-  std::shared_ptr<core::ProcessorNode> proc_node_;
-  std::shared_ptr<minifi::RemoteProcessorGroupPort> rpg_;
-  std::shared_ptr<io::StreamFactory> stream_factory_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessorNode> proc_node_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::RemoteProcessorGroupPort> rpg_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<io::StreamFactory> stream_factory_;
   std::string url_;
-  std::shared_ptr<Configure> configure_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configure_;
 
   utils::ThreadPool<utils::TaskRescheduleInfo> listener_thread_pool_;
 };

@@ -49,7 +49,7 @@ class C2Trigger : public core::Connectable{
   /**
    * initializes trigger with minifi configuration.
    */
-  virtual void initialize(const std::shared_ptr<minifi::Configure> &configuration) = 0;
+  virtual void initialize(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> &configuration) = 0;
   /**
    * returns true if triggered, false otherwise. calling this function multiple times
    * may change internal state.

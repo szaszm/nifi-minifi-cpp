@@ -40,10 +40,10 @@ class FlowFile : public core::Connectable, public ReferenceContainer {
   class FlowFileOwnedResourceClaimPtr{
    public:
     FlowFileOwnedResourceClaimPtr() = default;
-    explicit FlowFileOwnedResourceClaimPtr(const std::shared_ptr<ResourceClaim>& claim) : claim_(claim) {
+    explicit FlowFileOwnedResourceClaimPtr(const org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim>& claim) : claim_(claim) {
       if (claim_) claim_->increaseFlowFileRecordOwnedCount();
     }
-    explicit FlowFileOwnedResourceClaimPtr(std::shared_ptr<ResourceClaim>&& claim) : claim_(std::move(claim)) {
+    explicit FlowFileOwnedResourceClaimPtr(org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim>&& claim) : claim_(std::move(claim)) {
       if (claim_) claim_->increaseFlowFileRecordOwnedCount();
     }
     FlowFileOwnedResourceClaimPtr(const FlowFileOwnedResourceClaimPtr& ref) : claim_(ref.claim_) {
@@ -58,7 +58,7 @@ class FlowFile : public core::Connectable, public ReferenceContainer {
     FlowFileOwnedResourceClaimPtr& set(FlowFile& owner, const FlowFileOwnedResourceClaimPtr& ref) {
       return set(owner, ref.claim_);
     }
-    FlowFileOwnedResourceClaimPtr& set(FlowFile& owner, const std::shared_ptr<ResourceClaim>& newClaim) {
+    FlowFileOwnedResourceClaimPtr& set(FlowFile& owner, const org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim>& newClaim) {
       auto oldClaim = claim_;
       claim_ = newClaim;
       // the order of increase/release is important
@@ -69,10 +69,10 @@ class FlowFile : public core::Connectable, public ReferenceContainer {
       if (oldClaim) owner.releaseClaim(oldClaim);
       return *this;
     }
-    const std::shared_ptr<ResourceClaim>& get() const {
+    const org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim>& get() const {
       return claim_;
     }
-    const std::shared_ptr<ResourceClaim>& operator->() const {
+    const org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim>& operator->() const {
       return claim_;
     }
     operator bool() const noexcept {
@@ -91,7 +91,7 @@ class FlowFile : public core::Connectable, public ReferenceContainer {
      * We should indicate an empty or invalid content with special claims like
      * InvalidResourceClaim and EmptyResourceClaim.
      */
-    std::shared_ptr<ResourceClaim> claim_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim> claim_;
   };
 
  public:
@@ -103,11 +103,11 @@ class FlowFile : public core::Connectable, public ReferenceContainer {
    * Returns a pointer to this flow file record's
    * claim
    */
-  std::shared_ptr<ResourceClaim> getResourceClaim();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim> getResourceClaim();
   /**
    * Sets _claim to the inbound claim argument
    */
-  void setResourceClaim(const std::shared_ptr<ResourceClaim>& claim);
+  void setResourceClaim(const org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim>& claim);
 
   /**
    * clear the resource claim
@@ -118,12 +118,12 @@ class FlowFile : public core::Connectable, public ReferenceContainer {
    * Returns a pointer to this flow file record's
    * claim at the given stash key
    */
-  std::shared_ptr<ResourceClaim> getStashClaim(const std::string& key);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim> getStashClaim(const std::string& key);
 
   /**
    * Sets the given stash key to the inbound claim argument
    */
-  void setStashClaim(const std::string& key, const std::shared_ptr<ResourceClaim>& claim);
+  void setStashClaim(const std::string& key, const org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim>& claim);
 
   /**
    * Clear the resource claim at the given stash key
@@ -139,7 +139,7 @@ class FlowFile : public core::Connectable, public ReferenceContainer {
    * Decrease the flow file record owned count for the resource claim and, if 
    * its counter is at zero, remove it from the repo.
    */
-  virtual void releaseClaim(const std::shared_ptr<ResourceClaim> claim) = 0;
+  virtual void releaseClaim(const org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim> claim) = 0;
 
   /**
    * Get lineage identifiers
@@ -317,29 +317,29 @@ class FlowFile : public core::Connectable, public ReferenceContainer {
    * Sets the original connection with a shared pointer.
    * @param connection shared connection.
    */
-  void setConnection(std::shared_ptr<core::Connectable>& connection);
+  void setConnection(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable>& connection);
 
   /**
    * Sets the original connection with a shared pointer.
    * @param connection shared connection.
    */
-  void setConnection(std::shared_ptr<core::Connectable>&& connection);
+  void setConnection(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable>&& connection);
 
   /**
    * Returns the connection referenced by this record.
    * @return shared connection pointer.
    */
-  std::shared_ptr<core::Connectable> getConnection() const;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable> getConnection() const;
   /**
    * Sets the original connection with a shared pointer.
    * @param connection shared connection.
    */
-  void setOriginalConnection(std::shared_ptr<core::Connectable>& connection);
+  void setOriginalConnection(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable>& connection);
   /**
    * Returns the original connection referenced by this record.
    * @return shared original connection pointer.
    */
-  std::shared_ptr<core::Connectable> getOriginalConnection() const;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable> getOriginalConnection() const;
 
   void setStoredToRepository(bool storedInRepository) {
     stored = storedInRepository;
@@ -382,14 +382,14 @@ class FlowFile : public core::Connectable, public ReferenceContainer {
   std::set<std::string> lineage_Identifiers_;
 
   // Connection queue that this flow file will be transfer or current in
-  std::shared_ptr<core::Connectable> connection_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable> connection_;
   // Orginal connection queue that this flow file was dequeued from
-  std::shared_ptr<core::Connectable> original_connection_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable> original_connection_;
 
  private:
   static std::shared_ptr<logging::Logger> logger_;
-  static std::shared_ptr<utils::IdGenerator> id_generator_;
-  static std::shared_ptr<utils::NonRepeatingStringGenerator> numeric_id_generator_;
+  static org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> id_generator_;
+  static org::apache::nifi::minifi::utils::debug_shared_ptr<utils::NonRepeatingStringGenerator> numeric_id_generator_;
 };
 
 }  // namespace core

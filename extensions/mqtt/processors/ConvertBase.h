@@ -68,13 +68,13 @@ class ConvertBase : public core::Processor, public minifi::c2::RESTProtocol {
    * @param sessionFactory process session factory that is used when creating
    * ProcessSession objects.
    */
-  virtual void onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
+  virtual void onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
  protected:
 
   /**
    * MQTT controller service.
    */
-  std::shared_ptr<controllers::MQTTControllerService> mqtt_service_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<controllers::MQTTControllerService> mqtt_service_;
 
   std::string listening_topic;
 

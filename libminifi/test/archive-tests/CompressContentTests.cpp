@@ -56,7 +56,7 @@ class ReadCallback: public org::apache::nifi::minifi::InputStreamCallback {
     if (archive_buffer_)
       delete[] archive_buffer_;
   }
-  int64_t process(std::shared_ptr<org::apache::nifi::minifi::io::BaseStream> stream) {
+  int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<org::apache::nifi::minifi::io::BaseStream> stream) {
     int64_t total_read = 0;
     int64_t ret = 0;
     do {
@@ -117,23 +117,23 @@ class CompressDecompressionTestController : public TestController{
     LogTestController::getInstance().setTrace<org::apache::nifi::minifi::core::Connectable>();
     LogTestController::getInstance().setTrace<org::apache::nifi::minifi::io::FileStream>();
 
-    std::shared_ptr<TestRepository> repo = std::make_shared<TestRepository>();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<TestRepository> repo = org::apache::nifi::minifi::utils::debug_make_shared<TestRepository>();
 
-    processor_ = std::make_shared<org::apache::nifi::minifi::processors::CompressContent>("compresscontent");
+    processor_ = org::apache::nifi::minifi::utils::debug_make_shared<org::apache::nifi::minifi::processors::CompressContent>("compresscontent");
     processor_->initialize();
     utils::Identifier processoruuid;
     REQUIRE(true == processor_->getUUID(processoruuid));
 
-    std::shared_ptr<core::ContentRepository> content_repo = std::make_shared<core::repository::VolatileContentRepository>();
-    content_repo->initialize(std::make_shared<org::apache::nifi::minifi::Configure>());
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo = org::apache::nifi::minifi::utils::debug_make_shared<core::repository::VolatileContentRepository>();
+    content_repo->initialize(org::apache::nifi::minifi::utils::debug_make_shared<org::apache::nifi::minifi::Configure>());
     // connection from compress processor to log attribute
-    output_ = std::make_shared<minifi::Connection>(repo, content_repo, "Output");
+    output_ = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Connection>(repo, content_repo, "Output");
     output_->addRelationship(core::Relationship("success", "compress successful output"));
     output_->setSource(processor_);
     output_->setSourceUUID(processoruuid);
     processor_->addConnection(output_);
     // connection to compress processor
-    input_ = std::make_shared<minifi::Connection>(repo, content_repo, "Input");
+    input_ = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Connection>(repo, content_repo, "Input");
     input_->setDestination(processor_);
     input_->setDestinationUUID(processoruuid);
     processor_->addConnection(input_);
@@ -143,8 +143,8 @@ class CompressDecompressionTestController : public TestController{
     processor_->incrementActiveTasks();
     processor_->setScheduledState(core::ScheduledState::RUNNING);
 
-    std::shared_ptr<core::ProcessorNode> node = std::make_shared<core::ProcessorNode>(processor_);
-    context_ = std::make_shared<core::ProcessContext>(node, nullptr, repo, repo, content_repo);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessorNode> node = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessorNode>(processor_);
+    context_ = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessContext>(node, nullptr, repo, repo, content_repo);
   }
 
  public:
@@ -178,10 +178,10 @@ class CompressDecompressionTestController : public TestController{
 
   virtual ~CompressDecompressionTestController() = 0;
 
-  std::shared_ptr<core::Processor> processor_;
-  std::shared_ptr<core::ProcessContext> context_;
-  std::shared_ptr<minifi::Connection> output_;
-  std::shared_ptr<minifi::Connection> input_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> context_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> output_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> input_;
 };
 
 CompressDecompressionTestController::~CompressDecompressionTestController() = default;
@@ -246,20 +246,20 @@ TEST_CASE("CompressFileGZip", "[compressfiletest1]") {
   context->setProperty(org::apache::nifi::minifi::processors::CompressContent::UpdateFileName, "true");
 
   core::ProcessSession sessionGenFlowFile(context);
-  std::shared_ptr<core::FlowFile> flow = std::static_pointer_cast < core::FlowFile > (sessionGenFlowFile.create());
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow = static_pointer_cast < core::FlowFile > (sessionGenFlowFile.create());
   sessionGenFlowFile.import(testController.rawContentPath(), flow, true, 0);
   input->put(flow);
 
   REQUIRE(processor->getName() == "compresscontent");
-  auto factory = std::make_shared<core::ProcessSessionFactory>(context);
+  auto factory = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessSessionFactory>(context);
   processor->onSchedule(context, factory);
-  auto session = std::make_shared<core::ProcessSession>(context);
+  auto session = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessSession>(context);
   processor->onTrigger(context, session);
   session->commit();
 
   // validate the compress content
-  std::set<std::shared_ptr<core::FlowFile>> expiredFlowRecords;
-  std::shared_ptr<core::FlowFile> flow1 = output->poll(expiredFlowRecords);
+  std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> expiredFlowRecords;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow1 = output->poll(expiredFlowRecords);
   REQUIRE(flow1->getSize() > 0);
   {
     REQUIRE(flow1->getSize() != flow->getSize());
@@ -290,20 +290,20 @@ TEST_CASE("DecompressFileGZip", "[compressfiletest2]") {
   context->setProperty(org::apache::nifi::minifi::processors::CompressContent::UpdateFileName, "true");
 
   core::ProcessSession sessionGenFlowFile(context);
-  std::shared_ptr<core::FlowFile> flow = std::static_pointer_cast < core::FlowFile > (sessionGenFlowFile.create());
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow = static_pointer_cast < core::FlowFile > (sessionGenFlowFile.create());
   sessionGenFlowFile.import(testController.compressedPath(), flow, true, 0);
   input->put(flow);
 
   REQUIRE(processor->getName() == "compresscontent");
-  auto factory = std::make_shared<core::ProcessSessionFactory>(context);
+  auto factory = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessSessionFactory>(context);
   processor->onSchedule(context, factory);
-  auto session = std::make_shared<core::ProcessSession>(context);
+  auto session = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessSession>(context);
   processor->onTrigger(context, session);
   session->commit();
 
   // validate the compress content
-  std::set<std::shared_ptr<core::FlowFile>> expiredFlowRecords;
-  std::shared_ptr<core::FlowFile> flow1 = output->poll(expiredFlowRecords);
+  std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> expiredFlowRecords;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow1 = output->poll(expiredFlowRecords);
   REQUIRE(flow1->getSize() > 0);
   {
     REQUIRE(flow1->getSize() != flow->getSize());
@@ -330,20 +330,20 @@ TEST_CASE("CompressFileBZip", "[compressfiletest3]") {
   context->setProperty(org::apache::nifi::minifi::processors::CompressContent::UpdateFileName, "true");
 
   core::ProcessSession sessionGenFlowFile(context);
-  std::shared_ptr<core::FlowFile> flow = std::static_pointer_cast < core::FlowFile > (sessionGenFlowFile.create());
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow = static_pointer_cast < core::FlowFile > (sessionGenFlowFile.create());
   sessionGenFlowFile.import(testController.rawContentPath(), flow, true, 0);
   input->put(flow);
 
   REQUIRE(processor->getName() == "compresscontent");
-  auto factory = std::make_shared<core::ProcessSessionFactory>(context);
+  auto factory = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessSessionFactory>(context);
   processor->onSchedule(context, factory);
-  auto session = std::make_shared<core::ProcessSession>(context);
+  auto session = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessSession>(context);
   processor->onTrigger(context, session);
   session->commit();
 
   // validate the compress content
-  std::set<std::shared_ptr<core::FlowFile>> expiredFlowRecords;
-  std::shared_ptr<core::FlowFile> flow1 = output->poll(expiredFlowRecords);
+  std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> expiredFlowRecords;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow1 = output->poll(expiredFlowRecords);
   REQUIRE(flow1->getSize() > 0);
   {
     REQUIRE(flow1->getSize() != flow->getSize());
@@ -375,20 +375,20 @@ TEST_CASE("DecompressFileBZip", "[compressfiletest4]") {
   context->setProperty(org::apache::nifi::minifi::processors::CompressContent::UpdateFileName, "true");
 
   core::ProcessSession sessionGenFlowFile(context);
-  std::shared_ptr<core::FlowFile> flow = std::static_pointer_cast < core::FlowFile > (sessionGenFlowFile.create());
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow = static_pointer_cast < core::FlowFile > (sessionGenFlowFile.create());
   sessionGenFlowFile.import(testController.compressedPath(), flow, true, 0);
   input->put(flow);
 
   REQUIRE(processor->getName() == "compresscontent");
-  auto factory = std::make_shared<core::ProcessSessionFactory>(context);
+  auto factory = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessSessionFactory>(context);
   processor->onSchedule(context, factory);
-  auto session = std::make_shared<core::ProcessSession>(context);
+  auto session = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessSession>(context);
   processor->onTrigger(context, session);
   session->commit();
 
   // validate the compress content
-  std::set<std::shared_ptr<core::FlowFile>> expiredFlowRecords;
-  std::shared_ptr<core::FlowFile> flow1 = output->poll(expiredFlowRecords);
+  std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> expiredFlowRecords;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow1 = output->poll(expiredFlowRecords);
   REQUIRE(flow1->getSize() > 0);
   {
     REQUIRE(flow1->getSize() != flow->getSize());
@@ -415,14 +415,14 @@ TEST_CASE("CompressFileLZMA", "[compressfiletest5]") {
   context->setProperty(org::apache::nifi::minifi::processors::CompressContent::UpdateFileName, "true");
 
   core::ProcessSession sessionGenFlowFile(context);
-  std::shared_ptr<core::FlowFile> flow = std::static_pointer_cast < core::FlowFile > (sessionGenFlowFile.create());
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow = static_pointer_cast < core::FlowFile > (sessionGenFlowFile.create());
   sessionGenFlowFile.import(testController.rawContentPath(), flow, true, 0);
   input->put(flow);
 
   REQUIRE(processor->getName() == "compresscontent");
-  auto factory = std::make_shared<core::ProcessSessionFactory>(context);
+  auto factory = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessSessionFactory>(context);
   processor->onSchedule(context, factory);
-  auto session = std::make_shared<core::ProcessSession>(context);
+  auto session = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessSession>(context);
   processor->onTrigger(context, session);
   session->commit();
 
@@ -433,8 +433,8 @@ TEST_CASE("CompressFileLZMA", "[compressfiletest5]") {
   }
 
   // validate the compress content
-  std::set<std::shared_ptr<core::FlowFile>> expiredFlowRecords;
-  std::shared_ptr<core::FlowFile> flow1 = output->poll(expiredFlowRecords);
+  std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> expiredFlowRecords;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow1 = output->poll(expiredFlowRecords);
   REQUIRE(flow1->getSize() > 0);
   {
     REQUIRE(flow1->getSize() != flow->getSize());
@@ -466,15 +466,15 @@ TEST_CASE("DecompressFileLZMA", "[compressfiletest6]") {
   context->setProperty(org::apache::nifi::minifi::processors::CompressContent::UpdateFileName, "true");
 
   core::ProcessSession sessionGenFlowFile(context);
-  std::shared_ptr<core::FlowFile> flow = std::static_pointer_cast < core::FlowFile > (sessionGenFlowFile.create());
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow = static_pointer_cast < core::FlowFile > (sessionGenFlowFile.create());
   sessionGenFlowFile.import(testController.compressedPath(), flow, true, 0);
   flow->setAttribute(FlowAttributeKey(org::apache::nifi::minifi::MIME_TYPE), "application/x-lzma");
   input->put(flow);
 
   REQUIRE(processor->getName() == "compresscontent");
-  auto factory = std::make_shared<core::ProcessSessionFactory>(context);
+  auto factory = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessSessionFactory>(context);
   processor->onSchedule(context, factory);
-  auto session = std::make_shared<core::ProcessSession>(context);
+  auto session = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessSession>(context);
   processor->onTrigger(context, session);
   session->commit();
 
@@ -485,8 +485,8 @@ TEST_CASE("DecompressFileLZMA", "[compressfiletest6]") {
   }
 
   // validate the compress content
-  std::set<std::shared_ptr<core::FlowFile>> expiredFlowRecords;
-  std::shared_ptr<core::FlowFile> flow1 = output->poll(expiredFlowRecords);
+  std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> expiredFlowRecords;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow1 = output->poll(expiredFlowRecords);
   REQUIRE(flow1->getSize() > 0);
   {
     REQUIRE(flow1->getSize() != flow->getSize());
@@ -513,14 +513,14 @@ TEST_CASE("CompressFileXYLZMA", "[compressfiletest7]") {
   context->setProperty(org::apache::nifi::minifi::processors::CompressContent::UpdateFileName, "true");
 
   core::ProcessSession sessionGenFlowFile(context);
-  std::shared_ptr<core::FlowFile> flow = std::static_pointer_cast < core::FlowFile > (sessionGenFlowFile.create());
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow = static_pointer_cast < core::FlowFile > (sessionGenFlowFile.create());
   sessionGenFlowFile.import(testController.rawContentPath(), flow, true, 0);
   input->put(flow);
 
   REQUIRE(processor->getName() == "compresscontent");
-  auto factory = std::make_shared<core::ProcessSessionFactory>(context);
+  auto factory = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessSessionFactory>(context);
   processor->onSchedule(context, factory);
-  auto session = std::make_shared<core::ProcessSession>(context);
+  auto session = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessSession>(context);
   processor->onTrigger(context, session);
   session->commit();
 
@@ -531,8 +531,8 @@ TEST_CASE("CompressFileXYLZMA", "[compressfiletest7]") {
   }
 
   // validate the compress content
-  std::set<std::shared_ptr<core::FlowFile>> expiredFlowRecords;
-  std::shared_ptr<core::FlowFile> flow1 = output->poll(expiredFlowRecords);
+  std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> expiredFlowRecords;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow1 = output->poll(expiredFlowRecords);
   REQUIRE(flow1->getSize() > 0);
   {
     REQUIRE(flow1->getSize() != flow->getSize());
@@ -564,15 +564,15 @@ TEST_CASE("DecompressFileXYLZMA", "[compressfiletest8]") {
   context->setProperty(org::apache::nifi::minifi::processors::CompressContent::UpdateFileName, "true");
 
   core::ProcessSession sessionGenFlowFile(context);
-  std::shared_ptr<core::FlowFile> flow = std::static_pointer_cast < core::FlowFile > (sessionGenFlowFile.create());
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow = static_pointer_cast < core::FlowFile > (sessionGenFlowFile.create());
   sessionGenFlowFile.import(testController.compressedPath(), flow, true, 0);
   flow->setAttribute(FlowAttributeKey(org::apache::nifi::minifi::MIME_TYPE), "application/x-xz");
   input->put(flow);
 
   REQUIRE(processor->getName() == "compresscontent");
-  auto factory = std::make_shared<core::ProcessSessionFactory>(context);
+  auto factory = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessSessionFactory>(context);
   processor->onSchedule(context, factory);
-  auto session = std::make_shared<core::ProcessSession>(context);
+  auto session = org::apache::nifi::minifi::utils::debug_make_shared<core::ProcessSession>(context);
   processor->onTrigger(context, session);
   session->commit();
 
@@ -583,8 +583,8 @@ TEST_CASE("DecompressFileXYLZMA", "[compressfiletest8]") {
   }
 
   // validate the compress content
-  std::set<std::shared_ptr<core::FlowFile>> expiredFlowRecords;
-  std::shared_ptr<core::FlowFile> flow1 = output->poll(expiredFlowRecords);
+  std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> expiredFlowRecords;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow1 = output->poll(expiredFlowRecords);
   REQUIRE(flow1->getSize() > 0);
   {
     REQUIRE(flow1->getSize() != flow->getSize());

@@ -71,22 +71,22 @@ void ExecuteJavaProcessor::initialize() {
   setSupportedRelationships(relationships);
 }
 
-void ExecuteJavaProcessor::onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
+void ExecuteJavaProcessor::onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
   std::string controller_service_name;
   if (getProperty(JVMControllerService.getName(), controller_service_name)) {
     auto cs = context->getControllerService(controller_service_name);
     if (cs == nullptr) {
       auto serv_cs = JVMLoader::getInstance()->getBaseServicer();
-      java_servicer_ = std::static_pointer_cast<controllers::JavaControllerService>(serv_cs);
+      java_servicer_ = static_pointer_cast<controllers::JavaControllerService>(serv_cs);
       if (serv_cs == nullptr)
         throw std::runtime_error("Could not load controller service");
     } else {
-      java_servicer_ = std::static_pointer_cast<controllers::JavaControllerService>(cs);
+      java_servicer_ = static_pointer_cast<controllers::JavaControllerService>(cs);
     }
 
   } else {
     auto serv_cs = JVMLoader::getInstance()->getBaseServicer();
-    java_servicer_ = std::static_pointer_cast<controllers::JavaControllerService>(serv_cs);
+    java_servicer_ = static_pointer_cast<controllers::JavaControllerService>(serv_cs);
     if (serv_cs == nullptr)
       throw std::runtime_error("Could not load controller service");
   }
@@ -176,7 +176,7 @@ JNINativeMethod ExecuteJavaProcessor::registerNativeMethod(const std::string &na
   return mthd;
 }
 
-void ExecuteJavaProcessor::onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
+void ExecuteJavaProcessor::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
 
   assert(context == jpc.context_);
   auto env = java_servicer_->attach();
@@ -227,7 +227,7 @@ void ExecuteJavaProcessor::onTrigger(const std::shared_ptr<core::ProcessContext>
   }
 }
 
-void ExecuteJavaProcessor::onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
+void ExecuteJavaProcessor::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   // do nothing.
 }
 

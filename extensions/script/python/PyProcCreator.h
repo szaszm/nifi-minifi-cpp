@@ -34,21 +34,21 @@ class PythonObjectFactory : public core::DefautObjectFactory<minifi::python::pro
   /**
    * Create a shared pointer to a new processor.
    */
-  virtual std::shared_ptr<core::CoreComponent> create(const std::string &name) override {
-    auto ptr = std::static_pointer_cast<minifi::python::processors::ExecutePythonProcessor>(DefautObjectFactory::create(name));
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<core::CoreComponent> create(const std::string &name) override {
+    auto ptr = static_pointer_cast<minifi::python::processors::ExecutePythonProcessor>(DefautObjectFactory::create(name));
     ptr->initialize();
     ptr->setProperty(minifi::python::processors::ExecutePythonProcessor::ScriptFile, file_);
-    return std::static_pointer_cast<core::CoreComponent>(ptr);
+    return static_pointer_cast<core::CoreComponent>(ptr);
   }
 
   /**
    * Create a shared pointer to a new processor.
    */
-  virtual std::shared_ptr<core::CoreComponent> create(const std::string &name, utils::Identifier & uuid) override {
-    auto ptr = std::static_pointer_cast<minifi::python::processors::ExecutePythonProcessor>(DefautObjectFactory::create(name, uuid));
+  virtual org::apache::nifi::minifi::utils::debug_shared_ptr<core::CoreComponent> create(const std::string &name, utils::Identifier & uuid) override {
+    auto ptr = static_pointer_cast<minifi::python::processors::ExecutePythonProcessor>(DefautObjectFactory::create(name, uuid));
     ptr->initialize();
     ptr->setProperty(minifi::python::processors::ExecutePythonProcessor::ScriptFile, file_);
-    return std::static_pointer_cast<core::CoreComponent>(ptr);
+    return static_pointer_cast<core::CoreComponent>(ptr);
   }
 
   /**

@@ -30,7 +30,7 @@ TEST_CASE("RouteOnAttributeMatchedTest", "[routeOnAttributeMatchedTest]") {
   LogTestController::getInstance().setDebug<TestPlan>();
   LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
 
   const auto &generate_proc = plan->addProcessor("GenerateFlowFile", "generate");
 
@@ -65,7 +65,7 @@ TEST_CASE("RouteOnAttributeUnmatchedTest", "[routeOnAttributeUnmatchedTest]") {
   LogTestController::getInstance().setDebug<TestPlan>();
   LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
 
   const auto &generate_proc = plan->addProcessor("GenerateFlowFile", "generate");
 

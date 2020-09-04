@@ -42,7 +42,7 @@ FlowConfiguration::~FlowConfiguration() {
   }
 }
 
-std::shared_ptr<core::Processor> FlowConfiguration::createProcessor(std::string name, utils::Identifier & uuid) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> FlowConfiguration::createProcessor(std::string name, utils::Identifier & uuid) {
   auto processor = minifi::processors::ProcessorUtils::createProcessor(name, name, uuid, stream_factory_);
   if (nullptr == processor) {
     logger_->log_error("No Processor defined for %s", name);
@@ -51,7 +51,7 @@ std::shared_ptr<core::Processor> FlowConfiguration::createProcessor(std::string 
   return processor;
 }
 
-std::shared_ptr<core::Processor> FlowConfiguration::createProcessor(const std::string &name, const std::string &fullname, utils::Identifier & uuid) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> FlowConfiguration::createProcessor(const std::string &name, const std::string &fullname, utils::Identifier & uuid) {
   auto processor = minifi::processors::ProcessorUtils::createProcessor(name, fullname, uuid, stream_factory_);
   if (nullptr == processor) {
     logger_->log_error("No Processor defined for %s", fullname);
@@ -60,8 +60,8 @@ std::shared_ptr<core::Processor> FlowConfiguration::createProcessor(const std::s
   return processor;
 }
 
-std::shared_ptr<core::Processor> FlowConfiguration::createProvenanceReportTask() {
-  std::shared_ptr<core::Processor> processor = std::make_shared<org::apache::nifi::minifi::core::reporting::SiteToSiteProvenanceReportingTask>(stream_factory_, this->configuration_);
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> FlowConfiguration::createProvenanceReportTask() {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor = org::apache::nifi::minifi::utils::debug_make_shared<org::apache::nifi::minifi::core::reporting::SiteToSiteProvenanceReportingTask>(stream_factory_, this->configuration_);
   // initialize the processor
   processor->initialize();
   return processor;
@@ -70,8 +70,8 @@ std::shared_ptr<core::Processor> FlowConfiguration::createProvenanceReportTask()
 std::unique_ptr<core::ProcessGroup> FlowConfiguration::updateFromPayload(const std::string &source, const std::string &yamlConfigPayload) {
   auto old_services = controller_services_;
   auto old_provider = service_provider_;
-  controller_services_ = std::make_shared<core::controller::ControllerServiceMap>();
-  service_provider_ = std::make_shared<core::controller::StandardControllerServiceProvider>(controller_services_, nullptr, configuration_);
+  controller_services_ = org::apache::nifi::minifi::utils::debug_make_shared<core::controller::ControllerServiceMap>();
+  service_provider_ = org::apache::nifi::minifi::utils::debug_make_shared<core::controller::StandardControllerServiceProvider>(controller_services_, nullptr, configuration_);
   auto payload = getRootFromPayload(yamlConfigPayload);
   if (!source.empty() && payload != nullptr) {
     std::string host, protocol, path, query, url = source;
@@ -112,13 +112,13 @@ std::unique_ptr<core::ProcessGroup> FlowConfiguration::createRemoteProcessGroup(
   return std::unique_ptr<core::ProcessGroup>(new core::ProcessGroup(core::REMOTE_PROCESS_GROUP, name, uuid));
 }
 
-std::shared_ptr<minifi::Connection> FlowConfiguration::createConnection(std::string name, utils::Identifier & uuid) {
-  return std::make_shared<minifi::Connection>(flow_file_repo_, content_repo_, name, uuid);
+org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> FlowConfiguration::createConnection(std::string name, utils::Identifier & uuid) {
+  return org::apache::nifi::minifi::utils::debug_make_shared<minifi::Connection>(flow_file_repo_, content_repo_, name, uuid);
 }
 
-std::shared_ptr<core::controller::ControllerServiceNode> FlowConfiguration::createControllerService(const std::string &class_name, const std::string &full_class_name, const std::string &name,
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> FlowConfiguration::createControllerService(const std::string &class_name, const std::string &full_class_name, const std::string &name,
                                                                                                     utils::Identifier & uuid) {
-  std::shared_ptr<core::controller::ControllerServiceNode> controllerServicesNode = service_provider_->createControllerService(class_name, full_class_name, name, true);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> controllerServicesNode = service_provider_->createControllerService(class_name, full_class_name, name, true);
   if (nullptr != controllerServicesNode)
     controllerServicesNode->setUUID(uuid);
   return controllerServicesNode;

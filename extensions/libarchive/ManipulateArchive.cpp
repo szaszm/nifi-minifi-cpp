@@ -115,7 +115,7 @@ void ManipulateArchive::onSchedule(core::ProcessContext *context, core::ProcessS
 }
 
 void ManipulateArchive::onTrigger(core::ProcessContext *context, core::ProcessSession *session) {
-    std::shared_ptr<core::FlowFile> flowFile = session->get();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flowFile = session->get();
 
     if (!flowFile) {
         return;

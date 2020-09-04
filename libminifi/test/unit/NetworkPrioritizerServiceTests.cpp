@@ -29,8 +29,8 @@
 #include "state/UpdateController.h"
 
 TEST_CASE("TestPrioritizerOneInterface", "[test1]") {
-  auto controller = std::make_shared<minifi::controllers::NetworkPrioritizerService>("TestService");
-  std::shared_ptr<minifi::Configure> configuration = std::make_shared<minifi::Configure>();
+  auto controller = org::apache::nifi::minifi::utils::debug_make_shared<minifi::controllers::NetworkPrioritizerService>("TestService");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> configuration = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>();
   controller->initialize();
   controller->setProperty(minifi::controllers::NetworkPrioritizerService::NetworkControllers, "eth0,eth1");
   controller->setProperty(minifi::controllers::NetworkPrioritizerService::VerifyInterfaces, "false");
@@ -41,8 +41,8 @@ TEST_CASE("TestPrioritizerOneInterface", "[test1]") {
 }
 
 TEST_CASE("TestPrioritizerOneInterfaceMaxPayload", "[test2]") {
-  auto controller = std::make_shared<minifi::controllers::NetworkPrioritizerService>("TestService");
-  std::shared_ptr<minifi::Configure> configuration = std::make_shared<minifi::Configure>();
+  auto controller = org::apache::nifi::minifi::utils::debug_make_shared<minifi::controllers::NetworkPrioritizerService>("TestService");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> configuration = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>();
   controller->initialize();
   controller->setProperty(minifi::controllers::NetworkPrioritizerService::NetworkControllers, "eth0,eth1");
   controller->setProperty(minifi::controllers::NetworkPrioritizerService::VerifyInterfaces, "false");
@@ -54,8 +54,8 @@ TEST_CASE("TestPrioritizerOneInterfaceMaxPayload", "[test2]") {
 }
 
 TEST_CASE("TestPrioritizerOneInterfaceMaxThroughput", "[test3]") {
-  auto controller = std::make_shared<minifi::controllers::NetworkPrioritizerService>("TestService");
-  std::shared_ptr<minifi::Configure> configuration = std::make_shared<minifi::Configure>();
+  auto controller = org::apache::nifi::minifi::utils::debug_make_shared<minifi::controllers::NetworkPrioritizerService>("TestService");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> configuration = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>();
   controller->initialize();
   controller->setProperty(minifi::controllers::NetworkPrioritizerService::NetworkControllers, "eth0,eth1");
   controller->setProperty(minifi::controllers::NetworkPrioritizerService::VerifyInterfaces, "false");
@@ -72,10 +72,10 @@ TEST_CASE("TestPrioritizerOneInterfaceMaxThroughput", "[test3]") {
 TEST_CASE("TestPriorotizerMultipleInterfaces", "[test4]") {
   LogTestController::getInstance().setTrace<minifi::controllers::NetworkPrioritizerService>();
 
-  auto controller = std::make_shared<minifi::controllers::NetworkPrioritizerService>("TestService");
-  auto controller2 = std::make_shared<minifi::controllers::NetworkPrioritizerService>("TestService2");
-  auto controller3 = std::make_shared<minifi::controllers::NetworkPrioritizerService>("TestService3");
-  std::shared_ptr<minifi::Configure> configuration = std::make_shared<minifi::Configure>();
+  auto controller = org::apache::nifi::minifi::utils::debug_make_shared<minifi::controllers::NetworkPrioritizerService>("TestService");
+  auto controller2 = org::apache::nifi::minifi::utils::debug_make_shared<minifi::controllers::NetworkPrioritizerService>("TestService2");
+  auto controller3 = org::apache::nifi::minifi::utils::debug_make_shared<minifi::controllers::NetworkPrioritizerService>("TestService3");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> configuration = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>();
   controller->initialize();
   controller->setProperty(minifi::controllers::NetworkPrioritizerService::VerifyInterfaces, "false");
 
@@ -90,7 +90,7 @@ TEST_CASE("TestPriorotizerMultipleInterfaces", "[test4]") {
   controller2->setProperty(minifi::controllers::NetworkPrioritizerService::VerifyInterfaces, "false");
   controller2->setProperty(minifi::controllers::NetworkPrioritizerService::MaxThroughput, "10 B");
   controller2->onEnable();
-  std::vector<std::shared_ptr<core::controller::ControllerService> > services;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerService> > services;
   services.push_back(controller2);
   services.push_back(controller3);
   controller->setLinkedControllerServices(services);
@@ -103,10 +103,10 @@ TEST_CASE("TestPriorotizerMultipleInterfaces", "[test4]") {
 }
 
 TEST_CASE("TestPriorotizerMultipleInterfacesNeverSwitch", "[test5]") {
-  auto controller = std::make_shared<minifi::controllers::NetworkPrioritizerService>("TestService");
-  auto controller2 = std::make_shared<minifi::controllers::NetworkPrioritizerService>("TestService2");
-  auto controller3 = std::make_shared<minifi::controllers::NetworkPrioritizerService>("TestService3");
-  std::shared_ptr<minifi::Configure> configuration = std::make_shared<minifi::Configure>();
+  auto controller = org::apache::nifi::minifi::utils::debug_make_shared<minifi::controllers::NetworkPrioritizerService>("TestService");
+  auto controller2 = org::apache::nifi::minifi::utils::debug_make_shared<minifi::controllers::NetworkPrioritizerService>("TestService2");
+  auto controller3 = org::apache::nifi::minifi::utils::debug_make_shared<minifi::controllers::NetworkPrioritizerService>("TestService3");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> configuration = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>();
   controller->initialize();
   controller->setProperty(minifi::controllers::NetworkPrioritizerService::VerifyInterfaces, "false");
 
@@ -121,7 +121,7 @@ TEST_CASE("TestPriorotizerMultipleInterfacesNeverSwitch", "[test5]") {
   controller2->setProperty(minifi::controllers::NetworkPrioritizerService::VerifyInterfaces, "false");
   controller2->setProperty(minifi::controllers::NetworkPrioritizerService::MaxThroughput, "10 B");
   controller2->onEnable();
-  std::vector<std::shared_ptr<core::controller::ControllerService> > services;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerService> > services;
   services.push_back(controller3);
   services.push_back(controller2);
   controller->setLinkedControllerServices(services);
@@ -138,10 +138,10 @@ TEST_CASE("TestPriorotizerMultipleInterfacesNeverSwitch", "[test5]") {
 
 
 TEST_CASE("TestPriorotizerMultipleInterfacesMaxPayload", "[test4]") {
-  auto controller = std::make_shared<minifi::controllers::NetworkPrioritizerService>("TestService");
-  auto controller2 = std::make_shared<minifi::controllers::NetworkPrioritizerService>("TestService2");
-  auto controller3 = std::make_shared<minifi::controllers::NetworkPrioritizerService>("TestService3");
-  std::shared_ptr<minifi::Configure> configuration = std::make_shared<minifi::Configure>();
+  auto controller = org::apache::nifi::minifi::utils::debug_make_shared<minifi::controllers::NetworkPrioritizerService>("TestService");
+  auto controller2 = org::apache::nifi::minifi::utils::debug_make_shared<minifi::controllers::NetworkPrioritizerService>("TestService2");
+  auto controller3 = org::apache::nifi::minifi::utils::debug_make_shared<minifi::controllers::NetworkPrioritizerService>("TestService3");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> configuration = org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>();
   controller->initialize();
   controller->setProperty(minifi::controllers::NetworkPrioritizerService::VerifyInterfaces, "false");
 
@@ -158,7 +158,7 @@ TEST_CASE("TestPriorotizerMultipleInterfacesMaxPayload", "[test4]") {
   controller2->setProperty(minifi::controllers::NetworkPrioritizerService::MaxThroughput, "10 B");
   controller3->setProperty(minifi::controllers::NetworkPrioritizerService::MaxPayload, "10 B");
   controller2->onEnable();
-  std::vector<std::shared_ptr<core::controller::ControllerService> > services;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerService> > services;
   services.push_back(controller2);
   services.push_back(controller3);
   controller->setLinkedControllerServices(services);

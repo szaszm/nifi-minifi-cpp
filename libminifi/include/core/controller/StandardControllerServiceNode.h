@@ -35,22 +35,22 @@ namespace controller {
 
 class StandardControllerServiceNode : public ControllerServiceNode {
  public:
-  explicit StandardControllerServiceNode(std::shared_ptr<ControllerService> service, std::shared_ptr<ControllerServiceProvider> provider, const std::string &id,
-                                         std::shared_ptr<Configure> configuration)
+  explicit StandardControllerServiceNode(org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerService> service, org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerServiceProvider> provider, const std::string &id,
+                                         org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configuration)
       : ControllerServiceNode(service, id, configuration),
         provider(provider),
         logger_(logging::LoggerFactory<StandardControllerServiceNode>::getLogger()) {
   }
 
-  explicit StandardControllerServiceNode(std::shared_ptr<ControllerService> service, const std::string &id, std::shared_ptr<Configure> configuration)
+  explicit StandardControllerServiceNode(org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerService> service, const std::string &id, org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configuration)
       : ControllerServiceNode(service, id, configuration),
         provider(nullptr),
         logger_(logging::LoggerFactory<StandardControllerServiceNode>::getLogger()) {
   }
 
-  std::shared_ptr<core::ProcessGroup> &getProcessGroup();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessGroup> &getProcessGroup();
 
-  void setProcessGroup(std::shared_ptr<ProcessGroup> &processGroup);
+  void setProcessGroup(org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessGroup> &processGroup);
 
   StandardControllerServiceNode(const StandardControllerServiceNode &other) = delete;
   StandardControllerServiceNode &operator=(const StandardControllerServiceNode &parent) = delete;
@@ -86,10 +86,10 @@ class StandardControllerServiceNode : public ControllerServiceNode {
 
  protected:
   // controller service provider.
-  std::shared_ptr<ControllerServiceProvider> provider;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ControllerServiceProvider> provider;
 
   // process group.
-  std::shared_ptr<core::ProcessGroup> process_group_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessGroup> process_group_;
 
   std::mutex mutex_;
 

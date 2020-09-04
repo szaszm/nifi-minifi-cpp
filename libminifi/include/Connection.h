@@ -42,17 +42,17 @@ namespace nifi {
 namespace minifi {
 // Connection Class
 
-class Connection : public core::Connectable, public std::enable_shared_from_this<Connection> {
+class Connection : public core::Connectable, public org::apache::nifi::minifi::utils::enable_debug_shared_from_this<Connection> {
  public:
   // Constructor
   /*
    * Create a new processor
    */
-  explicit Connection(const std::shared_ptr<core::Repository> &flow_repository, const std::shared_ptr<core::ContentRepository> &content_repo, std::string name);
-  explicit Connection(const std::shared_ptr<core::Repository> &flow_repository, const std::shared_ptr<core::ContentRepository> &content_repo, std::string name, utils::Identifier & uuid);
-  explicit Connection(const std::shared_ptr<core::Repository> &flow_repository, const std::shared_ptr<core::ContentRepository> &content_repo, std::string name, utils::Identifier & uuid,
+  explicit Connection(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> &flow_repository, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> &content_repo, std::string name);
+  explicit Connection(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> &flow_repository, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> &content_repo, std::string name, utils::Identifier & uuid);
+  explicit Connection(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> &flow_repository, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> &content_repo, std::string name, utils::Identifier & uuid,
                       utils::Identifier & srcUUID);
-  explicit Connection(const std::shared_ptr<core::Repository> &flow_repository, const std::shared_ptr<core::ContentRepository> &content_repo, std::string name, utils::Identifier & uuid,
+  explicit Connection(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> &flow_repository, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> &content_repo, std::string name, utils::Identifier & uuid,
                       utils::Identifier & srcUUID, utils::Identifier & destUUID);
   // Destructor
   virtual ~Connection() = default;
@@ -75,19 +75,19 @@ class Connection : public core::Connectable, public std::enable_shared_from_this
   }
 
   // Set Connection Source Processor
-  void setSource(std::shared_ptr<core::Connectable> source) {
+  void setSource(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable> source) {
     source_connectable_ = source;
   }
   // ! Get Connection Source Processor
-  std::shared_ptr<core::Connectable> getSource() {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable> getSource() {
     return source_connectable_;
   }
   // Set Connection Destination Processor
-  void setDestination(std::shared_ptr<core::Connectable> dest) {
+  void setDestination(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable> dest) {
     dest_connectable_ = dest;
   }
   // ! Get Connection Destination Processor
-  std::shared_ptr<core::Connectable> getDestination() {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable> getDestination() {
     return dest_connectable_;
   }
 
@@ -153,20 +153,20 @@ class Connection : public core::Connectable, public std::enable_shared_from_this
   uint64_t getQueueDataSize() {
     return queued_data_size_;
   }
-  void put(std::shared_ptr<core::Connectable> flow) override {
-    std::shared_ptr<core::FlowFile> ff = std::dynamic_pointer_cast<core::FlowFile>(flow);
+  void put(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable> flow) override {
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> ff = dynamic_pointer_cast<core::FlowFile>(flow);
     if (nullptr != ff) {
       put(ff);
     }
   }
 
   // Put the flow file into queue
-  void put(std::shared_ptr<core::FlowFile> flow);
+  void put(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow);
 
   // Put multiple flowfiles into the queue
-  void multiPut(std::vector<std::shared_ptr<core::FlowFile>>& flows);
+  void multiPut(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>>& flows);
   // Poll the flow file from queue, the expired flow file record also being returned
-  std::shared_ptr<core::FlowFile> poll(std::set<std::shared_ptr<core::FlowFile>> &expiredFlowRecords);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> poll(std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> &expiredFlowRecords);
   // Drain the flow records
   void drain(bool delete_permanently);
 
@@ -188,9 +188,9 @@ class Connection : public core::Connectable, public std::enable_shared_from_this
   // Relationship for this connection
   std::set<core::Relationship> relationships_;
   // Source Processor (ProcessNode/Port)
-  std::shared_ptr<core::Connectable> source_connectable_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable> source_connectable_;
   // Destination Processor (ProcessNode/Port)
-  std::shared_ptr<core::Connectable> dest_connectable_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable> dest_connectable_;
   // Max queue size to apply back pressure
   std::atomic<uint64_t> max_queue_size_;
   // Max queue data size to apply back pressure
@@ -198,9 +198,9 @@ class Connection : public core::Connectable, public std::enable_shared_from_this
   // Flow File Expiration Duration in= MilliSeconds
   std::atomic<uint64_t> expired_duration_;
   // flow file repository
-  std::shared_ptr<core::Repository> flow_repository_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_repository_;
   // content repository reference.
-  std::shared_ptr<core::ContentRepository> content_repo_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo_;
 
  private:
   bool drop_empty_;
@@ -209,7 +209,7 @@ class Connection : public core::Connectable, public std::enable_shared_from_this
   // Queued data size
   std::atomic<uint64_t> queued_data_size_;
   // Queue for the Flow File
-  std::queue<std::shared_ptr<core::FlowFile>> queue_;
+  std::queue<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> queue_;
   // flow repository
   // Logger
   std::shared_ptr<logging::Logger> logger_;

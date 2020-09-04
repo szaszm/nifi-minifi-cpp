@@ -23,6 +23,7 @@
 #include <string>
 #include <mutex>
 #include "properties/Properties.h"
+#include "utils/PointerUtils.h"
 
 namespace org {
 namespace apache {

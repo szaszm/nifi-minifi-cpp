@@ -74,12 +74,12 @@ class ExtractText : public core::Processor {
 
     class ReadCallback : public InputStreamCallback {
      public:
-        ReadCallback(std::shared_ptr<core::FlowFile> flowFile, core::ProcessContext *ct, std::shared_ptr<logging::Logger> lgr);
+        ReadCallback(utils::debug_shared_ptr<core::FlowFile> flowFile, core::ProcessContext *ct, std::shared_ptr<logging::Logger> lgr);
         ~ReadCallback() = default;
-        int64_t process(std::shared_ptr<io::BaseStream> stream);
+        int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream);
 
      private:
-        std::shared_ptr<core::FlowFile> flowFile_;
+        utils::debug_shared_ptr<core::FlowFile> flowFile_;
         core::ProcessContext *ctx_;
         std::vector<uint8_t> buffer_;
         std::shared_ptr<logging::Logger> logger_;

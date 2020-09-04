@@ -60,7 +60,7 @@ class UnfocusArchiveEntry : public core::Processor {
   //! Supported Relationships
   static core::Relationship Success;
 
-  bool set_or_update_attr(std::shared_ptr<core::FlowFile>, const std::string&, const std::string&) const;
+  bool set_or_update_attr(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>, const std::string&, const std::string&) const;
 
   //! OnTrigger method, implemented by NiFi UnfocusArchiveEntry
   virtual void onTrigger(core::ProcessContext *context,
@@ -72,7 +72,7 @@ class UnfocusArchiveEntry : public core::Processor {
   class WriteCallback : public OutputStreamCallback {
    public:
     explicit WriteCallback(ArchiveMetadata *archiveMetadata);
-    int64_t process(std::shared_ptr<io::BaseStream> stream);
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream);
    private:
     //! Logger
     std::shared_ptr<Logger> logger_;

@@ -47,37 +47,37 @@ class TFExtractTopLabels : public core::Processor {
   void onTrigger(core::ProcessContext *context, core::ProcessSession *session) override {
     logger_->log_error("onTrigger invocation with raw pointers is not implemented");
   }
-  void onTrigger(const std::shared_ptr<core::ProcessContext> &context,
-                 const std::shared_ptr<core::ProcessSession> &session) override;
+  void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context,
+                 const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) override;
 
   class LabelsReadCallback : public InputStreamCallback {
    public:
-    explicit LabelsReadCallback(std::shared_ptr<std::vector<std::string>> labels)
+    explicit LabelsReadCallback(org::apache::nifi::minifi::utils::debug_shared_ptr<std::vector<std::string>> labels)
         : labels_(std::move(labels)) {
     }
     ~LabelsReadCallback() override = default;
-    int64_t process(std::shared_ptr<io::BaseStream> stream) override;
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) override;
 
    private:
-    std::shared_ptr<std::vector<std::string>> labels_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<std::vector<std::string>> labels_;
   };
 
   class TensorReadCallback : public InputStreamCallback {
    public:
-    explicit TensorReadCallback(std::shared_ptr<tensorflow::TensorProto> tensor_proto)
+    explicit TensorReadCallback(org::apache::nifi::minifi::utils::debug_shared_ptr<tensorflow::TensorProto> tensor_proto)
         : tensor_proto_(std::move(tensor_proto)) {
     }
     ~TensorReadCallback() override = default;
-    int64_t process(std::shared_ptr<io::BaseStream> stream) override;
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) override;
 
    private:
-    std::shared_ptr<tensorflow::TensorProto> tensor_proto_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<tensorflow::TensorProto> tensor_proto_;
   };
 
  private:
   std::shared_ptr<logging::Logger> logger_;
 
-  std::shared_ptr<std::vector<std::string>> labels_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<std::vector<std::string>> labels_;
   std::mutex labels_mtx_;
 };
 

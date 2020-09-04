@@ -27,6 +27,7 @@
 
 #include "spdlog/common.h"
 #include "spdlog/logger.h"
+#include "utils/PointerUtils.h"
 
 namespace org {
 namespace apache {

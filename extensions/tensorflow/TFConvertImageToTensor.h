@@ -57,11 +57,11 @@ class TFConvertImageToTensor : public core::Processor {
   void onTrigger(core::ProcessContext *context, core::ProcessSession *session) override {
     logger_->log_error("onTrigger invocation with raw pointers is not implemented");
   }
-  void onTrigger(const std::shared_ptr<core::ProcessContext> &context,
-                 const std::shared_ptr<core::ProcessSession> &session) override;
+  void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context,
+                 const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) override;
 
   struct TFContext {
-    std::shared_ptr<tensorflow::Session> tf_session;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<tensorflow::Session> tf_session;
   };
 
   class ImageReadCallback : public InputStreamCallback {
@@ -70,7 +70,7 @@ class TFConvertImageToTensor : public core::Processor {
         : tensor_(tensor) {
     }
     ~ImageReadCallback() override = default;
-    int64_t process(std::shared_ptr<io::BaseStream> stream) override;
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) override;
 
    private:
     tensorflow::Tensor *tensor_;
@@ -78,14 +78,14 @@ class TFConvertImageToTensor : public core::Processor {
 
   class TensorWriteCallback : public OutputStreamCallback {
    public:
-    explicit TensorWriteCallback(std::shared_ptr<tensorflow::TensorProto> tensor_proto)
+    explicit TensorWriteCallback(org::apache::nifi::minifi::utils::debug_shared_ptr<tensorflow::TensorProto> tensor_proto)
         : tensor_proto_(std::move(tensor_proto)) {
     }
     ~TensorWriteCallback() override = default;
-    int64_t process(std::shared_ptr<io::BaseStream> stream) override;
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) override;
 
    private:
-    std::shared_ptr<tensorflow::TensorProto> tensor_proto_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<tensorflow::TensorProto> tensor_proto_;
   };
 
  private:
@@ -103,8 +103,8 @@ class TFConvertImageToTensor : public core::Processor {
   int crop_size_x_ = 0;
   int crop_size_y_ = 0;
 
-  std::shared_ptr<tensorflow::GraphDef> graph_def_;
-  moodycamel::ConcurrentQueue<std::shared_ptr<TFContext>> tf_context_q_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<tensorflow::GraphDef> graph_def_;
+  moodycamel::ConcurrentQueue<org::apache::nifi::minifi::utils::debug_shared_ptr<TFContext>> tf_context_q_;
 };
 
 REGISTER_RESOURCE(TFConvertImageToTensor, "Converts the input image file into a tensor protobuf. The image will be resized to the given output tensor dimensions."); // NOLINT

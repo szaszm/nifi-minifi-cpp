@@ -44,7 +44,7 @@ void FlowFileRepository::flush() {
   rocksdb::WriteBatch batch;
   rocksdb::ReadOptions options;
 
-  std::vector<std::shared_ptr<FlowFileRecord>> purgeList;
+  std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord>> purgeList;
 
   std::vector<rocksdb::Slice> keys;
   std::list<std::string> keystrings;
@@ -67,7 +67,7 @@ void FlowFileRepository::flush() {
       continue;
     }
 
-    std::shared_ptr<FlowFileRecord> eventRead = std::make_shared<FlowFileRecord>(shared_from_this(), content_repo_);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> eventRead = utils::debug_make_shared<FlowFileRecord>(shared_from_this(), content_repo_);
     if (eventRead->DeSerialize(reinterpret_cast<const uint8_t *>(values[i].data()), values[i].size())) {
       purgeList.push_back(eventRead);
     }
@@ -152,7 +152,7 @@ void FlowFileRepository::prune_stored_flowfiles() {
 
   auto it = opendb->NewIterator(rocksdb::ReadOptions());
   for (it->SeekToFirst(); it->Valid(); it->Next()) {
-    std::shared_ptr<FlowFileRecord> eventRead = std::make_shared<FlowFileRecord>(shared_from_this(), content_repo_);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> eventRead = utils::debug_make_shared<FlowFileRecord>(shared_from_this(), content_repo_);
     std::string key = it->key().ToString();
     if (eventRead->DeSerialize(reinterpret_cast<const uint8_t *>(it->value().data()), it->value().size())) {
       logger_->log_debug("Found connection for %s, path %s ", eventRead->getConnectionUuid(), eventRead->getContentFullPath());
@@ -166,7 +166,7 @@ void FlowFileRepository::prune_stored_flowfiles() {
       }
       if (found) {
         // we find the connection for the persistent flowfile, create the flowfile and enqueue that
-        std::shared_ptr<core::FlowFile> flow_file_ref = std::static_pointer_cast<core::FlowFile>(eventRead);
+        org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow_file_ref = static_pointer_cast<core::FlowFile>(eventRead);
         eventRead->setStoredToRepository(true);
         search->second->put(eventRead);
       } else {
@@ -230,7 +230,7 @@ void FlowFileRepository::initialize_repository() {
     logger_->log_trace("Could not create checkpoint directory. Not properly deleted?");
 }
 
-void FlowFileRepository::loadComponent(const std::shared_ptr<core::ContentRepository> &content_repo) {
+void FlowFileRepository::loadComponent(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> &content_repo) {
   content_repo_ = content_repo;
   repo_size_ = 0;
 

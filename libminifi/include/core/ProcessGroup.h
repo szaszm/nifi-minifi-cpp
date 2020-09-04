@@ -174,9 +174,9 @@ class ProcessGroup {
     return config_version_;
   }
   // Start Processing
-  void startProcessing(const std::shared_ptr<TimerDrivenSchedulingAgent> timeScheduler, const std::shared_ptr<EventDrivenSchedulingAgent> &eventScheduler, const std::shared_ptr<CronDrivenSchedulingAgent> &cronScheduler); // NOLINT
+  void startProcessing(const org::apache::nifi::minifi::utils::debug_shared_ptr<TimerDrivenSchedulingAgent> timeScheduler, const org::apache::nifi::minifi::utils::debug_shared_ptr<EventDrivenSchedulingAgent> &eventScheduler, const org::apache::nifi::minifi::utils::debug_shared_ptr<CronDrivenSchedulingAgent> &cronScheduler); // NOLINT
   // Stop Processing
-  void stopProcessing(const std::shared_ptr<TimerDrivenSchedulingAgent> timeScheduler, const std::shared_ptr<EventDrivenSchedulingAgent> &eventScheduler, const std::shared_ptr<CronDrivenSchedulingAgent> &cronScheduler, const std::function<bool(const std::shared_ptr<Processor>&)>& filter = [] (const std::shared_ptr<Processor>&) {return true;}); // NOLINT
+  void stopProcessing(const org::apache::nifi::minifi::utils::debug_shared_ptr<TimerDrivenSchedulingAgent> timeScheduler, const org::apache::nifi::minifi::utils::debug_shared_ptr<EventDrivenSchedulingAgent> &eventScheduler, const org::apache::nifi::minifi::utils::debug_shared_ptr<CronDrivenSchedulingAgent> &cronScheduler, const std::function<bool(const org::apache::nifi::minifi::utils::debug_shared_ptr<Processor>&)>& filter = [] (const org::apache::nifi::minifi::utils::debug_shared_ptr<Processor>&) {return true;}); // NOLINT
   // Whether it is root process group
   bool isRootProcessGroup();
   // set parent process group
@@ -190,52 +190,52 @@ class ProcessGroup {
     return parent_process_group_;
   }
   // Add processor
-  void addProcessor(std::shared_ptr<Processor> processor);
+  void addProcessor(org::apache::nifi::minifi::utils::debug_shared_ptr<Processor> processor);
   // Remove processor
-  void removeProcessor(std::shared_ptr<Processor> processor);
+  void removeProcessor(org::apache::nifi::minifi::utils::debug_shared_ptr<Processor> processor);
   // Add child processor group
   void addProcessGroup(ProcessGroup *child);
   // Remove child processor group
   void removeProcessGroup(ProcessGroup *child);
   // ! Add connections
-  void addConnection(std::shared_ptr<Connection> connection);
+  void addConnection(org::apache::nifi::minifi::utils::debug_shared_ptr<Connection> connection);
   // findProcessor based on UUID
-  std::shared_ptr<Processor> findProcessor(utils::Identifier &uuid);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Processor> findProcessor(utils::Identifier &uuid);
   // findProcessor based on name
-  std::shared_ptr<Processor> findProcessor(const std::string &processorName);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Processor> findProcessor(const std::string &processorName);
 
-  void getAllProcessors(std::vector<std::shared_ptr<Processor>> &processor_vec);
+  void getAllProcessors(std::vector<org::apache::nifi::minifi::utils::debug_shared_ptr<Processor>> &processor_vec);
   /**
    * Add controller service
    * @param nodeId node identifier
    * @param node controller service node.
    */
-  void addControllerService(const std::string &nodeId, std::shared_ptr<core::controller::ControllerServiceNode> &node);
+  void addControllerService(const std::string &nodeId, org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> &node);
 
   /**
    * Find controllerservice node will search child groups until the nodeId is found.
    * @param node node identifier
    * @return controller service node, if it exists.
    */
-  std::shared_ptr<core::controller::ControllerServiceNode> findControllerService(const std::string &nodeId);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> findControllerService(const std::string &nodeId);
 
   // removeConnection
-  void removeConnection(std::shared_ptr<Connection> connection);
+  void removeConnection(org::apache::nifi::minifi::utils::debug_shared_ptr<Connection> connection);
   // update property value
   void updatePropertyValue(std::string processorName, std::string propertyName, std::string propertyValue);
 
-  void getConnections(std::map<std::string, std::shared_ptr<Connection>> &connectionMap);
+  void getConnections(std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<Connection>> &connectionMap);
 
-  void getConnections(std::map<std::string, std::shared_ptr<Connectable>> &connectionMap);
+  void getConnections(std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable>> &connectionMap);
 
-  void getFlowFileContainers(std::map<std::string, std::shared_ptr<Connectable>> &containers) const;
+  void getFlowFileContainers(std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<Connectable>> &containers) const;
 
   void drainConnections();
 
   std::size_t getTotalFlowFileCount() const;
 
  protected:
-  void startProcessingProcessors(const std::shared_ptr<TimerDrivenSchedulingAgent> timeScheduler, const std::shared_ptr<EventDrivenSchedulingAgent> &eventScheduler, const std::shared_ptr<CronDrivenSchedulingAgent> &cronScheduler); // NOLINT
+  void startProcessingProcessors(const org::apache::nifi::minifi::utils::debug_shared_ptr<TimerDrivenSchedulingAgent> timeScheduler, const org::apache::nifi::minifi::utils::debug_shared_ptr<EventDrivenSchedulingAgent> &eventScheduler, const org::apache::nifi::minifi::utils::debug_shared_ptr<CronDrivenSchedulingAgent> &cronScheduler); // NOLINT
 
   // A global unique identifier
   utils::Identifier uuid_;
@@ -246,11 +246,11 @@ class ProcessGroup {
   // Process Group Type
   ProcessGroupType type_;
   // Processors (ProcessNode) inside this process group which include Input/Output Port, Remote Process Group input/Output port
-  std::set<std::shared_ptr<Processor> > processors_;
-  std::set<std::shared_ptr<Processor> > failed_processors_;
+  std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<Processor> > processors_;
+  std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<Processor> > failed_processors_;
   std::set<ProcessGroup *> child_process_groups_;
   // Connections between the processor inside the group;
-  std::set<std::shared_ptr<Connection> > connections_;
+  std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<Connection> > connections_;
   // Parent Process Group
   ProcessGroup* parent_process_group_;
   // Yield Period in Milliseconds
@@ -281,7 +281,7 @@ class ProcessGroup {
   // Only support pass by reference or pointer
   ProcessGroup(const ProcessGroup &parent);
   ProcessGroup &operator=(const ProcessGroup &parent);
-  static std::shared_ptr<utils::IdGenerator> id_generator_;
+  static org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> id_generator_;
   std::unique_ptr<utils::CallBackTimer> onScheduleTimer_;
 };
 }  // namespace core

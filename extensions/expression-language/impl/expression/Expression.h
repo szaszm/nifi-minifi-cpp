@@ -49,12 +49,12 @@ namespace expression {
 struct Parameters {
   std::weak_ptr<core::FlowFile> flow_file;
   std::weak_ptr<core::VariableRegistry> registry_;
-  Parameters(std::shared_ptr<core::VariableRegistry> reg, std::shared_ptr<core::FlowFile> ff = nullptr)
+  Parameters(org::apache::nifi::minifi::utils::debug_shared_ptr<core::VariableRegistry> reg, org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> ff = nullptr)
       : registry_(reg) {
     flow_file = ff;
   }
 
-  Parameters(std::shared_ptr<core::FlowFile> ff = nullptr) {
+  Parameters(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> ff = nullptr) {
     flow_file = ff;
   }
 

@@ -66,7 +66,7 @@ bool ConsumeMQTT::enqueueReceiveMQTTMsg(MQTTClient_message *message) {
   }
 }
 
-void ConsumeMQTT::onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &factory) {
+void ConsumeMQTT::onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &factory) {
   AbstractMQTTProcessor::onSchedule(context, factory);
   std::string value;
   int64_t valInt;
@@ -82,7 +82,7 @@ void ConsumeMQTT::onSchedule(const std::shared_ptr<core::ProcessContext> &contex
   }
 }
 
-void ConsumeMQTT::onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
+void ConsumeMQTT::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   // reconnect if necessary
   if(!reconnect()) {
     yield();
@@ -92,7 +92,7 @@ void ConsumeMQTT::onTrigger(const std::shared_ptr<core::ProcessContext> &context
   getReceivedMQTTMsg(msg_queue);
   while (!msg_queue.empty()) {
     MQTTClient_message *message = msg_queue.front();
-    std::shared_ptr<core::FlowFile> processFlowFile = session->create();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> processFlowFile = session->create();
     ConsumeMQTT::WriteCallback callback(message);
     session->write(processFlowFile, &callback);
     if (callback.status_ < 0) {

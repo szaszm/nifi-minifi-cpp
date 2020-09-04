@@ -124,7 +124,7 @@ FetchSFTP::FetchSFTP(std::string name, utils::Identifier uuid /*= utils::Identif
 
 FetchSFTP::~FetchSFTP() = default;
 
-void FetchSFTP::onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
+void FetchSFTP::onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
   parseCommonPropertiesOnSchedule(context);
 
   std::string value;
@@ -157,15 +157,15 @@ FetchSFTP::WriteCallback::WriteCallback(const std::string& remote_file,
 
 FetchSFTP::WriteCallback::~WriteCallback() = default;
 
-int64_t FetchSFTP::WriteCallback::process(std::shared_ptr<io::BaseStream> stream) {
+int64_t FetchSFTP::WriteCallback::process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
   if (!client_.getFile(remote_file_, *stream)) {
     throw client_.getLastError();
   }
   return stream->getSize();
 }
 
-void FetchSFTP::onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
-  std::shared_ptr<FlowFileRecord> flow_file = std::static_pointer_cast<FlowFileRecord>(session->get());
+void FetchSFTP::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<FlowFileRecord> flow_file = static_pointer_cast<FlowFileRecord>(session->get());
   if (flow_file == nullptr) {
     return;
   }

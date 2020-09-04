@@ -29,7 +29,7 @@ namespace minifi {
 namespace core {
 namespace repository {
 
-bool FileSystemRepository::initialize(const std::shared_ptr<minifi::Configure> &configuration) {
+bool FileSystemRepository::initialize(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> &configuration) {
   std::string value;
   if (configuration->get(Configure::nifi_dbcontent_repository_directory_default, value)) {
     directory_ = value;
@@ -42,20 +42,20 @@ bool FileSystemRepository::initialize(const std::shared_ptr<minifi::Configure> &
 void FileSystemRepository::stop() {
 }
 
-std::shared_ptr<io::BaseStream> FileSystemRepository::write(const std::shared_ptr<minifi::ResourceClaim> &claim, bool append) {
-  return std::make_shared<io::FileStream>(claim->getContentFullPath(), append);
+org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> FileSystemRepository::write(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> &claim, bool append) {
+  return org::apache::nifi::minifi::utils::debug_make_shared<io::FileStream>(claim->getContentFullPath(), append);
 }
 
-bool FileSystemRepository::exists(const std::shared_ptr<minifi::ResourceClaim> &streamId) {
+bool FileSystemRepository::exists(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> &streamId) {
   std::ifstream file(streamId->getContentFullPath());
   return file.good();
 }
 
-std::shared_ptr<io::BaseStream> FileSystemRepository::read(const std::shared_ptr<minifi::ResourceClaim> &claim) {
-  return std::make_shared<io::FileStream>(claim->getContentFullPath(), 0, false);
+org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> FileSystemRepository::read(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> &claim) {
+  return org::apache::nifi::minifi::utils::debug_make_shared<io::FileStream>(claim->getContentFullPath(), 0, false);
 }
 
-bool FileSystemRepository::remove(const std::shared_ptr<minifi::ResourceClaim> &claim) {
+bool FileSystemRepository::remove(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::ResourceClaim> &claim) {
   std::remove(claim->getContentFullPath().c_str());
   return true;
 }

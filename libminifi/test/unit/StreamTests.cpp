@@ -27,7 +27,7 @@
 #include "io/BaseStream.h"
 
 TEST_CASE("TestReadData", "[testread]") {
-  auto base = std::make_shared<minifi::io::BaseStream>();
+  auto base = org::apache::nifi::minifi::utils::debug_make_shared<minifi::io::BaseStream>();
   uint64_t b = 8;
   base->write(b);
   uint64_t c = 0;
@@ -39,7 +39,7 @@ TEST_CASE("TestReadData", "[testread]") {
 }
 
 TEST_CASE("TestRead8", "[testread]") {
-  auto base = std::make_shared<minifi::io::BaseStream>();
+  auto base = org::apache::nifi::minifi::utils::debug_make_shared<minifi::io::BaseStream>();
   uint64_t b = 8;
   base->write(b);
   uint64_t c = 0;
@@ -48,7 +48,7 @@ TEST_CASE("TestRead8", "[testread]") {
 }
 
 TEST_CASE("TestRead2", "[testread]") {
-  auto base = std::make_shared<minifi::io::BaseStream>();
+  auto base = org::apache::nifi::minifi::utils::debug_make_shared<minifi::io::BaseStream>();
   uint16_t b = 8;
   base->write(b);
   uint16_t c = 0;
@@ -57,7 +57,7 @@ TEST_CASE("TestRead2", "[testread]") {
 }
 
 TEST_CASE("TestRead1", "[testread]") {
-  auto base = std::make_shared<minifi::io::BaseStream>();
+  auto base = org::apache::nifi::minifi::utils::debug_make_shared<minifi::io::BaseStream>();
   uint8_t b = 8;
   base->write(&b, 1);
   uint8_t c = 0;
@@ -66,7 +66,7 @@ TEST_CASE("TestRead1", "[testread]") {
 }
 
 TEST_CASE("TestRead4", "[testread]") {
-  auto base = std::make_shared<minifi::io::BaseStream>();
+  auto base = org::apache::nifi::minifi::utils::debug_make_shared<minifi::io::BaseStream>();
   uint32_t b = 8;
   base->write(b);
   uint32_t c = 0;

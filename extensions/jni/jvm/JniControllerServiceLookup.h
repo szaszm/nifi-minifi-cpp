@@ -37,12 +37,12 @@ namespace jni {
 class JniControllerService {
  public:
 
-  std::shared_ptr<core::controller::ControllerService> cs_reference_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerService> cs_reference_;
 };
 
 class JniControllerServiceLookup {
  public:
-  std::shared_ptr<core::controller::ControllerServiceLookup> cs_lookup_reference_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceLookup> cs_lookup_reference_;
 };
 
 } /* namespace jni */

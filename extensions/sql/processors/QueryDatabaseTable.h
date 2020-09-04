@@ -76,7 +76,7 @@ class QueryDatabaseTable: public SQLProcessor<QueryDatabaseTable>, public Output
   bool saveState();
 
  private:
-  std::shared_ptr<core::CoreComponentStateManager> state_manager_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::CoreComponentStateManager> state_manager_;
   std::string tableName_;
   std::string columnNames_;
   std::string maxValueColumnNames_;

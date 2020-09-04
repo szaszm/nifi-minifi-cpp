@@ -80,9 +80,9 @@ class SourceInitiatedSubscriptionListener : public core::Processor {
   static constexpr char const* ATTRIBUTE_WEF_REMOTE_MACHINEID = "wef.remote.machineid";
   static constexpr char const* ATTRIBUTE_WEF_REMOTE_IP = "wef.remote.ip";
 
-  void onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) override;
+  void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) override;
   void initialize() override;
-  void onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
+  void onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
   void notifyStop() override;
   
   class Handler: public CivetHandler {
@@ -93,7 +93,7 @@ class SourceInitiatedSubscriptionListener : public core::Processor {
     class WriteCallback : public OutputStreamCallback {
      public:
       explicit WriteCallback(char* text);
-      int64_t process(std::shared_ptr<io::BaseStream> stream);
+      int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream);
 
      private:
       char* text_;
@@ -117,9 +117,9 @@ class SourceInitiatedSubscriptionListener : public core::Processor {
  protected:
   std::shared_ptr<logging::Logger> logger_;
 
-  std::shared_ptr<core::CoreComponentStateManager> state_manager_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::CoreComponentStateManager> state_manager_;
 
-  std::shared_ptr<core::ProcessSessionFactory> session_factory_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> session_factory_;
 
   std::string listen_hostname_;
   uint16_t listen_port_;

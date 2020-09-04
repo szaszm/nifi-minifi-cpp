@@ -60,11 +60,11 @@ class MQTTC2Protocol : public C2Protocol {
     return serialize(payload);
   }
 
-  virtual void update(const std::shared_ptr<Configure> &configure) override {
+  virtual void update(const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure) override {
     // no op.
   }
 
-  virtual void initialize(core::controller::ControllerServiceProvider* controller, const std::shared_ptr<Configure> &configure) override;
+  virtual void initialize(core::controller::ControllerServiceProvider* controller, const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure) override;
 
  protected:
 
@@ -81,7 +81,7 @@ class MQTTC2Protocol : public C2Protocol {
   std::string update_topic_;
 
   // mqtt controller service reference.
-  std::shared_ptr<controllers::MQTTControllerService> mqtt_service_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<controllers::MQTTControllerService> mqtt_service_;
   std::shared_ptr<logging::Logger> logger_;
   //mqtt controller serviec name.
   std::string controller_service_name_;

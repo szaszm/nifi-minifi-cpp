@@ -67,7 +67,7 @@ class ExecutePythonProcessorTestBase {
   static const std::string SCRIPT_FILES_DIRECTORY;
 
   std::unique_ptr<TestController> testController_;
-  std::shared_ptr<TestPlan> plan_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan_;
   LogTestController& logTestController_;
   std::shared_ptr<logging::Logger> logger_;
 };
@@ -138,14 +138,14 @@ class SimplePythonFlowFileTransferTest : public ExecutePythonProcessorTestBase {
   }
 
  private:
-  std::shared_ptr<core::Processor> addGetFileProcessorToPlan(const std::string& dir_path) {
-    std::shared_ptr<core::Processor> getfile = plan_->addProcessor("GetFile", "getfileCreate2");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> addGetFileProcessorToPlan(const std::string& dir_path) {
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> getfile = plan_->addProcessor("GetFile", "getfileCreate2");
     plan_->setProperty(getfile, org::apache::nifi::minifi::processors::GetFile::Directory.getName(), dir_path);
     plan_->setProperty(getfile, org::apache::nifi::minifi::processors::GetFile::KeepSourceFile.getName(), "true");
     return getfile;
   }
 
-  std::shared_ptr<core::Processor> addExecutePythonProcessorToPlan(const std::string& used_as_script_file, const std::string& used_as_script_body) {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> addExecutePythonProcessorToPlan(const std::string& used_as_script_file, const std::string& used_as_script_body) {
     auto executePythonProcessor = plan_->addProcessor("ExecutePythonProcessor", "executePythonProcessor", core::Relationship("success", "description"), true);
     if ("" != used_as_script_file) {
       plan_->setProperty(executePythonProcessor, org::apache::nifi::minifi::python::processors::ExecutePythonProcessor::ScriptFile.getName(), getScriptFullPath(used_as_script_file));
@@ -157,8 +157,8 @@ class SimplePythonFlowFileTransferTest : public ExecutePythonProcessorTestBase {
     return executePythonProcessor;
   }
 
-  std::shared_ptr<core::Processor> addPutFileProcessorToPlan(const core::Relationship& execute_python_outbound_connection, const std::string& dir_path) {
-    std::shared_ptr<core::Processor> putfile = plan_->addProcessor("PutFile", "putfile", execute_python_outbound_connection, true);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> addPutFileProcessorToPlan(const core::Relationship& execute_python_outbound_connection, const std::string& dir_path) {
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> putfile = plan_->addProcessor("PutFile", "putfile", execute_python_outbound_connection, true);
     plan_->setProperty(putfile, org::apache::nifi::minifi::processors::PutFile::Directory.getName(), dir_path);
     return putfile;
   }

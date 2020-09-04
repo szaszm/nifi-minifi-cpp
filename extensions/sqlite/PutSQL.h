@@ -52,23 +52,23 @@ class PutSQL : public core::Processor {
   void onTrigger(core::ProcessContext *context, core::ProcessSession *session) override {
     logger_->log_error("onTrigger invocation with raw pointers is not implemented");
   }
-  void onTrigger(const std::shared_ptr<core::ProcessContext> &context,
-                 const std::shared_ptr<core::ProcessSession> &session) override;
+  void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context,
+                 const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) override;
 
   class SQLReadCallback : public InputStreamCallback {
    public:
-    explicit SQLReadCallback(std::shared_ptr<std::string> sql)
+    explicit SQLReadCallback(org::apache::nifi::minifi::utils::debug_shared_ptr<std::string> sql)
         : sql_(std::move(sql)) {
     }
-    int64_t process(std::shared_ptr<io::BaseStream> stream) override;
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) override;
 
    private:
-    std::shared_ptr<std::string> sql_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<std::string> sql_;
   };
 
  private:
   std::shared_ptr<logging::Logger> logger_;
-  moodycamel::ConcurrentQueue<std::shared_ptr<minifi::sqlite::SQLiteConnection>> conn_q_;
+  moodycamel::ConcurrentQueue<org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::sqlite::SQLiteConnection>> conn_q_;
 
   uint64_t batch_size_;
   std::string db_url_;

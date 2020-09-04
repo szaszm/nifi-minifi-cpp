@@ -34,7 +34,7 @@ namespace core {
  */
 class VariableRegistry {
  public:
-  explicit VariableRegistry(const std::shared_ptr<minifi::Configure> &configuration)
+  explicit VariableRegistry(const org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> &configuration)
       : configuration_(configuration) {
     if (configuration_ != nullptr) {
       loadVariableRegistry();
@@ -89,7 +89,7 @@ class VariableRegistry {
 
   std::map<std::string, std::string> variable_registry_;
 
-  std::shared_ptr<minifi::Configure> configuration_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> configuration_;
 };
 
 }  // namespace core

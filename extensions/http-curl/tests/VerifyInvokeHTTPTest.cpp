@@ -44,7 +44,7 @@ class VerifyInvokeHTTP : public HTTPIntegrationBase {
   void cleanup() override {
   }
 
-  void setProperties(std::shared_ptr<core::Processor> proc) {
+  void setProperties(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> proc) {
     std::string url = scheme + "://localhost:" + getWebPort() + path;
     proc->setProperty(minifi::processors::InvokeHTTP::URL.getName(), url);
   }
@@ -52,18 +52,18 @@ class VerifyInvokeHTTP : public HTTPIntegrationBase {
   void setupFlow(const std::string& flow_yml_path) {
     testSetup();
 
-    std::shared_ptr<core::Repository> test_repo = std::make_shared<TestRepository>();
-    std::shared_ptr<core::Repository> test_flow_repo = std::make_shared<TestFlowRepository>();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> test_repo = utils::debug_make_shared<TestRepository>();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> test_flow_repo = utils::debug_make_shared<TestFlowRepository>();
 
     configuration->set(minifi::Configure::nifi_flow_configuration_file, flow_yml_path);
     configuration->set("c2.agent.heartbeat.period", "200");
-    std::shared_ptr<core::ContentRepository> content_repo = std::make_shared<core::repository::VolatileContentRepository>();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo = utils::debug_make_shared<core::repository::VolatileContentRepository>();
     content_repo->initialize(configuration);
-    std::shared_ptr<minifi::io::StreamFactory> stream_factory = minifi::io::StreamFactory::getInstance(configuration);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::io::StreamFactory> stream_factory = minifi::io::StreamFactory::getInstance(configuration);
     std::unique_ptr<core::FlowConfiguration> yaml_ptr = std::unique_ptr<core::YamlConfiguration>(
         new core::YamlConfiguration(test_repo, test_repo, content_repo, stream_factory, configuration, flow_yml_path));
 
-    flowController_ = std::make_shared<minifi::FlowController>(test_repo, test_flow_repo, configuration, std::move(yaml_ptr), content_repo, DEFAULT_ROOT_GROUP_NAME, true);
+    flowController_ = utils::debug_make_shared<minifi::FlowController>(test_repo, test_flow_repo, configuration, std::move(yaml_ptr), content_repo, DEFAULT_ROOT_GROUP_NAME, true);
     flowController_->load();
 
     const auto components = flowController_->getComponents("InvokeHTTP");
@@ -71,7 +71,7 @@ class VerifyInvokeHTTP : public HTTPIntegrationBase {
 
     const auto stateController = components.at(0);
     assert(stateController);
-    const auto processorController = std::dynamic_pointer_cast<minifi::state::ProcessorController>(stateController);
+    const auto processorController = dynamic_pointer_cast<minifi::state::ProcessorController>(stateController);
     assert(processorController);
     setProperties(processorController->getProcessor());
   }

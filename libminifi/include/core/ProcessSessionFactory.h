@@ -38,12 +38,12 @@ class ProcessSessionFactory {
   /*!
    * Create a new process session factory
    */
-  explicit ProcessSessionFactory(std::shared_ptr<ProcessContext> processContext)
+  explicit ProcessSessionFactory(org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessContext> processContext)
       : process_context_(processContext) {
   }
 
   // Create the session
-  std::shared_ptr<ProcessSession> createSession();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessSession> createSession();
 
   // Prevent default copy constructor and assignment operation
   // Only support pass by reference or pointer
@@ -52,7 +52,7 @@ class ProcessSessionFactory {
 
  private:
   // ProcessContext
-  std::shared_ptr<ProcessContext> process_context_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<ProcessContext> process_context_;
 };
 
 }  // namespace core

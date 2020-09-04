@@ -29,8 +29,8 @@ namespace nifi {
 namespace minifi {
 namespace core {
 
-std::shared_ptr<utils::IdGenerator> FlowFile::id_generator_ = utils::IdGenerator::getIdGenerator();
-std::shared_ptr<utils::NonRepeatingStringGenerator> FlowFile::numeric_id_generator_ = std::make_shared<utils::NonRepeatingStringGenerator>();
+org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> FlowFile::id_generator_ = utils::IdGenerator::getIdGenerator();
+org::apache::nifi::minifi::utils::debug_shared_ptr<utils::NonRepeatingStringGenerator> FlowFile::numeric_id_generator_ = org::apache::nifi::minifi::utils::debug_make_shared<utils::NonRepeatingStringGenerator>();
 std::shared_ptr<logging::Logger> FlowFile::logger_ = logging::LoggerFactory<FlowFile>::getLogger();
 
 FlowFile::FlowFile()
@@ -92,22 +92,22 @@ void FlowFile::setDeleted(const bool deleted) {
   }
 }
 
-std::shared_ptr<ResourceClaim> FlowFile::getResourceClaim() {
+org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim> FlowFile::getResourceClaim() {
   return claim_.get();
 }
 
 void FlowFile::clearResourceClaim() {
   claim_.set(*this, nullptr);
 }
-void FlowFile::setResourceClaim(const std::shared_ptr<ResourceClaim>& claim) {
+void FlowFile::setResourceClaim(const org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim>& claim) {
   claim_.set(*this, claim);
 }
 
-std::shared_ptr<ResourceClaim> FlowFile::getStashClaim(const std::string& key) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim> FlowFile::getStashClaim(const std::string& key) {
   return stashedContent_[key].get();
 }
 
-void FlowFile::setStashClaim(const std::string& key, const std::shared_ptr<ResourceClaim>& claim) {
+void FlowFile::setStashClaim(const std::string& key, const org::apache::nifi::minifi::utils::debug_shared_ptr<ResourceClaim>& claim) {
   if (hasStashClaim(key)) {
     logger_->log_warn("Stashing content of record %s to existing key %s; "
                       "existing content will be overwritten",
@@ -203,7 +203,7 @@ void FlowFile::setLineageStartDate(const uint64_t date) {
  * Sets the original connection with a shared pointer.
  * @param connection shared connection.
  */
-void FlowFile::setOriginalConnection(std::shared_ptr<core::Connectable>& connection) {
+void FlowFile::setOriginalConnection(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable>& connection) {
   original_connection_ = connection;
 }
 
@@ -211,7 +211,7 @@ void FlowFile::setOriginalConnection(std::shared_ptr<core::Connectable>& connect
  * Sets the connection with a shared pointer.
  * @param connection shared connection.
  */
-void FlowFile::setConnection(std::shared_ptr<core::Connectable>& connection) {
+void FlowFile::setConnection(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable>& connection) {
   connection_ = connection;
 }
 
@@ -219,7 +219,7 @@ void FlowFile::setConnection(std::shared_ptr<core::Connectable>& connection) {
  * Sets the connection with a shared pointer.
  * @param connection shared connection.
  */
-void FlowFile::setConnection(std::shared_ptr<core::Connectable>&& connection) {
+void FlowFile::setConnection(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable>&& connection) {
   connection_ = connection;
 }
 
@@ -227,7 +227,7 @@ void FlowFile::setConnection(std::shared_ptr<core::Connectable>&& connection) {
  * Returns the connection referenced by this record.
  * @return shared connection pointer.
  */
-std::shared_ptr<core::Connectable> FlowFile::getConnection() const {
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable> FlowFile::getConnection() const {
   return connection_;
 }
 
@@ -235,7 +235,7 @@ std::shared_ptr<core::Connectable> FlowFile::getConnection() const {
  * Returns the original connection referenced by this record.
  * @return shared original connection pointer.
  */
-std::shared_ptr<core::Connectable> FlowFile::getOriginalConnection() const {
+org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable> FlowFile::getOriginalConnection() const {
   return original_connection_;
 }
 

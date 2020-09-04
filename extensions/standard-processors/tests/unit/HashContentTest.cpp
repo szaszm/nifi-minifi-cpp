@@ -52,7 +52,7 @@ const char* SHA256_CHECKSUM = "66D5B2CC06203137F8A0E9714638DC1085C57A3F1FA26C882
 
 TEST_CASE("Test Creation of HashContent", "[HashContentCreate]") {
   TestController testController;
-  std::shared_ptr<core::Processor> processor = std::make_shared<org::apache::nifi::minifi::processors::HashContent>("processorname");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor = utils::debug_make_shared<org::apache::nifi::minifi::processors::HashContent>("processorname");
   REQUIRE(processor->getName() == "processorname");
   utils::Identifier processoruuid;
   REQUIRE(processor->getUUID(processoruuid));
@@ -65,34 +65,34 @@ TEST_CASE("Test usage of ExtractText", "[extracttextTest]") {
   LogTestController::getInstance().setTrace<core::ProcessSession>();
   LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::HashContent>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
-  std::shared_ptr<TestRepository> repo = std::make_shared<TestRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestRepository> repo = utils::debug_make_shared<TestRepository>();
 
   char dir[] = "/tmp/gt.XXXXXX";
 
   auto tempdir = testController.createTempDirectory(dir);
   REQUIRE(!tempdir.empty());
 
-  std::shared_ptr<core::Processor> getfile = plan->addProcessor("GetFile", "getfileCreate2");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> getfile = plan->addProcessor("GetFile", "getfileCreate2");
   plan->setProperty(getfile, org::apache::nifi::minifi::processors::GetFile::Directory.getName(), tempdir);
   plan->setProperty(getfile, org::apache::nifi::minifi::processors::GetFile::KeepSourceFile.getName(), "true");
 
-  std::shared_ptr<core::Processor> md5processor = plan->addProcessor("HashContent", "HashContentMD5",
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> md5processor = plan->addProcessor("HashContent", "HashContentMD5",
       core::Relationship("success", "description"), true);
   plan->setProperty(md5processor, org::apache::nifi::minifi::processors::HashContent::HashAttribute.getName(), MD5_ATTR);
   plan->setProperty(md5processor, org::apache::nifi::minifi::processors::HashContent::HashAlgorithm.getName(), "MD5");
 
-  std::shared_ptr<core::Processor> shaprocessor = plan->addProcessor("HashContent", "HashContentSHA1",
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> shaprocessor = plan->addProcessor("HashContent", "HashContentSHA1",
       core::Relationship("success", "description"), true);
   plan->setProperty(shaprocessor, org::apache::nifi::minifi::processors::HashContent::HashAttribute.getName(), SHA1_ATTR);
   plan->setProperty(shaprocessor, org::apache::nifi::minifi::processors::HashContent::HashAlgorithm.getName(), "sha1");
 
-  std::shared_ptr<core::Processor> sha2processor = plan->addProcessor("HashContent", "HashContentSHA256",
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> sha2processor = plan->addProcessor("HashContent", "HashContentSHA256",
       core::Relationship("success", "description"), true);
   plan->setProperty(sha2processor, org::apache::nifi::minifi::processors::HashContent::HashAttribute.getName(), SHA256_ATTR);
   plan->setProperty(sha2processor, org::apache::nifi::minifi::processors::HashContent::HashAlgorithm.getName(), "sha-256");
 
-  std::shared_ptr<core::Processor> laprocessor = plan->addProcessor("LogAttribute", "outputLogAttribute",
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> laprocessor = plan->addProcessor("LogAttribute", "outputLogAttribute",
       core::Relationship("success", "description"), true);
 
   std::stringstream ss1;

@@ -73,10 +73,10 @@ class ExecuteJavaProcessor : public core::Processor {
   // Supported Relationships
   static core::Relationship Success;
 
-  virtual void onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
-  virtual void onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) override;
+  virtual void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
+  virtual void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) override;
   virtual void initialize() override;
-  virtual void onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
+  virtual void onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) override;
   virtual bool supportsDynamicProperties() override {
     return true;
   }
@@ -238,7 +238,7 @@ class ExecuteJavaProcessor : public core::Processor {
 
  private:
 
-  JniSessionFactory *getFactory(const std::shared_ptr<core::ProcessSessionFactory> &ptr) {
+  JniSessionFactory *getFactory(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &ptr) {
     std::lock_guard<std::mutex> lock(local_mutex_);
     for (const auto &factory : session_factories_) {
       if (factory->getFactory() == ptr) {
@@ -249,7 +249,7 @@ class ExecuteJavaProcessor : public core::Processor {
 
   }
 
-  JniSessionFactory *setFactory(const std::shared_ptr<core::ProcessSessionFactory> &ptr, jobject obj) {
+  JniSessionFactory *setFactory(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &ptr, jobject obj) {
     std::lock_guard<std::mutex> lock(local_mutex_);
     JniSessionFactory *factory = new JniSessionFactory(ptr, java_servicer_, obj);
     session_factories_.push_back(factory);
@@ -281,7 +281,7 @@ class ExecuteJavaProcessor : public core::Processor {
 
   jobject clazzInstance;
 
-  std::shared_ptr<controllers::JavaControllerService> java_servicer_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<controllers::JavaControllerService> java_servicer_;
 
   std::string class_name_;
 

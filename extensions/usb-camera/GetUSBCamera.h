@@ -44,8 +44,8 @@ class GetUSBCamera : public core::Processor {
   explicit GetUSBCamera(const std::string &name, utils::Identifier uuid = utils::Identifier())
       : core::Processor(name, uuid),
         logger_(logging::LoggerFactory<GetUSBCamera>::getLogger()) {
-    png_write_mtx_ = std::make_shared<std::mutex>();
-    dev_access_mtx_ = std::make_shared<std::recursive_mutex>();
+    png_write_mtx_ = utils::debug_make_shared<std::mutex>();
+    dev_access_mtx_ = utils::debug_make_shared<std::recursive_mutex>();
   }
 
   virtual ~GetUSBCamera() {
@@ -81,8 +81,8 @@ class GetUSBCamera : public core::Processor {
     core::ProcessContext *context;
     core::ProcessSessionFactory *session_factory;
     std::shared_ptr<logging::Logger> logger;
-    std::shared_ptr<std::mutex> png_write_mtx;
-    std::shared_ptr<std::recursive_mutex> dev_access_mtx;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<std::mutex> png_write_mtx;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<std::recursive_mutex> dev_access_mtx;
     std::string format;
     uvc_frame_t *frame_buffer;
     uint16_t device_width;
@@ -97,11 +97,11 @@ class GetUSBCamera : public core::Processor {
   // Write callback for storing camera capture data in PNG format
   class PNGWriteCallback : public OutputStreamCallback {
    public:
-    PNGWriteCallback(std::shared_ptr<std::mutex> write_mtx, uvc_frame_t *frame, uint32_t width, uint32_t height);
-    int64_t process(std::shared_ptr<io::BaseStream> stream) override;
+    PNGWriteCallback(org::apache::nifi::minifi::utils::debug_shared_ptr<std::mutex> write_mtx, uvc_frame_t *frame, uint32_t width, uint32_t height);
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) override;
 
    private:
-    std::shared_ptr<std::mutex> png_write_mtx_;
+    org::apache::nifi::minifi::utils::debug_shared_ptr<std::mutex> png_write_mtx_;
     uvc_frame_t *frame_;
     uint32_t width_;
     uint32_t height_;
@@ -113,7 +113,7 @@ class GetUSBCamera : public core::Processor {
   class RawWriteCallback : public OutputStreamCallback {
    public:
     explicit RawWriteCallback(uvc_frame_t *frame);
-    int64_t process(std::shared_ptr<io::BaseStream> stream) override;
+    int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) override;
 
    private:
     uvc_frame_t *frame_;
@@ -122,13 +122,13 @@ class GetUSBCamera : public core::Processor {
 
  private:
   std::shared_ptr<logging::Logger> logger_;
-  static std::shared_ptr<utils::IdGenerator> id_generator_;
+  static org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> id_generator_;
 
-  std::shared_ptr<std::thread> camera_thread_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<std::thread> camera_thread_;
   CallbackData cb_data_;
 
-  std::shared_ptr<std::mutex> png_write_mtx_;
-  std::shared_ptr<std::recursive_mutex> dev_access_mtx_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<std::mutex> png_write_mtx_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<std::recursive_mutex> dev_access_mtx_;
 
   uvc_frame_t *frame_buffer_ = nullptr;
   uvc_context_t *ctx_ = nullptr;

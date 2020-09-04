@@ -55,7 +55,7 @@ class Bin {
         logger_(logging::LoggerFactory<Bin>::getLogger()) {
     queued_data_size_ = 0;
     creation_dated_ = utils::timeutils::getTimeMillis();
-    std::shared_ptr<utils::IdGenerator> id_generator = utils::IdGenerator::getIdGenerator();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> id_generator = utils::IdGenerator::getIdGenerator();
     id_generator->generate(uuid_);
     uuid_str_ = uuid_.to_string();
     logger_->log_debug("Bin %s for group %s created", uuid_str_, groupId_);
@@ -82,11 +82,11 @@ class Bin {
     else
       return false;
   }
-  std::deque<std::shared_ptr<core::FlowFile>> & getFlowFile() {
+  std::deque<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> & getFlowFile() {
     return queue_;
   }
   // offer the flowfile to the bin
-  bool offer(std::shared_ptr<core::FlowFile> flow) {
+  bool offer(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow) {
     if (!fileCount_.empty()) {
       std::string value;
       if (flow->getAttribute(fileCount_, value)) {
@@ -135,7 +135,7 @@ class Bin {
   // Queued data size
   uint64_t queued_data_size_;
   // Queue for the Flow File
-  std::deque<std::shared_ptr<core::FlowFile>> queue_;
+  std::deque<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> queue_;
   uint64_t creation_dated_;
   std::string fileCount_;
   std::string groupId_;
@@ -192,7 +192,7 @@ class BinManager {
     binCount_ = 0;
   }
   // Adds the given flowFile to the first available bin in which it fits for the given group or creates a new bin in the specified group if necessary.
-  bool offer(const std::string &group, std::shared_ptr<core::FlowFile> flow);
+  bool offer(const std::string &group, org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow);
   // gather ready bins once the bin are full enough or exceed bin age
   void gatherReadyBins();
   // marks oldest bin as ready
@@ -270,19 +270,19 @@ class BinFiles : public core::Processor {
   void onTrigger(core::ProcessContext *context, core::ProcessSession *session) override {
   }
   // OnTrigger method, implemented by NiFi BinFiles
-  void onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) override;
+  void onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) override;
   // Initialize, over write by NiFi BinFiles
   void initialize(void) override;
 
-  void put(std::shared_ptr<core::Connectable> flow) override;
+  void put(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable> flow) override;
 
-  std::set<std::shared_ptr<core::Connectable>> getOutGoingConnections(const std::string &relationship) const override;
+  std::set<org::apache::nifi::minifi::utils::debug_shared_ptr<core::Connectable>> getOutGoingConnections(const std::string &relationship) const override;
 
  protected:
   // Allows general pre-processing of a flow file before it is offered to a bin. This is called before getGroupId().
-  virtual void preprocessFlowFile(core::ProcessContext *context, core::ProcessSession *session, std::shared_ptr<core::FlowFile> flow);
+  virtual void preprocessFlowFile(core::ProcessContext *context, core::ProcessSession *session, org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow);
   // Returns a group ID representing a bin. This allows flow files to be binned into like groups
-  virtual std::string getGroupId(core::ProcessContext *context, std::shared_ptr<core::FlowFile> flow) {
+  virtual std::string getGroupId(core::ProcessContext *context, org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> flow) {
     return "";
   }
   // Processes a single bin.
@@ -303,12 +303,12 @@ class BinFiles : public core::Processor {
      * Returns the already-preprocessed FlowFiles that got restored on restart from the FlowFileRepository
      * @return the resurrected persisted FlowFiles
      */
-    std::unordered_set<std::shared_ptr<core::FlowFile>> getNewFlowFiles();
-    void put(std::shared_ptr<core::FlowFile>& flowFile);
+    std::unordered_set<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> getNewFlowFiles();
+    void put(org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>& flowFile);
    private:
     std::atomic_bool has_new_flow_file_{false};
     std::mutex flow_file_mutex_;
-    std::unordered_set<std::shared_ptr<core::FlowFile>> incoming_files_;
+    std::unordered_set<org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile>> incoming_files_;
   };
 
   std::shared_ptr<logging::Logger> logger_;

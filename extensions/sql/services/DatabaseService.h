@@ -58,7 +58,7 @@ class DatabaseService : public core::controller::ControllerService {
     initialize();
   }
 
-  explicit DatabaseService(const std::string &name, const std::shared_ptr<Configure> &configuration)
+  explicit DatabaseService(const std::string &name, const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configuration)
       : ControllerService(name),
         initialized_(false),
         logger_(logging::LoggerFactory<DatabaseService>::getLogger()) {

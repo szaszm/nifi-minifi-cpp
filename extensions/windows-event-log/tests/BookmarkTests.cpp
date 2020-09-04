@@ -94,7 +94,7 @@ unique_evt_handle getFirstEventFromResults(const unique_evt_handle& results) {
 
 TEST_CASE("Bookmark constructor works", "[create]") {
   TestController test_controller;
-  std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> test_plan = test_controller.createPlan();
   LogTestController::getInstance().setTrace<TestPlan>();
 
   reportEvent(APPLICATION_CHANNEL, "Publish an event to make sure the event log is not empty");
@@ -111,7 +111,7 @@ TEST_CASE("Bookmark constructor works", "[create]") {
 
 TEST_CASE("Bookmark is restored from the state", "[create][state]") {
   TestController test_controller;
-  std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> test_plan = test_controller.createPlan();
   LogTestController::getInstance().setTrace<TestPlan>();
 
   std::string uuid = IdGenerator::getIdGenerator()->generate().to_string();
@@ -129,7 +129,7 @@ TEST_CASE("Bookmark is restored from the state", "[create][state]") {
 
 TEST_CASE("Bookmark created after a new event is different", "[create][state]") {
   TestController test_controller;
-  std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> test_plan = test_controller.createPlan();
   LogTestController::getInstance().setTrace<TestPlan>();
 
   std::string uuid_one = IdGenerator::getIdGenerator()->generate().to_string();
@@ -146,7 +146,7 @@ TEST_CASE("Bookmark created after a new event is different", "[create][state]") 
 
 TEST_CASE("Bookmark::getBookmarkHandleFromXML() returns the same event from a copy", "[handle_from_xml]") {
   TestController test_controller;
-  std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> test_plan = test_controller.createPlan();
   LogTestController::getInstance().setTrace<TestPlan>();
 
   std::string uuid = IdGenerator::getIdGenerator()->generate().to_string();
@@ -160,7 +160,7 @@ TEST_CASE("Bookmark::getBookmarkHandleFromXML() returns the same event from a co
 
 TEST_CASE("Bookmark::getBookmarkHandleFromXML() returns a different event after the XML is changed", "[handle_from_xml]") {
   TestController test_controller;
-  std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> test_plan = test_controller.createPlan();
   LogTestController::getInstance().setTrace<TestPlan>();
 
   GIVEN("We have two different bookmarks") {
@@ -191,7 +191,7 @@ TEST_CASE("Bookmark::getBookmarkHandleFromXML() returns a different event after 
 
 TEST_CASE("Bookmark::getNewBookmarkXml() updates the bookmark", "[add_event]") {
   TestController test_controller;
-  std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> test_plan = test_controller.createPlan();
   LogTestController::getInstance().setTrace<TestPlan>();
 
   std::unique_ptr<Bookmark> bookmark = createBookmark(*test_plan, APPLICATION_CHANNEL);
@@ -210,7 +210,7 @@ TEST_CASE("Bookmark::getNewBookmarkXml() updates the bookmark", "[add_event]") {
 
 TEST_CASE("Bookmark::saveBookmarkXml() updates the bookmark and saves it to the state manager", "[save_bookmark][state]") {
   TestController test_controller;
-  std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> test_plan = test_controller.createPlan();
   LogTestController::getInstance().setTrace<TestPlan>();
 
   GIVEN("We have two different bookmarks with two different state managers") {

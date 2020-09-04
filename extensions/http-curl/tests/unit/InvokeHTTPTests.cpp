@@ -42,37 +42,37 @@
 
 TEST_CASE("HTTPTestsWithNoResourceClaimPOST", "[httptest1]") {
   TestController testController;
-  std::shared_ptr<core::ContentRepository> content_repo = std::make_shared<core::repository::VolatileContentRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo = utils::debug_make_shared<core::repository::VolatileContentRepository>();
   LogTestController::getInstance().setInfo<org::apache::nifi::minifi::processors::InvokeHTTP>();
 
-  std::shared_ptr<TestRepository> repo = std::make_shared<TestRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestRepository> repo = utils::debug_make_shared<TestRepository>();
 
-  std::shared_ptr<core::Processor> getfileprocessor = std::make_shared<org::apache::nifi::minifi::processors::GetFile>("getfileCreate2");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> getfileprocessor = utils::debug_make_shared<org::apache::nifi::minifi::processors::GetFile>("getfileCreate2");
 
-  std::shared_ptr<core::Processor> logAttribute = std::make_shared<org::apache::nifi::minifi::processors::LogAttribute>("logattribute");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> logAttribute = utils::debug_make_shared<org::apache::nifi::minifi::processors::LogAttribute>("logattribute");
 
   char format[] = "/tmp/gt.XXXXXX";
   auto dir = testController.createTempDirectory(format);
 
-  std::shared_ptr<core::Processor> listenhttp = std::make_shared<org::apache::nifi::minifi::processors::ListenHTTP>("listenhttp");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> listenhttp = utils::debug_make_shared<org::apache::nifi::minifi::processors::ListenHTTP>("listenhttp");
 
-  std::shared_ptr<core::Processor> invokehttp = std::make_shared<org::apache::nifi::minifi::processors::InvokeHTTP>("invokehttp");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> invokehttp = utils::debug_make_shared<org::apache::nifi::minifi::processors::InvokeHTTP>("invokehttp");
   utils::Identifier processoruuid;
   REQUIRE(true == listenhttp->getUUID(processoruuid));
 
   utils::Identifier invokehttp_uuid;
   REQUIRE(true == invokehttp->getUUID(invokehttp_uuid));
 
-  std::shared_ptr<minifi::Connection> gcConnection = std::make_shared<minifi::Connection>(repo, content_repo, "getfileCreate2Connection");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> gcConnection = utils::debug_make_shared<minifi::Connection>(repo, content_repo, "getfileCreate2Connection");
   gcConnection->addRelationship(core::Relationship("success", "description"));
 
-  std::shared_ptr<minifi::Connection> laConnection = std::make_shared<minifi::Connection>(repo, content_repo, "logattribute");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> laConnection = utils::debug_make_shared<minifi::Connection>(repo, content_repo, "logattribute");
   laConnection->addRelationship(core::Relationship("success", "description"));
 
-  std::shared_ptr<minifi::Connection> connection = std::make_shared<minifi::Connection>(repo, content_repo, "getfileCreate2Connection");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> connection = utils::debug_make_shared<minifi::Connection>(repo, content_repo, "getfileCreate2Connection");
   connection->addRelationship(core::Relationship("success", "description"));
 
-  std::shared_ptr<minifi::Connection> connection2 = std::make_shared<minifi::Connection>(repo, content_repo, "listenhttp");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> connection2 = utils::debug_make_shared<minifi::Connection>(repo, content_repo, "listenhttp");
 
   connection2->addRelationship(core::Relationship("No Retry", "description"));
 
@@ -87,30 +87,30 @@ TEST_CASE("HTTPTestsWithNoResourceClaimPOST", "[httptest1]") {
   invokehttp->addConnection(connection);
   invokehttp->addConnection(connection2);
 
-  std::shared_ptr<core::ProcessorNode> node = std::make_shared<core::ProcessorNode>(listenhttp);
-  std::shared_ptr<core::ProcessorNode> node2 = std::make_shared<core::ProcessorNode>(invokehttp);
-  std::shared_ptr<core::ProcessContext> context = std::make_shared<core::ProcessContext>(node, nullptr, repo, repo, content_repo);
-  std::shared_ptr<core::ProcessContext> context2 = std::make_shared<core::ProcessContext>(node2, nullptr, repo, repo, content_repo);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessorNode> node = utils::debug_make_shared<core::ProcessorNode>(listenhttp);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessorNode> node2 = utils::debug_make_shared<core::ProcessorNode>(invokehttp);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> context = utils::debug_make_shared<core::ProcessContext>(node, nullptr, repo, repo, content_repo);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> context2 = utils::debug_make_shared<core::ProcessContext>(node2, nullptr, repo, repo, content_repo);
   context->setProperty(org::apache::nifi::minifi::processors::ListenHTTP::Port, "8686");
   context->setProperty(org::apache::nifi::minifi::processors::ListenHTTP::BasePath, "/testytesttest");
 
   context2->setProperty(org::apache::nifi::minifi::processors::InvokeHTTP::Method, "POST");
   context2->setProperty(org::apache::nifi::minifi::processors::InvokeHTTP::URL, "http://localhost:8686/testytesttest");
-  auto session = std::make_shared<core::ProcessSession>(context);
-  auto session2 = std::make_shared<core::ProcessSession>(context2);
+  auto session = utils::debug_make_shared<core::ProcessSession>(context);
+  auto session2 = utils::debug_make_shared<core::ProcessSession>(context2);
 
   REQUIRE(listenhttp->getName() == "listenhttp");
 
-  std::shared_ptr<core::ProcessSessionFactory> factory = std::make_shared<core::ProcessSessionFactory>(context);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> factory = utils::debug_make_shared<core::ProcessSessionFactory>(context);
 
-  std::shared_ptr<core::FlowFile> record;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> record;
   listenhttp->setScheduledState(core::ScheduledState::RUNNING);
   listenhttp->onSchedule(context, factory);
   listenhttp->onTrigger(context, session);
 
   invokehttp->incrementActiveTasks();
   invokehttp->setScheduledState(core::ScheduledState::RUNNING);
-  std::shared_ptr<core::ProcessSessionFactory> factory2 = std::make_shared<core::ProcessSessionFactory>(context2);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> factory2 = utils::debug_make_shared<core::ProcessSessionFactory>(context2);
   invokehttp->onSchedule(context2, factory2);
   invokehttp->onTrigger(context2, session2);
 
@@ -139,7 +139,7 @@ TEST_CASE("HTTPTestsWithNoResourceClaimPOST", "[httptest1]") {
   for (auto provEventRecord : records) {
     REQUIRE(provEventRecord->getComponentType() == listenhttp->getName());
   }
-  std::shared_ptr<core::FlowFile> ffr = session2->get();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> ffr = session2->get();
   REQUIRE(true == LogTestController::getInstance().contains("exiting because method is POST"));
   LogTestController::getInstance().reset();
 }
@@ -150,7 +150,7 @@ class CallBack : public minifi::OutputStreamCallback {
   }
   virtual ~CallBack() {
   }
-  virtual int64_t process(std::shared_ptr<minifi::io::BaseStream> stream) {
+  virtual int64_t process(org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::io::BaseStream> stream) {
     // leaving the typo for posterity sake
     std::string st = "we're gnna write some test stuff";
     return stream->write(reinterpret_cast<uint8_t*>(const_cast<char*>(st.c_str())), st.length());
@@ -161,36 +161,36 @@ TEST_CASE("HTTPTestsWithResourceClaimPOST", "[httptest1]") {
   TestController testController;
   LogTestController::getInstance().setInfo<org::apache::nifi::minifi::processors::InvokeHTTP>();
 
-  std::shared_ptr<TestRepository> repo = std::make_shared<TestRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestRepository> repo = utils::debug_make_shared<TestRepository>();
 
-  std::shared_ptr<core::Processor> getfileprocessor = std::make_shared<org::apache::nifi::minifi::processors::GetFile>("getfileCreate2");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> getfileprocessor = utils::debug_make_shared<org::apache::nifi::minifi::processors::GetFile>("getfileCreate2");
 
-  std::shared_ptr<core::Processor> logAttribute = std::make_shared<org::apache::nifi::minifi::processors::LogAttribute>("logattribute");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> logAttribute = utils::debug_make_shared<org::apache::nifi::minifi::processors::LogAttribute>("logattribute");
 
   char format[] = "/tmp/gt.XXXXXX";
   auto dir = testController.createTempDirectory(format);
 
-  std::shared_ptr<core::Processor> listenhttp = std::make_shared<org::apache::nifi::minifi::processors::ListenHTTP>("listenhttp");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> listenhttp = utils::debug_make_shared<org::apache::nifi::minifi::processors::ListenHTTP>("listenhttp");
 
-  std::shared_ptr<core::Processor> invokehttp = std::make_shared<org::apache::nifi::minifi::processors::InvokeHTTP>("invokehttp");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> invokehttp = utils::debug_make_shared<org::apache::nifi::minifi::processors::InvokeHTTP>("invokehttp");
   utils::Identifier processoruuid;
   REQUIRE(true == listenhttp->getUUID(processoruuid));
 
   utils::Identifier invokehttp_uuid;
   REQUIRE(true == invokehttp->getUUID(invokehttp_uuid));
 
-  std::shared_ptr<core::ContentRepository> content_repo = std::make_shared<core::repository::VolatileContentRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo = utils::debug_make_shared<core::repository::VolatileContentRepository>();
 
-  std::shared_ptr<minifi::Connection> gcConnection = std::make_shared<minifi::Connection>(repo, content_repo, "getfileCreate2Connection");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> gcConnection = utils::debug_make_shared<minifi::Connection>(repo, content_repo, "getfileCreate2Connection");
   gcConnection->addRelationship(core::Relationship("success", "description"));
 
-  std::shared_ptr<minifi::Connection> laConnection = std::make_shared<minifi::Connection>(repo, content_repo, "logattribute");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> laConnection = utils::debug_make_shared<minifi::Connection>(repo, content_repo, "logattribute");
   laConnection->addRelationship(core::Relationship("success", "description"));
 
-  std::shared_ptr<minifi::Connection> connection = std::make_shared<minifi::Connection>(repo, content_repo, "getfileCreate2Connection");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> connection = utils::debug_make_shared<minifi::Connection>(repo, content_repo, "getfileCreate2Connection");
   connection->addRelationship(core::Relationship("success", "description"));
 
-  std::shared_ptr<minifi::Connection> connection2 = std::make_shared<minifi::Connection>(repo, content_repo, "listenhttp");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> connection2 = utils::debug_make_shared<minifi::Connection>(repo, content_repo, "listenhttp");
 
   connection2->addRelationship(core::Relationship("No Retry", "description"));
 
@@ -208,34 +208,34 @@ TEST_CASE("HTTPTestsWithResourceClaimPOST", "[httptest1]") {
   invokehttp->addConnection(connection2);
 
 
-  std::shared_ptr<core::ProcessorNode> node = std::make_shared<core::ProcessorNode>(listenhttp);
-  std::shared_ptr<core::ProcessorNode> node2 = std::make_shared<core::ProcessorNode>(invokehttp);
-  std::shared_ptr<core::ProcessContext> context = std::make_shared<core::ProcessContext>(node, nullptr, repo, repo, content_repo);
-  std::shared_ptr<core::ProcessContext> context2 = std::make_shared<core::ProcessContext>(node2, nullptr, repo, repo, content_repo);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessorNode> node = utils::debug_make_shared<core::ProcessorNode>(listenhttp);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessorNode> node2 = utils::debug_make_shared<core::ProcessorNode>(invokehttp);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> context = utils::debug_make_shared<core::ProcessContext>(node, nullptr, repo, repo, content_repo);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> context2 = utils::debug_make_shared<core::ProcessContext>(node2, nullptr, repo, repo, content_repo);
   context->setProperty(org::apache::nifi::minifi::processors::ListenHTTP::Port, "8680");
   context->setProperty(org::apache::nifi::minifi::processors::ListenHTTP::BasePath, "/testytesttest");
 
   context2->setProperty(org::apache::nifi::minifi::processors::InvokeHTTP::Method, "POST");
   context2->setProperty(org::apache::nifi::minifi::processors::InvokeHTTP::URL, "http://localhost:8680/testytesttest");
-  auto session = std::make_shared<core::ProcessSession>(context);
-  auto session2 = std::make_shared<core::ProcessSession>(context2);
+  auto session = utils::debug_make_shared<core::ProcessSession>(context);
+  auto session2 = utils::debug_make_shared<core::ProcessSession>(context2);
 
   REQUIRE(listenhttp->getName() == "listenhttp");
 
-  std::shared_ptr<core::ProcessSessionFactory> factory = std::make_shared<core::ProcessSessionFactory>(context);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> factory = utils::debug_make_shared<core::ProcessSessionFactory>(context);
 
-  std::shared_ptr<core::FlowFile> record;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> record;
 
   CallBack callback;
 
   std::map<std::string, std::string> attributes;
   attributes["testy"] = "test";
-  std::shared_ptr<minifi::FlowFileRecord> flow = std::make_shared<minifi::FlowFileRecord>(repo, content_repo, attributes);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::FlowFileRecord> flow = utils::debug_make_shared<minifi::FlowFileRecord>(repo, content_repo, attributes);
   session2->write(flow, &callback);
 
   invokehttp->incrementActiveTasks();
   invokehttp->setScheduledState(core::ScheduledState::RUNNING);
-  std::shared_ptr<core::ProcessSessionFactory> factory2 = std::make_shared<core::ProcessSessionFactory>(context2);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> factory2 = utils::debug_make_shared<core::ProcessSessionFactory>(context2);
   invokehttp->onSchedule(context2, factory2);
   invokehttp->onTrigger(context2, session2);
 
@@ -269,7 +269,7 @@ TEST_CASE("HTTPTestsWithResourceClaimPOST", "[httptest1]") {
   for (auto provEventRecord : records) {
     REQUIRE(provEventRecord->getComponentType() == listenhttp->getName());
   }
-  std::shared_ptr<core::FlowFile> ffr = session2->get();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> ffr = session2->get();
   REQUIRE(true == LogTestController::getInstance().contains("exiting because method is POST"));
   LogTestController::getInstance().reset();
 }
@@ -280,9 +280,9 @@ TEST_CASE("HTTPTestsPostNoResourceClaim", "[httptest1]") {
   LogTestController::getInstance().setInfo<org::apache::nifi::minifi::processors::ListenHTTP>();
   LogTestController::getInstance().setInfo<core::Processor>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
-  std::shared_ptr<core::Processor> processor = plan->addProcessor("ListenHTTP", "listenhttp", core::Relationship("No Retry", "description"), false);
-  std::shared_ptr<core::Processor> invokehttp = plan->addProcessor("InvokeHTTP", "invokehttp", core::Relationship("success", "description"), true);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor = plan->addProcessor("ListenHTTP", "listenhttp", core::Relationship("No Retry", "description"), false);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> invokehttp = plan->addProcessor("InvokeHTTP", "invokehttp", core::Relationship("success", "description"), true);
 
   REQUIRE(true == plan->setProperty(processor, org::apache::nifi::minifi::processors::ListenHTTP::Port.getName(), "8685"));
   REQUIRE(true == plan->setProperty(processor, org::apache::nifi::minifi::processors::ListenHTTP::BasePath.getName(), "/testytesttest"));
@@ -293,7 +293,7 @@ TEST_CASE("HTTPTestsPostNoResourceClaim", "[httptest1]") {
   testController.runSession(plan, true);
 
   auto records = plan->getProvenanceRecords();
-  std::shared_ptr<core::FlowFile> record = plan->getCurrentFlowFile();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> record = plan->getCurrentFlowFile();
   REQUIRE(record == nullptr);
   REQUIRE(records.size() == 0);
 
@@ -306,7 +306,7 @@ TEST_CASE("HTTPTestsPostNoResourceClaim", "[httptest1]") {
   for (auto provEventRecord : records) {
     REQUIRE(provEventRecord->getComponentType() == processor->getName());
   }
-  std::shared_ptr<core::FlowFile> ffr = plan->getCurrentFlowFile();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> ffr = plan->getCurrentFlowFile();
   REQUIRE(true == LogTestController::getInstance().contains("exiting because method is POST"));
   LogTestController::getInstance().reset();
 }

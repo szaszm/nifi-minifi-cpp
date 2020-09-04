@@ -42,7 +42,7 @@ TEST_CASE("TensorFlow: Apply Graph", "[tfApplyGraph]") { // NOLINT
   LogTestController::getInstance().setTrace<processors::LogAttribute>();
 
   auto plan = testController.createPlan();
-  auto repo = std::make_shared<TestRepository>();
+  auto repo = org::apache::nifi::minifi::utils::debug_make_shared<TestRepository>();
 
   // Define directory for input protocol buffers
   std::string in_dir("/tmp/gt.XXXXXX");
@@ -126,8 +126,8 @@ TEST_CASE("TensorFlow: Apply Graph", "[tfApplyGraph]") { // NOLINT
   }
 
   // Read test TensorFlow graph into TFApplyGraph
-  plan->runNextProcessor([&get_file, &in_graph_file, &plan](const std::shared_ptr<core::ProcessContext> context,
-                                                            const std::shared_ptr<core::ProcessSession> session) {
+  plan->runNextProcessor([&get_file, &in_graph_file, &plan](const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> context,
+                                                            const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> session) {
     // Intercept the call so that we can add an attr (won't be required when we have UpdateAttribute processor)
     auto flow_file = session->create();
     session->import(in_graph_file, flow_file, false);
@@ -181,7 +181,7 @@ TEST_CASE("TensorFlow: ConvertImageToTensor", "[tfConvertImageToTensor]") { // N
   LogTestController::getInstance().setTrace<processors::LogAttribute>();
 
   auto plan = testController.createPlan();
-  auto repo = std::make_shared<TestRepository>();
+  auto repo = org::apache::nifi::minifi::utils::debug_make_shared<TestRepository>();
 
   // Define directory for input protocol buffers
   std::string in_dir("/tmp/gt.XXXXXX");
@@ -309,7 +309,7 @@ TEST_CASE("TensorFlow: Extract Top Labels", "[tfExtractTopLabels]") { // NOLINT
   LogTestController::getInstance().setTrace<processors::LogAttribute>();
 
   auto plan = testController.createPlan();
-  auto repo = std::make_shared<TestRepository>();
+  auto repo = org::apache::nifi::minifi::utils::debug_make_shared<TestRepository>();
 
   // Define directory for input protocol buffers
   std::string in_dir("/tmp/gt.XXXXXX");
@@ -358,8 +358,8 @@ TEST_CASE("TensorFlow: Extract Top Labels", "[tfExtractTopLabels]") { // NOLINT
   }
 
   // Read labels
-  plan->runNextProcessor([&get_file, &in_labels_file, &plan](const std::shared_ptr<core::ProcessContext> context,
-                                                             const std::shared_ptr<core::ProcessSession> session) {
+  plan->runNextProcessor([&get_file, &in_labels_file, &plan](const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> context,
+                                                             const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> session) {
     // Intercept the call so that we can add an attr (won't be required when we have UpdateAttribute processor)
     auto flow_file = session->create();
     session->import(in_labels_file, flow_file, false);

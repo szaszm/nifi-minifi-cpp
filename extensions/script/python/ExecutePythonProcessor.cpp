@@ -79,7 +79,7 @@ void ExecutePythonProcessor::initialize() {
   loadScript();
   try {
     if (script_to_exec_.size()) {
-      std::shared_ptr<python::PythonScriptEngine> engine = getScriptEngine();
+      org::apache::nifi::minifi::utils::debug_shared_ptr<python::PythonScriptEngine> engine = getScriptEngine();
       engine->eval(script_to_exec_);
       auto shared_this = shared_from_this();
       engine->describe(shared_this);
@@ -98,7 +98,7 @@ void ExecutePythonProcessor::initialize() {
   }
 }
 
-void ExecutePythonProcessor::onSchedule(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
+void ExecutePythonProcessor::onSchedule(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSessionFactory> &sessionFactory) {
   if (!valid_init_) {
     throw std::runtime_error("Could not correctly initialize " + getName());
   }
@@ -107,7 +107,7 @@ void ExecutePythonProcessor::onSchedule(const std::shared_ptr<core::ProcessConte
     if (script_to_exec_.empty()) {
       throw std::runtime_error("Neither Script Body nor Script File is available to execute");
     }
-    std::shared_ptr<python::PythonScriptEngine> engine = getScriptEngine();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<python::PythonScriptEngine> engine = getScriptEngine();
 
     engine->eval(script_to_exec_);
     engine->onSchedule(context);
@@ -122,7 +122,7 @@ void ExecutePythonProcessor::onSchedule(const std::shared_ptr<core::ProcessConte
   }
 }
 
-void ExecutePythonProcessor::onTrigger(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session) {
+void ExecutePythonProcessor::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   if (!valid_init_) {
     throw std::runtime_error("Could not correctly initialize " + getName());
   }
@@ -134,7 +134,7 @@ void ExecutePythonProcessor::onTrigger(const std::shared_ptr<core::ProcessContex
       throw std::runtime_error("Neither Script Body nor Script File is available to execute");
     }
 
-    std::shared_ptr<python::PythonScriptEngine> engine = getScriptEngine();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<python::PythonScriptEngine> engine = getScriptEngine();
     engine->onTrigger(context, session);
     handleEngineNoLongerInUse(std::move(engine));
   }
@@ -149,8 +149,8 @@ void ExecutePythonProcessor::onTrigger(const std::shared_ptr<core::ProcessContex
 }
 
 // TODO(hunyadi): This is potentially not what we want. See https://issues.apache.org/jira/browse/MINIFICPP-1222
-std::shared_ptr<python::PythonScriptEngine> ExecutePythonProcessor::getScriptEngine() {
-  std::shared_ptr<python::PythonScriptEngine> engine;
+org::apache::nifi::minifi::utils::debug_shared_ptr<python::PythonScriptEngine> ExecutePythonProcessor::getScriptEngine() {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<python::PythonScriptEngine> engine;
   // Use an existing engine, if one is available
   if (script_engine_q_.try_dequeue(engine)) {
     logger_->log_debug("Using available [%p] script engine instance", engine.get());
@@ -164,7 +164,7 @@ std::shared_ptr<python::PythonScriptEngine> ExecutePythonProcessor::getScriptEng
   return engine;
 }
 
-void ExecutePythonProcessor::handleEngineNoLongerInUse(std::shared_ptr<python::PythonScriptEngine>&& engine) {
+void ExecutePythonProcessor::handleEngineNoLongerInUse(org::apache::nifi::minifi::utils::debug_shared_ptr<python::PythonScriptEngine>&& engine) {
   // Make engine available for use again
   if (script_engine_q_.size_approx() < getMaxConcurrentTasks()) {
     logger_->log_debug("Releasing [%p] script engine", engine.get());

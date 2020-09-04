@@ -151,7 +151,7 @@ class FlowControlProtocol {
   /*!
    * Create a new control protocol
    */
-  FlowControlProtocol(FlowController *controller, const std::shared_ptr<Configure> &configure)
+  FlowControlProtocol(FlowController *controller, const org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> &configure)
       : logger_(logging::LoggerFactory<FlowControlProtocol>::getLogger()) {
     _controller = controller;
     _socket = 0;

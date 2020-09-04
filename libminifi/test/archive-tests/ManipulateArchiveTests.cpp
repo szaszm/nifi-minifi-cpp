@@ -56,8 +56,8 @@ bool run_archive_test(OrderedTestArchive input_archive, OrderedTestArchive outpu
     LogTestController::getInstance().setTrace<org::apache::nifi::minifi::core::Connectable>();
     LogTestController::getInstance().setTrace<org::apache::nifi::minifi::core::FlowFile>();
 
-    std::shared_ptr<TestPlan> plan = testController.createPlan();
-    std::shared_ptr<TestRepository> repo = std::make_shared<TestRepository>();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<TestPlan> plan = testController.createPlan();
+    org::apache::nifi::minifi::utils::debug_shared_ptr<TestRepository> repo = org::apache::nifi::minifi::utils::debug_make_shared<TestRepository>();
 
     std::string dir1 = [&] {char format[] = "/tmp/gt.XXXXXX"; return testController.createTempDirectory(format); }();
     std::string dir2 = [&] {char format[] = "/tmp/gt.XXXXXX"; return testController.createTempDirectory(format); }();
@@ -65,17 +65,17 @@ bool run_archive_test(OrderedTestArchive input_archive, OrderedTestArchive outpu
     REQUIRE(!dir1.empty());
     REQUIRE(!dir2.empty());
 
-    std::shared_ptr<core::Processor> getfile = plan->addProcessor("GetFile", "getfileCreate2");
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> getfile = plan->addProcessor("GetFile", "getfileCreate2");
     plan->setProperty(getfile, org::apache::nifi::minifi::processors::GetFile::Directory.getName(), dir1);
     plan->setProperty(getfile, org::apache::nifi::minifi::processors::GetFile::KeepSourceFile.getName(), "true");
 
-    std::shared_ptr<core::Processor> maprocessor = plan->addProcessor("ManipulateArchive", "testManipulateArchive", core::Relationship("success", "description"), true);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> maprocessor = plan->addProcessor("ManipulateArchive", "testManipulateArchive", core::Relationship("success", "description"), true);
 
     for (auto kv : properties) {
       plan->setProperty(maprocessor, kv.first, kv.second);
     }
 
-    std::shared_ptr<core::Processor> putfile2 = plan->addProcessor("PutFile", "PutFile2", core::Relationship("success", "description"), true);
+    org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> putfile2 = plan->addProcessor("PutFile", "PutFile2", core::Relationship("success", "description"), true);
     plan->setProperty(putfile2, org::apache::nifi::minifi::processors::PutFile::Directory.getName(), dir2);
     plan->setProperty(putfile2, org::apache::nifi::minifi::processors::PutFile::ConflictResolution.getName(),
                       org::apache::nifi::minifi::processors::PutFile::CONFLICT_RESOLUTION_STRATEGY_REPLACE);
@@ -105,7 +105,7 @@ bool run_archive_test(TAE_MAP_T input_map, TAE_MAP_T output_map, PROP_MAP_T prop
 
 TEST_CASE("Test creation of ManipulateArchive", "[manipulatearchiveCreate]") {
   TestController testController;
-  std::shared_ptr<core::Processor> processor = std::make_shared<org::apache::nifi::minifi::processors::ManipulateArchive>("processorname");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> processor = org::apache::nifi::minifi::utils::debug_make_shared<org::apache::nifi::minifi::processors::ManipulateArchive>("processorname");
   REQUIRE(processor->getName() == "processorname");
   utils::Identifier processoruuid;
   REQUIRE(true == processor->getUUID(processoruuid));

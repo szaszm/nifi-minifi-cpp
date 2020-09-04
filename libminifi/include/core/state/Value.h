@@ -27,6 +27,7 @@
 #include <vector>
 #include <typeinfo>
 #include "utils/ValueParser.h"
+#include "utils/PointerUtils.h"
 
 namespace org {
 namespace apache {
@@ -383,40 +384,40 @@ class Int64Value : public Value {
   int64_t value;
 };
 
-static inline std::shared_ptr<Value> createValue(const bool &object) {
-  return std::make_shared<BoolValue>(object);
+static inline org::apache::nifi::minifi::utils::debug_shared_ptr<Value> createValue(const bool &object) {
+  return org::apache::nifi::minifi::utils::debug_make_shared<BoolValue>(object);
 }
 
-static inline std::shared_ptr<Value> createValue(const char *object) {
-  return std::make_shared<Value>(object);
+static inline org::apache::nifi::minifi::utils::debug_shared_ptr<Value> createValue(const char *object) {
+  return org::apache::nifi::minifi::utils::debug_make_shared<Value>(object);
 }
 
-static inline std::shared_ptr<Value> createValue(char *object) {
-  return std::make_shared<Value>(std::string(object));
+static inline org::apache::nifi::minifi::utils::debug_shared_ptr<Value> createValue(char *object) {
+  return org::apache::nifi::minifi::utils::debug_make_shared<Value>(std::string(object));
 }
 
-static inline std::shared_ptr<Value> createValue(const std::string &object) {
-  return std::make_shared<Value>(object);
+static inline org::apache::nifi::minifi::utils::debug_shared_ptr<Value> createValue(const std::string &object) {
+  return org::apache::nifi::minifi::utils::debug_make_shared<Value>(object);
 }
 
-static inline std::shared_ptr<Value> createValue(const uint32_t &object) {
-  return std::make_shared<UInt32Value>(object);
+static inline org::apache::nifi::minifi::utils::debug_shared_ptr<Value> createValue(const uint32_t &object) {
+  return org::apache::nifi::minifi::utils::debug_make_shared<UInt32Value>(object);
 }
 #if ( defined(__APPLE__) || defined(__MACH__) || defined(DARWIN) )
-static inline std::shared_ptr<Value> createValue(const size_t &object) {
-  return std::make_shared<UInt64Value>(object);
+static inline org::apache::nifi::minifi::utils::debug_shared_ptr<Value> createValue(const size_t &object) {
+  return org::apache::nifi::minifi::utils::debug_make_shared<UInt64Value>(object);
 }
 #endif
-static inline std::shared_ptr<Value> createValue(const uint64_t &object) {
-  return std::make_shared<UInt64Value>(object);
+static inline org::apache::nifi::minifi::utils::debug_shared_ptr<Value> createValue(const uint64_t &object) {
+  return org::apache::nifi::minifi::utils::debug_make_shared<UInt64Value>(object);
 }
 
-static inline std::shared_ptr<Value> createValue(const int64_t &object) {
-  return std::make_shared<Int64Value>(object);
+static inline org::apache::nifi::minifi::utils::debug_shared_ptr<Value> createValue(const int64_t &object) {
+  return org::apache::nifi::minifi::utils::debug_make_shared<Int64Value>(object);
 }
 
-static inline std::shared_ptr<Value> createValue(const int &object) {
-  return std::make_shared<IntValue>(object);
+static inline org::apache::nifi::minifi::utils::debug_shared_ptr<Value> createValue(const int &object) {
+  return org::apache::nifi::minifi::utils::debug_make_shared<IntValue>(object);
 }
 
 /**
@@ -467,7 +468,7 @@ class ValueNode {
     return value_ ? value_->getStringValue() : "";
   }
 
-  std::shared_ptr<Value> getValue() const {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Value> getValue() const {
     return value_;
   }
 
@@ -476,7 +477,7 @@ class ValueNode {
   }
 
  protected:
-  std::shared_ptr<Value> value_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Value> value_;
 };
 
 struct SerializedResponseNode {

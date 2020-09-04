@@ -63,8 +63,8 @@ class FlowConfiguration : public CoreComponent {
    * Constructor that will be used for configuring
    * the flow controller.
    */
-  explicit FlowConfiguration(std::shared_ptr<core::Repository> repo, std::shared_ptr<core::Repository> flow_file_repo, std::shared_ptr<core::ContentRepository> content_repo,
-                             std::shared_ptr<io::StreamFactory> stream_factory, std::shared_ptr<Configure> configuration, const std::string path)
+  explicit FlowConfiguration(org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> repo, org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_file_repo, org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo,
+                             org::apache::nifi::minifi::utils::debug_shared_ptr<io::StreamFactory> stream_factory, org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configuration, const std::string path)
       : CoreComponent(core::getClassName<FlowConfiguration>()),
         config_path_(path),
         flow_file_repo_(flow_file_repo),
@@ -72,12 +72,12 @@ class FlowConfiguration : public CoreComponent {
         stream_factory_(stream_factory),
         configuration_(configuration),
         logger_(logging::LoggerFactory<FlowConfiguration>::getLogger()) {
-    controller_services_ = std::make_shared<core::controller::ControllerServiceMap>();
-    service_provider_ = std::make_shared<core::controller::StandardControllerServiceProvider>(controller_services_, nullptr, configuration);
+    controller_services_ = org::apache::nifi::minifi::utils::debug_make_shared<core::controller::ControllerServiceMap>();
+    service_provider_ = org::apache::nifi::minifi::utils::debug_make_shared<core::controller::StandardControllerServiceProvider>(controller_services_, nullptr, configuration);
     std::string flowUrl = "", bucket_id = "default", flowId = "";
     configuration->get(Configure::nifi_c2_flow_id, flowId);
     configuration->get(Configure::nifi_c2_flow_url, flowUrl);
-    flow_version_ = std::make_shared<state::response::FlowVersion>(flowUrl, bucket_id, flowId);
+    flow_version_ = org::apache::nifi::minifi::utils::debug_make_shared<state::response::FlowVersion>(flowUrl, bucket_id, flowId);
 
     // it is okay if this has already been called
     initialize_static_functions();
@@ -86,27 +86,27 @@ class FlowConfiguration : public CoreComponent {
   virtual ~FlowConfiguration();
 
   // Create Processor (Node/Input/Output Port) based on the name
-  std::shared_ptr<core::Processor> createProcessor(std::string name, utils::Identifier &uuid);
-  std::shared_ptr<core::Processor> createProcessor(const std::string &name, const std::string &fullname, utils::Identifier &uuid);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> createProcessor(std::string name, utils::Identifier &uuid);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> createProcessor(const std::string &name, const std::string &fullname, utils::Identifier &uuid);
   // Create Root Processor Group
 
   std::unique_ptr<core::ProcessGroup> createRootProcessGroup(std::string name, utils::Identifier & uuid, int version);
 
-  std::shared_ptr<core::controller::ControllerServiceNode> createControllerService(const std::string &class_name, const std::string &full_class_name, const std::string &name,
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceNode> createControllerService(const std::string &class_name, const std::string &full_class_name, const std::string &name,
                                                                                    utils::Identifier & uuid);
 
   // Create Remote Processor Group
   std::unique_ptr<core::ProcessGroup> createRemoteProcessGroup(std::string name, utils::Identifier & uuid);
   // Create Connection
-  std::shared_ptr<minifi::Connection> createConnection(std::string name, utils::Identifier & uuid);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Connection> createConnection(std::string name, utils::Identifier & uuid);
   // Create Provenance Report Task
-  std::shared_ptr<core::Processor> createProvenanceReportTask(void);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Processor> createProvenanceReportTask(void);
 
-  std::shared_ptr<state::response::FlowVersion> getFlowVersion() const {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::FlowVersion> getFlowVersion() const {
     return flow_version_;
   }
 
-  std::shared_ptr<Configure> getConfiguration() {  // cannot be const as getters mutate the underlying map
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> getConfiguration() {  // cannot be const as getters mutate the underlying map
     return configuration_;
   }
 
@@ -137,7 +137,7 @@ class FlowConfiguration : public CoreComponent {
     return nullptr;
   }
 
-  std::shared_ptr<core::controller::StandardControllerServiceProvider> &getControllerServiceProvider() {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::StandardControllerServiceProvider> &getControllerServiceProvider() {
     return service_provider_;
   }
 
@@ -164,19 +164,19 @@ class FlowConfiguration : public CoreComponent {
   }
 
   // service provider reference.
-  std::shared_ptr<core::controller::StandardControllerServiceProvider> service_provider_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::StandardControllerServiceProvider> service_provider_;
   // based, shared controller service map.
-  std::shared_ptr<core::controller::ControllerServiceMap> controller_services_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::controller::ControllerServiceMap> controller_services_;
   // configuration path
   std::string config_path_;
   // flow file repo
-  std::shared_ptr<core::Repository> flow_file_repo_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> flow_file_repo_;
   // content repository.
-  std::shared_ptr<core::ContentRepository> content_repo_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo_;
   // stream factory
-  std::shared_ptr<io::StreamFactory> stream_factory_;
-  std::shared_ptr<Configure> configuration_;
-  std::shared_ptr<state::response::FlowVersion> flow_version_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<io::StreamFactory> stream_factory_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Configure> configuration_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<state::response::FlowVersion> flow_version_;
 
  private:
   std::shared_ptr<logging::Logger> logger_;

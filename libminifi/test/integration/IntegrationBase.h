@@ -60,7 +60,7 @@ class IntegrationBase {
   virtual void configureC2() {
   }
 
-  virtual void queryRootProcessGroup(std::shared_ptr<core::ProcessGroup> pg) {
+  virtual void queryRootProcessGroup(org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessGroup> pg) {
 
   }
 
@@ -68,13 +68,13 @@ class IntegrationBase {
 
   }
 
-  virtual void updateProperties(std::shared_ptr<minifi::FlowController> fc) {
+  virtual void updateProperties(org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::FlowController> fc) {
 
   }
 
   void configureSecurity();
-  std::shared_ptr<minifi::Configure> configuration;
-  std::shared_ptr<minifi::FlowController> flowController_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::Configure> configuration;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::FlowController> flowController_;
   uint64_t wait_time_;
   std::string port, scheme, path;
   std::string key_dir;
@@ -82,7 +82,7 @@ class IntegrationBase {
 };
 
 IntegrationBase::IntegrationBase(uint64_t waitTime)
-    : configuration(std::make_shared<minifi::Configure>()),
+    : configuration(org::apache::nifi::minifi::utils::debug_make_shared<minifi::Configure>()),
       wait_time_(waitTime) {
 }
 
@@ -99,17 +99,17 @@ void IntegrationBase::configureSecurity() {
 void IntegrationBase::run(std::string test_file_location) {
   testSetup();
 
-  std::shared_ptr<core::Repository> test_repo = std::make_shared<TestRepository>();
-  std::shared_ptr<core::Repository> test_flow_repo = std::make_shared<TestFlowRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> test_repo = org::apache::nifi::minifi::utils::debug_make_shared<TestRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::Repository> test_flow_repo = org::apache::nifi::minifi::utils::debug_make_shared<TestFlowRepository>();
 
   configuration->set(minifi::Configure::nifi_flow_configuration_file, test_file_location);
 
   configureC2();
   configureFullHeartbeat();
 
-  std::shared_ptr<core::ContentRepository> content_repo = std::make_shared<core::repository::VolatileContentRepository>();
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ContentRepository> content_repo = org::apache::nifi::minifi::utils::debug_make_shared<core::repository::VolatileContentRepository>();
   content_repo->initialize(configuration);
-  std::shared_ptr<minifi::io::StreamFactory> stream_factory = minifi::io::StreamFactory::getInstance(configuration);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::io::StreamFactory> stream_factory = minifi::io::StreamFactory::getInstance(configuration);
   std::unique_ptr<core::FlowConfiguration> yaml_ptr = std::unique_ptr<core::YamlConfiguration>(
       new core::YamlConfiguration(test_repo, test_repo, content_repo, stream_factory, configuration, test_file_location));
 
@@ -120,12 +120,12 @@ void IntegrationBase::run(std::string test_file_location) {
   state_dir = utils::file::FileUtils::create_temp_directory(state_dir_name_template);
   core::ProcessContext::getOrCreateDefaultStateManagerProvider(controller_service_provider.get(), configuration, state_dir.c_str());
 
-  std::shared_ptr<core::ProcessGroup> pg(yaml_config.getRoot(test_file_location));
+  org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessGroup> pg(yaml_config.getRoot(test_file_location));
   queryRootProcessGroup(pg);
 
-  std::shared_ptr<TestRepository> repo = std::static_pointer_cast<TestRepository>(test_repo);
+  org::apache::nifi::minifi::utils::debug_shared_ptr<TestRepository> repo = static_pointer_cast<TestRepository>(test_repo);
 
-  flowController_ = std::make_shared<minifi::FlowController>(test_repo, test_flow_repo, configuration, std::move(yaml_ptr), content_repo, DEFAULT_ROOT_GROUP_NAME,
+  flowController_ = org::apache::nifi::minifi::utils::debug_make_shared<minifi::FlowController>(test_repo, test_flow_repo, configuration, std::move(yaml_ptr), content_repo, DEFAULT_ROOT_GROUP_NAME,
                                                                                                 true);
   flowController_->load();
   updateProperties(flowController_);

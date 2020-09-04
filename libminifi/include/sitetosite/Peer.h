@@ -103,7 +103,7 @@ class Peer {
 
 class PeerStatus {
  public:
-  PeerStatus(const std::shared_ptr<Peer> &peer, uint32_t flow_file_count, bool query_for_peers)
+  PeerStatus(const org::apache::nifi::minifi::utils::debug_shared_ptr<Peer> &peer, uint32_t flow_file_count, bool query_for_peers)
       : peer_(peer),
         flow_file_count_(flow_file_count),
         query_for_peers_(query_for_peers) {
@@ -113,7 +113,7 @@ class PeerStatus {
         flow_file_count_(std::move(other.flow_file_count_)),
         query_for_peers_(std::move(other.query_for_peers_)) {
   }
-  const std::shared_ptr<Peer> &getPeer() const {
+  const org::apache::nifi::minifi::utils::debug_shared_ptr<Peer> &getPeer() const {
     return peer_;
   }
 
@@ -126,7 +126,7 @@ class PeerStatus {
   }
 
  protected:
-  std::shared_ptr<Peer> peer_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Peer> peer_;
   uint32_t flow_file_count_;
   bool query_for_peers_;
 };

@@ -53,7 +53,7 @@ JNIEXPORT jobject JNICALL Java_org_apache_nifi_processor_JniProcessSession_creat
 
   auto flow_file = session->getSession()->create();
 
-  auto flow = std::make_shared<minifi::jni::JniFlowFile>(flow_file, session->getServicer(), ff_instance);
+  auto flow = utils::debug_make_shared<minifi::jni::JniFlowFile>(flow_file, session->getServicer(), ff_instance);
 
   flow_file->addReference(flow);
 
@@ -84,7 +84,7 @@ JNIEXPORT jobject JNICALL Java_org_apache_nifi_processor_JniProcessSession_readF
 
     session->getSession()->read(ptr->get(), callback.get());
 
-    auto jniInpuStream = std::make_shared<minifi::jni::JniInputStream>(std::move(callback), jin, session->getServicer());
+    auto jniInpuStream = utils::debug_make_shared<minifi::jni::JniInputStream>(std::move(callback), jin, session->getServicer());
 
     session->addInputStream(jniInpuStream);
 
@@ -162,7 +162,7 @@ JNIEXPORT jobject JNICALL Java_org_apache_nifi_processor_JniProcessSession_clone
 
     auto flow_file = session->getSession()->clone(ptr->get());
 
-    auto flow = std::make_shared<minifi::jni::JniFlowFile>(flow_file, session->getServicer(), ff_instance);
+    auto flow = utils::debug_make_shared<minifi::jni::JniFlowFile>(flow_file, session->getServicer(), ff_instance);
 
     flow_file->addReference(flow);
 
@@ -203,7 +203,7 @@ JNIEXPORT jobject JNICALL Java_org_apache_nifi_processor_JniProcessSession_get(J
     return nullptr;
   }
 
-  auto flow = std::make_shared<minifi::jni::JniFlowFile>(flow_file, session->getServicer(), ff_instance);
+  auto flow = utils::debug_make_shared<minifi::jni::JniFlowFile>(flow_file, session->getServicer(), ff_instance);
 
   flow_file->addReference(flow);
 
@@ -283,7 +283,7 @@ JNIEXPORT jobject JNICALL Java_org_apache_nifi_processor_JniProcessSession_creat
 
     auto flow_file = session->getSession()->create(ptr->get());
 
-    auto flow = std::make_shared<minifi::jni::JniFlowFile>(flow_file, session->getServicer(), ff_instance);
+    auto flow = utils::debug_make_shared<minifi::jni::JniFlowFile>(flow_file, session->getServicer(), ff_instance);
 
     flow_file->addReference(flow);
 
@@ -341,7 +341,7 @@ JNIEXPORT jobject JNICALL Java_org_apache_nifi_processor_JniProcessSessionFactor
   // create a session
   auto procSession = sessionFactory->getFactory()->createSession();
 
-  std::shared_ptr<minifi::jni::JniSession> session = std::make_shared<minifi::jni::JniSession>(procSession, session_instance, sessionFactory->getServicer());
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::jni::JniSession> session = utils::debug_make_shared<minifi::jni::JniSession>(procSession, session_instance, sessionFactory->getServicer());
 
   // add a reference so the minifi C++ session factory knows to remove these eventually.
   procSession->addReference(session);
@@ -420,7 +420,7 @@ JNIEXPORT jobject JNICALL  Java_org_apache_nifi_processor_JniProcessSession_clon
 
     auto flow_file = session->getSession()->clone(ptr->get(), offset, size);
 
-    auto flow = std::make_shared<minifi::jni::JniFlowFile>(flow_file, session->getServicer(), ff_instance);
+    auto flow = utils::debug_make_shared<minifi::jni::JniFlowFile>(flow_file, session->getServicer(), ff_instance);
 
     flow_file->addReference(flow);
 

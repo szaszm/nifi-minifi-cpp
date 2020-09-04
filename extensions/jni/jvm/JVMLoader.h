@@ -275,11 +275,11 @@ class JVMLoader {
     env->SetLongField(obj, getPtrField(minifi::core::getClassName<T>(), env, obj), handle);
   }
 
-  void setBaseServicer(std::shared_ptr<JavaServicer> servicer) {
+  void setBaseServicer(org::apache::nifi::minifi::utils::debug_shared_ptr<JavaServicer> servicer) {
     java_servicer_ = servicer;
   }
 
-  std::shared_ptr<JavaServicer> getBaseServicer() const {
+  org::apache::nifi::minifi::utils::debug_shared_ptr<JavaServicer> getBaseServicer() const {
     std::lock_guard<std::mutex> lock(internal_mutex_);
     return java_servicer_;
   }
@@ -490,7 +490,7 @@ class JVMLoader {
   jobject gClassLoader;
   jmethodID gFindClassMethod;
 
-  std::shared_ptr<JavaServicer> java_servicer_;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<JavaServicer> java_servicer_;
 
   JVMLoader()
       : java_options_(nullptr),

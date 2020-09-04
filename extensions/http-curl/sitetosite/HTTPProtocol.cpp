@@ -38,7 +38,7 @@ namespace nifi {
 namespace minifi {
 namespace sitetosite {
 
-std::shared_ptr<utils::IdGenerator> HttpSiteToSiteClient::id_generator_ = utils::IdGenerator::getIdGenerator();
+org::apache::nifi::minifi::utils::debug_shared_ptr<utils::IdGenerator> HttpSiteToSiteClient::id_generator_ = utils::IdGenerator::getIdGenerator();
 
 const std::string HttpSiteToSiteClient::parseTransactionId(const std::string &uri) {
   int i = 0;
@@ -49,7 +49,7 @@ const std::string HttpSiteToSiteClient::parseTransactionId(const std::string &ur
   return uri.substr(i + 1, uri.length() - (i + 1));
 }
 
-std::shared_ptr<Transaction> HttpSiteToSiteClient::createTransaction(std::string &transactionID, TransferDirection direction) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> HttpSiteToSiteClient::createTransaction(std::string &transactionID, TransferDirection direction) {
   std::string dir_str = direction == SEND ? "input-ports" : "output-ports";
   std::stringstream uri;
   uri << getBaseURI() << "data-transfer/" << dir_str << "/" << getPortId() << "/transactions";
@@ -73,13 +73,13 @@ std::shared_ptr<Transaction> HttpSiteToSiteClient::createTransaction(std::string
         logger_->log_debug("Location is empty");
       } else {
         org::apache::nifi::minifi::io::CRCStream<SiteToSitePeer> crcstream(peer_.get());
-        auto transaction = std::make_shared<HttpTransaction>(direction, crcstream);
+        auto transaction = utils::debug_make_shared<HttpTransaction>(direction, crcstream);
         transaction->initialize(this, url);
         auto transactionId = parseTransactionId(url);
         if (IsNullOrEmpty(transactionId))
           return nullptr;
         transaction->setTransactionId(transactionId);
-        std::shared_ptr<minifi::utils::HTTPClient> client;
+        org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::utils::HTTPClient> client;
         if (transaction->getDirection() == SEND) {
           client = openConnectionForSending(transaction);
         } else {
@@ -105,7 +105,7 @@ std::shared_ptr<Transaction> HttpSiteToSiteClient::createTransaction(std::string
   return nullptr;
 }
 
-int HttpSiteToSiteClient::readResponse(const std::shared_ptr<Transaction> &transaction, RespondCode &code, std::string &message) {
+int HttpSiteToSiteClient::readResponse(const org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> &transaction, RespondCode &code, std::string &message) {
   if (current_code == FINISH_TRANSACTION) {
 
     if (transaction->getDirection() == SEND) {
@@ -170,7 +170,7 @@ int HttpSiteToSiteClient::readResponse(const std::shared_ptr<Transaction> &trans
 
 }
 // write respond
-int HttpSiteToSiteClient::writeResponse(const std::shared_ptr<Transaction> &transaction, RespondCode code, std::string message) {
+int HttpSiteToSiteClient::writeResponse(const org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> &transaction, RespondCode code, std::string message) {
   current_code = code;
   if (code == CONFIRM_TRANSACTION || code == FINISH_TRANSACTION) {
     return 1;
@@ -200,25 +200,25 @@ bool HttpSiteToSiteClient::getPeerList(std::vector<PeerStatus> &peers) {
   return false;
 }
 
-std::shared_ptr<minifi::utils::HTTPClient> HttpSiteToSiteClient::openConnectionForSending(const std::shared_ptr<HttpTransaction> &transaction) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::utils::HTTPClient> HttpSiteToSiteClient::openConnectionForSending(const org::apache::nifi::minifi::utils::debug_shared_ptr<HttpTransaction> &transaction) {
   std::stringstream uri;
   uri << transaction->getTransactionUrl() << "/flow-files";
-  std::shared_ptr<minifi::utils::HTTPClient> client = create_http_client(uri.str(), "POST");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::utils::HTTPClient> client = create_http_client(uri.str(), "POST");
   client->setContentType("application/octet-stream");
   client->appendHeader("Accept", "text/plain");
   client->setUseChunkedEncoding();
   return client;
 }
 
-std::shared_ptr<minifi::utils::HTTPClient> HttpSiteToSiteClient::openConnectionForReceive(const std::shared_ptr<HttpTransaction> &transaction) {
+org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::utils::HTTPClient> HttpSiteToSiteClient::openConnectionForReceive(const org::apache::nifi::minifi::utils::debug_shared_ptr<HttpTransaction> &transaction) {
   std::stringstream uri;
   uri << transaction->getTransactionUrl() << "/flow-files";
-  std::shared_ptr<minifi::utils::HTTPClient> client = create_http_client(uri.str(), "GET");
+  org::apache::nifi::minifi::utils::debug_shared_ptr<minifi::utils::HTTPClient> client = create_http_client(uri.str(), "GET");
   return client;
 }
 
 //! Transfer string for the process session
-bool HttpSiteToSiteClient::transmitPayload(const std::shared_ptr<core::ProcessContext> &context, const std::shared_ptr<core::ProcessSession> &session, const std::string &payload,
+bool HttpSiteToSiteClient::transmitPayload(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session, const std::string &payload,
                                            std::map<std::string, std::string> attributes) {
   return false;
 }
@@ -235,9 +235,9 @@ void HttpSiteToSiteClient::tearDown() {
 }
 
 void HttpSiteToSiteClient::closeTransaction(const std::string &transactionID) {
-  std::shared_ptr<Transaction> transaction = NULL;
+  org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> transaction = NULL;
 
-  std::map<std::string, std::shared_ptr<Transaction> >::iterator it = this->known_transactions_.find(transactionID);
+  std::map<std::string, org::apache::nifi::minifi::utils::debug_shared_ptr<Transaction> >::iterator it = this->known_transactions_.find(transactionID);
 
   if (it == known_transactions_.end()) {
     return;

@@ -48,8 +48,8 @@ void ApplyTemplate::initialize() {
   setSupportedRelationships(relationships);
 }
 
-void ApplyTemplate::onTrigger(const std::shared_ptr<core::ProcessContext> &context,
-                              const std::shared_ptr<core::ProcessSession> &session) {
+void ApplyTemplate::onTrigger(const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessContext> &context,
+                              const org::apache::nifi::minifi::utils::debug_shared_ptr<core::ProcessSession> &session) {
   auto flow_file = session->get();
 
   if (!flow_file) {
@@ -63,13 +63,13 @@ void ApplyTemplate::onTrigger(const std::shared_ptr<core::ProcessContext> &conte
   session->transfer(flow_file, Success);
 }
 
-ApplyTemplate::WriteCallback::WriteCallback(const std::string &path, const std::shared_ptr<core::FlowFile> &flow_file) {
+ApplyTemplate::WriteCallback::WriteCallback(const std::string &path, const org::apache::nifi::minifi::utils::debug_shared_ptr<core::FlowFile> &flow_file) {
   logger_ = logging::LoggerFactory<ApplyTemplate::WriteCallback>::getLogger();
   template_file_ = path;
   flow_file_ = flow_file;
 }
 
-int64_t ApplyTemplate::WriteCallback::process(const std::shared_ptr<io::BaseStream> stream) {
+int64_t ApplyTemplate::WriteCallback::process(const org::apache::nifi::minifi::utils::debug_shared_ptr<io::BaseStream> stream) {
   logger_->log_info("ApplyTemplate reading template file from %s", template_file_);
   boost::iostreams::mapped_file_source file(template_file_);
 
