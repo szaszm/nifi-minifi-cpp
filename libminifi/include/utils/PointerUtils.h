@@ -17,12 +17,14 @@
 
 #pragma once
 
+#include <boost/stacktrace.hpp>
+
 #include <memory>
 #include <utility>
 #include <type_traits>
-#include <iostream>
+#include <sstream>
 #include <unordered_map>
-#include <set>
+#include <map>
 #include <mutex>
 
 #include "utils/GeneralUtils.h"
@@ -38,8 +40,8 @@ struct make_shared_t{};
 struct pointer_cast_t{};
 struct shared_from_this_t{};
 
-inline std::unordered_map<std::string /* typeid(T).name() */, std::unordered_map<const void* /* obj_ptr */, std::set<const void* /* shared_ptr_this */>>>& get_debug_map() {
-  static std::unordered_map<std::string /* typeid(T).name() */, std::unordered_map<const void* /* obj_ptr */, std::set<const void* /* shared_ptr_this */>>> collection;
+inline std::unordered_map<std::string /* typeid(T).name() */, std::unordered_map<const void* /* obj_ptr */, std::map<const void* /* shared_ptr_this */, std::string /* stack trace */>>>& get_debug_map() {
+  static std::unordered_map<std::string /* typeid(T).name() */, std::unordered_map<const void* /* obj_ptr */, std::map<const void* /* shared_ptr_this */, std::string /* stack trace */>>> collection;
   return collection;
 }
 
@@ -55,11 +57,14 @@ struct managed_object_metadata {
   void add() {
     if (!ptr) return;
     const auto l = lock_debug_map();
-    get_debug_map()[this->type_id][this->ptr].insert(this);
+    std::ostringstream trace;
+    trace << boost::stacktrace::stacktrace{};
+    get_debug_map()[this->type_id][this->ptr][this] = trace.str();
   }
 
   template<typename T>
   void check(const std::shared_ptr<T>& p) const {
+    return;
     gsl_Expects((p == nullptr) == (this->ptr == nullptr));
     if(!ptr) return;
     const auto l = lock_debug_map();
@@ -71,10 +76,9 @@ struct managed_object_metadata {
   void remove() {
     if (!ptr) return;
     const auto l = lock_debug_map();
-    auto& set = detail::get_debug_map()[type_id][ptr];
-    const auto it = set.find(this);
-    gsl_Expects(it != set.end());
-    set.erase(it);
+    auto& map = detail::get_debug_map()[type_id][ptr];
+    const auto removed = map.erase(this);
+    gsl_Expects(removed > 0);
   }
 
   void reset() {
@@ -247,12 +251,7 @@ struct debug_shared_ptr : private std::shared_ptr<T> {
 
   ~debug_shared_ptr() {
     auto l = detail::lock_debug_map();
-    gsl_Expects((metadata.ptr == nullptr) == (get() == nullptr));
-    if(metadata.ptr) {
-      const auto& sptrs = detail::get_debug_map()[metadata.type_id][metadata.ptr];
-      const auto usecnt = use_count();
-      gsl_Expects(sptrs.size() == gsl::narrow<size_t>(usecnt));
-    }
+    metadata.check(*this);
   }
 
   std::shared_ptr<T> sptr() const noexcept { return *this; }

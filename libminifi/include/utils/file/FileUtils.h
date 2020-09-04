@@ -24,10 +24,6 @@
 #include <utility>
 #include <vector>
 
-#ifdef BOOST_VERSION
-#include <boost/filesystem.hpp>
-
-#else
 #include <errno.h>
 
 #include <cstdlib>
@@ -48,7 +44,6 @@
 #include <sys/types.h>
 #include <utime.h>
 
-#endif
 #endif
 #include <cstdio>
 
@@ -152,21 +147,7 @@ class FileUtils {
   }
 
   static int64_t delete_dir(const std::string &path, bool delete_files_recursively = true) {
-#ifdef BOOST_VERSION
-    try {
-      if (boost::filesystem::exists(path)) {
-        if (delete_files_recursively) {
-          boost::filesystem::remove_all(path);
-        } else {
-          boost::filesystem::remove(path);
-        }
-      }
-    } catch(boost::filesystem::filesystem_error const & e) {
-      return -1;
-      // display error message
-    }
-    return 0;
-#elif defined(WIN32)
+#if defined(WIN32)
     WIN32_FIND_DATA FindFileData;
     HANDLE hFind;
     DWORD Attributes;
@@ -239,9 +220,6 @@ class FileUtils {
   }
 
   static uint64_t last_write_time(const std::string &path) {
-#ifdef BOOST_VERSION
-    return boost::filesystem::last_write_time(movedFile.str());
-#else
 #ifdef WIN32
     struct _stat result;
     if (_stat(path.c_str(), &result) == 0) {
@@ -252,7 +230,6 @@ class FileUtils {
     if (stat(path.c_str(), &result) == 0) {
       return result.st_mtime;
     }
-#endif
 #endif
     return 0;
   }
@@ -322,14 +299,6 @@ class FileUtils {
   }
 
   static int create_dir(const std::string& path, bool recursive = true) {
-#ifdef BOOST_VERSION
-    boost::filesystem::path dir(path);
-    if (boost::filesystem::create_directory(dir)) {
-      return 0;
-    } else {
-      return -1;
-    }
-#else
     if (!recursive) {
         if (platform_create_dir(path) != 0 && errno != EEXIST) {
             return -1;
@@ -365,7 +334,6 @@ class FileUtils {
         return -1;
     }
     return -1;
-#endif
   }
 
   static int copy_file(const std::string &path_from, const std::string dest_path) {
