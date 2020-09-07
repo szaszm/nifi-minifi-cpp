@@ -292,7 +292,7 @@ template<typename T, typename U, typename = typename std::enable_if<std::is_conv
 bool operator!=(const debug_shared_ptr<U>& p1, const debug_shared_ptr<T>& p2) noexcept { return p2 != p1; }
 
 template<typename T>
-std::ostream& operator<<(std::ostream& os, const debug_shared_ptr<T>& ptr) { return os << ptr.sptr(); }
+std::ostream& operator<<(std::ostream& os, const debug_shared_ptr<T>& ptr) { return os << ptr.get(); }
 
 template<typename T, typename... Args>
 debug_shared_ptr<T> debug_make_shared(Args&&... args) {

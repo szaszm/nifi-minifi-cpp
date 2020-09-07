@@ -58,8 +58,8 @@ class LogTestController {
     return instance;
   }
 
-  static org::apache::nifi::minifi::utils::debug_shared_ptr<LogTestController> getInstance(const org::apache::nifi::minifi::utils::debug_shared_ptr<logging::LoggerProperties> &logger_properties) {
-    static std::map<org::apache::nifi::minifi::utils::debug_shared_ptr<logging::LoggerProperties>, org::apache::nifi::minifi::utils::debug_shared_ptr<LogTestController>> map;
+  static org::apache::nifi::minifi::utils::debug_shared_ptr<LogTestController> getInstance(const std::shared_ptr<logging::LoggerProperties> &logger_properties) {
+    static std::map<std::shared_ptr<logging::LoggerProperties>, org::apache::nifi::minifi::utils::debug_shared_ptr<LogTestController>> map;
     auto fnd = map.find(logger_properties);
     if (fnd != std::end(map)) {
       return fnd->second;
@@ -191,11 +191,11 @@ class LogTestController {
       : LogTestController(nullptr) {
   }
 
-  explicit LogTestController(const org::apache::nifi::minifi::utils::debug_shared_ptr<logging::LoggerProperties> &loggerProps) {
+  explicit LogTestController(const std::shared_ptr<logging::LoggerProperties> &loggerProps) {
     my_properties_ = loggerProps;
     bool initMain = false;
     if (nullptr == my_properties_) {
-      my_properties_ = org::apache::nifi::minifi::utils::debug_make_shared<logging::LoggerProperties>();
+      my_properties_ = std::make_shared<logging::LoggerProperties>();
       initMain = true;
     }
     my_properties_->set("logger.root", "ERROR,ostream");
@@ -206,13 +206,13 @@ class LogTestController {
     dist_sink->add_sink(spdlog::sinks::stderr_sink_mt::instance());
     my_properties_->add_sink("ostream", dist_sink);
     if (initMain) {
-      logging::LoggerConfiguration::getConfiguration().initialize(my_properties_.sptr());
+      logging::LoggerConfiguration::getConfiguration().initialize(my_properties_);
       logger_ = logging::LoggerConfiguration::getConfiguration().getLogger(core::getClassName<LogTestController>());
     } else {
       config = logging::LoggerConfiguration::newInstance();
       // create for test purposes. most tests use the main logging factory, but this exists to test the logging
       // framework itself.
-      config->initialize(my_properties_.sptr());
+      config->initialize(my_properties_);
       logger_ = config->getLogger(core::getClassName<LogTestController>());
     }
 
@@ -222,7 +222,7 @@ class LogTestController {
 
   void setLevel(const std::string name, spdlog::level::level_enum level);
 
-  org::apache::nifi::minifi::utils::debug_shared_ptr<logging::LoggerProperties> my_properties_;
+  std::shared_ptr<logging::LoggerProperties> my_properties_;
   std::unique_ptr<logging::LoggerConfiguration> config;
   std::set<std::string> modified_loggers;
 };
