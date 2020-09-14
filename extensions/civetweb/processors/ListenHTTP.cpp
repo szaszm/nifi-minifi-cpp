@@ -246,15 +246,17 @@ std::vector<pattern::Token> tokenize_url_pattern(const std::string& url_pattern)
   return result;
 }
 
+std::vector<std::pair<std::string, std::string>> collect_arguments(std::vector<std::unique_ptr<url::UrlComponent>>&& components) {
+  std::vector<std::pair<std::string, std::string>> args;
+  auto collector = url::make_arg_collector([args](url::Argument& arg) mutable { args.emplace_back(arg.key, arg.value); });
+  for (auto& component: components) {
+    component->accept(collector);
+  }
+  return args;
+}
+
 utils::optional<std::vector<std::pair<std::string, std::string>>> match_url(const std::string& url, const std::vector<pattern::Token>& pattern) {
-  return url::parse_url(url, pattern) | utils::map([](std::vector<std::unique_ptr<url::UrlComponent>>&& components) {
-    std::vector<std::pair<std::string, std::string>> args;
-    auto collector = url::make_arg_collector([args](url::Argument& arg) mutable { args.emplace_back(arg.key, arg.value); });
-    for (auto& component: components) {
-      component->accept(collector);
-    }
-    return args;
-  });
+  return url::parse_url(url, pattern) | utils::map(collect_arguments);
 }
 
 std::string static_head(const std::string& url_pattern) {
@@ -497,7 +499,28 @@ bool ListenHTTP::Handler::handlePost(CivetServer *server, struct mg_connection *
     return true;
   }
 
-  const auto url_arguments = match_url(req_info->request_uri, *pattern_);
+  auto components = url::parse_url(req_info->request_uri, *pattern_);
+  logger_->log_debug("url pattern: %s", [&components]{
+    if(!components) return std::string{"NULL"};
+
+    struct DebugVisitor : url::UrlComponentDispatcher {
+      void operator()(url::StringComponent& string_component) override { f(fmt::format("String({})", string_component.text)); }
+      void operator()(url::Argument& argument) override { f(fmt::format("Argument({}: {})", argument.key, argument.value)); }
+      void operator()(url::Slash&) override { f("/"); }
+
+      std::function<void(const std::string&)> f;
+    };
+
+    std::ostringstream oss;
+    DebugVisitor debug_visitor;
+    debug_visitor.f = [&oss](const std::string& s) { oss << s << ' '; };
+
+    for(auto& c : *components) {
+      c->accept(debug_visitor);
+    }
+    return oss.str();
+  }());
+  const auto url_arguments = std::move(components) | utils::map(collect_arguments);
 
   // Always send 100 Continue, as allowed per standard to minimize client delay (https://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html)
   mg_printf(conn, "HTTP/1.1 100 Continue\r\n\r\n");
