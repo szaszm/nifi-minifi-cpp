@@ -265,6 +265,15 @@ std::string static_head(const std::string& url_pattern) {
   const auto last_slash_before_brace = url_pattern.find_last_of('/', brace);
   return url_pattern.substr(0, last_slash_before_brace);
 }
+
+std::string token_type_to_str(TokenType t) {
+  switch(t) {
+    case TokenType::String: return "String";
+    case TokenType::Slash: return "Slash";
+    case TokenType::Argument: return "Argument";
+  }
+  throw std::runtime_error{"invalid token type"};
+}
 }  // namespace
 
 void ListenHTTP::initialize() {
@@ -297,6 +306,13 @@ void ListenHTTP::onSchedule(core::ProcessContext *context, core::ProcessSessionF
 
   basePath.insert(0, "/");
   url_pattern_ = tokenize_url_pattern(basePath);
+  logger_->log_debug("pattern tokens: %s", [this]{
+    std::ostringstream oss;
+    for(const auto& p: url_pattern_) {
+      oss << token_type_to_str(p.token_type) << ':' << p.text << "  ";
+    }
+    return oss.str();
+  }());
 
   if (!context->getProperty(Port.getName(), listeningPort)) {
     logger_->log_error("%s attribute is missing or invalid", Port.getName());
@@ -500,7 +516,7 @@ bool ListenHTTP::Handler::handlePost(CivetServer *server, struct mg_connection *
   }
 
   auto components = url::parse_url(req_info->request_uri, *pattern_);
-  logger_->log_debug("url pattern: %s", [&components]{
+  logger_->log_trace("url pattern: %s", [&components]{
     if(!components) return std::string{"NULL"};
 
     struct DebugVisitor : url::UrlComponentDispatcher {
