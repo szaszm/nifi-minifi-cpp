@@ -95,7 +95,7 @@ TokenizeResult get_next_token(const gsl::span<const char> str) {
       if (closing_brace == str.end()) {
         throw std::out_of_range{utils::StringUtils::join_pack("Invalid token: ", str_from_span(text_span))};
       }
-      return {Token{TokenType::Argument, str_from_span(text_span)}, closing_brace};
+      return {Token{TokenType::Argument, str_from_span(text_span)}, text_span.end()};
     }
     default: {
       const auto is_slash_or_brace = [](char c) { return c == '/' || c == '{'; };
@@ -516,12 +516,12 @@ bool ListenHTTP::Handler::handlePost(CivetServer *server, struct mg_connection *
   }
 
   auto components = url::parse_url(req_info->request_uri, *pattern_);
-  logger_->log_trace("url pattern: %s", [&components]{
+  logger_->log_trace("url pattern: %s : %s", [&components]{
     if(!components) return std::string{"NULL"};
 
     struct DebugVisitor : url::UrlComponentDispatcher {
-      void operator()(url::StringComponent& string_component) override { f(fmt::format("String({})", string_component.text)); }
-      void operator()(url::Argument& argument) override { f(fmt::format("Argument({}: {})", argument.key, argument.value)); }
+      void operator()(url::StringComponent& string_component) override { f(fmt::format("\"{}\"", string_component.text)); }
+      void operator()(url::Argument& argument) override { f(fmt::format("{}={}", argument.key, argument.value)); }
       void operator()(url::Slash&) override { f("/"); }
 
       std::function<void(const std::string&)> f;
