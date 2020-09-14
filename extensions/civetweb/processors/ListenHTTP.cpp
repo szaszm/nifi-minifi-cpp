@@ -179,7 +179,7 @@ std::pair<Argument, const char*> match_argument(const char* const str, const pat
   return std::make_pair(Argument{key, std::move(value)}, it);
 }
 
-utils::optional<std::vector<std::unique_ptr<UrlComponent>>> parse_url(const std::string& url, const std::vector<pattern::Token>& pattern, core::logging::Logger& logger) {
+utils::optional<std::vector<std::unique_ptr<UrlComponent>>> parse_url(const std::string& url, const std::vector<pattern::Token>& pattern) {
   utils::optional<std::vector<std::unique_ptr<UrlComponent>>> result{ std::vector<std::unique_ptr<UrlComponent>>{} };
   const char* iterator = url.c_str();
   auto pattern_it = pattern.begin();
@@ -188,7 +188,6 @@ utils::optional<std::vector<std::unique_ptr<UrlComponent>>> parse_url(const std:
     switch (pattern_it->token_type) {
       case TokenType::String: {
         auto end = match_string(iterator, *pattern_it);
-        logger.log_debug("STR %s, next: %s", iterator, end ? end : "(null)");
         if (!end) return utils::nullopt;
         result->push_back(utils::make_unique<StringComponent>(str_from_span(gsl::make_span(iterator, end))));
         iterator = end;
@@ -196,7 +195,6 @@ utils::optional<std::vector<std::unique_ptr<UrlComponent>>> parse_url(const std:
       break;
       case TokenType::Slash: {
         auto end = match_slash(iterator);
-        logger.log_debug("SLASH %s, next: %s", iterator, end ? end : "(null)");
         if (!end) return utils::nullopt;
         result->push_back(utils::make_unique<Slash>());
         iterator = end;
@@ -205,7 +203,6 @@ utils::optional<std::vector<std::unique_ptr<UrlComponent>>> parse_url(const std:
       case TokenType::Argument: {
         const auto next_token = std::next(pattern_it);
         auto res = match_argument(iterator, *pattern_it, next_token == pattern.end() ? nullptr : &*next_token);
-        logger.log_debug("ARG %s, key=%s value=%s, next: %s", iterator, res.first.key, res.first.value, res.second ? res.second : "(null)");
         result->push_back(utils::make_unique<Argument>(std::move(res.first)));
         iterator = res.second;
       }
@@ -261,8 +258,8 @@ std::vector<std::pair<std::string, std::string>> collect_arguments(std::vector<s
   return args;
 }
 
-utils::optional<std::vector<std::pair<std::string, std::string>>> match_url(const std::string& url, const std::vector<pattern::Token>& pattern, core::logging::Logger& logger) {
-  return url::parse_url(url, pattern, logger) | utils::map(collect_arguments);
+utils::optional<std::vector<std::pair<std::string, std::string>>> match_url(const std::string& url, const std::vector<pattern::Token>& pattern) {
+  return url::parse_url(url, pattern) | utils::map(collect_arguments);
 }
 
 std::string static_head(const std::string& url_pattern) {
@@ -514,7 +511,7 @@ bool ListenHTTP::Handler::handlePost(CivetServer *server, struct mg_connection *
     return true;
   }
 
-  auto components = url::parse_url(req_info->request_uri, *pattern_, *logger_);
+  auto components = url::parse_url(req_info->request_uri, *pattern_);
   logger_->log_trace("url pattern: %s : %s", req_info->request_uri, [&components]{
     if(!components) return std::string{"NULL"};
 
@@ -536,6 +533,7 @@ bool ListenHTTP::Handler::handlePost(CivetServer *server, struct mg_connection *
     return oss.str();
   }());
   const auto url_arguments = std::move(components) | utils::map(collect_arguments);
+  logger_->log_trace("url arguments %s, size=%zu", url_arguments ? "present": "missing", url_arguments ? url_arguments->size() : -1);
 
   // Always send 100 Continue, as allowed per standard to minimize client delay (https://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html)
   mg_printf(conn, "HTTP/1.1 100 Continue\r\n\r\n");
@@ -554,7 +552,8 @@ bool ListenHTTP::Handler::handlePost(CivetServer *server, struct mg_connection *
     set_header_attributes(req_info, flow_file);
     if (url_arguments) {
       for(const auto& arg: *url_arguments) {
-        flow_file->addAttribute(arg.first, arg.second);
+        logger_->log_trace("url arg %s=%s", arg.first, arg.second);
+        flow_file->setAttribute(arg.first, arg.second);
       }
     }
     session->transfer(flow_file, Success);
