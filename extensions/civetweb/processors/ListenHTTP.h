@@ -75,6 +75,17 @@ class ListenHTTP : public core::Processor {
   std::string getPort() const;
   bool isSecure() const;
 
+  enum class TokenType {
+    String,
+    Slash,
+    Argument
+  };
+
+  struct UrlPatternToken {
+    TokenType token_type;
+    std::string text;
+  };
+
   struct response_body {
     std::string uri;
     std::string mime_type;
@@ -87,8 +98,9 @@ class ListenHTTP : public core::Processor {
     Handler(std::string base_uri,
             core::ProcessContext *context,
             core::ProcessSessionFactory *sessionFactory,
-            std::string &&authDNPattern,
-            std::string &&headersAsAttributesPattern);
+            const std::string &authDNPattern,
+            const std::string &headersAsAttributesPattern,
+            std::vector<UrlPatternToken>& pattern);
     bool handlePost(CivetServer *server, struct mg_connection *conn);
     bool handleGet(CivetServer *server, struct mg_connection *conn);
     bool handleHead(CivetServer *server, struct mg_connection *conn);
@@ -124,10 +136,9 @@ class ListenHTTP : public core::Processor {
     std::regex headers_as_attrs_regex_;
     core::ProcessContext *process_context_;
     core::ProcessSessionFactory *session_factory_;
-
-    // Logger
     std::shared_ptr<logging::Logger> logger_;
     std::map<std::string, response_body> response_uri_map_;
+    gsl::not_null<const std::vector<UrlPatternToken>*> pattern_;
     std::mutex uri_map_mutex_;
   };
 
@@ -165,6 +176,7 @@ class ListenHTTP : public core::Processor {
     struct mg_connection *conn_;
     const struct mg_request_info *req_info_;
   };
+
 
   static int log_message(const struct mg_connection *conn, const char *message) {
     try {
@@ -212,6 +224,7 @@ class ListenHTTP : public core::Processor {
   std::unique_ptr<CivetServer> server_;
   std::unique_ptr<Handler> handler_;
   std::string listeningPort;
+  std::vector<UrlPatternToken> url_pattern_;
 };
 
 REGISTER_RESOURCE(ListenHTTP, "Starts an HTTP Server and listens on a given base path to transform incoming requests into FlowFiles. The default URI of the Service will be "
