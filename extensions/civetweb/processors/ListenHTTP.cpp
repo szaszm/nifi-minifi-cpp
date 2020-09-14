@@ -251,7 +251,7 @@ std::vector<pattern::Token> tokenize_url_pattern(const std::string& url_pattern)
 
 std::vector<std::pair<std::string, std::string>> collect_arguments(std::vector<std::unique_ptr<url::UrlComponent>>&& components) {
   std::vector<std::pair<std::string, std::string>> args;
-  auto collector = url::make_arg_collector([args](url::Argument& arg) mutable { args.emplace_back(arg.key, arg.value); });
+  auto collector = url::make_arg_collector([&args](url::Argument& arg) mutable { args.emplace_back(arg.key, arg.value); });
   for (auto& component: components) {
     component->accept(collector);
   }
