@@ -179,7 +179,7 @@ std::pair<Argument, const char*> match_argument(const char* const str, const pat
   return std::make_pair(Argument{key, std::move(value)}, it);
 }
 
-utils::optional<std::vector<std::unique_ptr<UrlComponent>>> parse_url(const std::string& url, const std::vector<pattern::Token>& pattern) {
+utils::optional<std::vector<std::unique_ptr<UrlComponent>>> parse_url(const std::string& url, const std::vector<pattern::Token>& pattern, core::logging::Logger& logger) {
   utils::optional<std::vector<std::unique_ptr<UrlComponent>>> result{ std::vector<std::unique_ptr<UrlComponent>>{} };
   const char* iterator = url.c_str();
   auto pattern_it = pattern.begin();
@@ -188,12 +188,14 @@ utils::optional<std::vector<std::unique_ptr<UrlComponent>>> parse_url(const std:
     switch (pattern_it->token_type) {
       case TokenType::String: {
         auto end = match_string(iterator, *pattern_it);
+        logger.log_debug("STR %s, next: %s", iterator, end ? end : "(null)");
         if (!end) return utils::nullopt;
         result->push_back(utils::make_unique<StringComponent>(str_from_span(gsl::make_span(iterator, end))));
         iterator = end;
       }
       case TokenType::Slash: {
         auto end = match_slash(iterator);
+        logger.log_debug("SLASH %s, next: %s", iterator, end ? end : "(null)");
         if (!end) return utils::nullopt;
         result->push_back(utils::make_unique<Slash>());
         iterator = end;
@@ -201,6 +203,7 @@ utils::optional<std::vector<std::unique_ptr<UrlComponent>>> parse_url(const std:
       case TokenType::Argument: {
         const auto next_token = std::next(pattern_it);
         auto res = match_argument(iterator, *pattern_it, next_token == pattern.end() ? nullptr : &*next_token);
+        logger.log_debug("ARG %s, key=%s value=%s, next: %s", iterator, res.first.key, res.first.value, res.second ? res.second : "(null)");
         result->push_back(utils::make_unique<Argument>(std::move(res.first)));
         iterator = res.second;
       }
@@ -255,8 +258,8 @@ std::vector<std::pair<std::string, std::string>> collect_arguments(std::vector<s
   return args;
 }
 
-utils::optional<std::vector<std::pair<std::string, std::string>>> match_url(const std::string& url, const std::vector<pattern::Token>& pattern) {
-  return url::parse_url(url, pattern) | utils::map(collect_arguments);
+utils::optional<std::vector<std::pair<std::string, std::string>>> match_url(const std::string& url, const std::vector<pattern::Token>& pattern, core::logging::Logger& logger) {
+  return url::parse_url(url, pattern, logger) | utils::map(collect_arguments);
 }
 
 std::string static_head(const std::string& url_pattern) {
@@ -306,13 +309,6 @@ void ListenHTTP::onSchedule(core::ProcessContext *context, core::ProcessSessionF
 
   basePath.insert(0, "/");
   url_pattern_ = tokenize_url_pattern(basePath);
-  logger_->log_debug("pattern tokens: %s", [this]{
-    std::ostringstream oss;
-    for(const auto& p: url_pattern_) {
-      oss << token_type_to_str(p.token_type) << ':' << p.text << "  ";
-    }
-    return oss.str();
-  }());
 
   if (!context->getProperty(Port.getName(), listeningPort)) {
     logger_->log_error("%s attribute is missing or invalid", Port.getName());
@@ -515,8 +511,8 @@ bool ListenHTTP::Handler::handlePost(CivetServer *server, struct mg_connection *
     return true;
   }
 
-  auto components = url::parse_url(req_info->request_uri, *pattern_);
-  logger_->log_trace("url pattern: %s : %s", [&components]{
+  auto components = url::parse_url(req_info->request_uri, *pattern_, *logger_);
+  logger_->log_trace("url pattern: %s : %s", req_info->request_uri, [&components]{
     if(!components) return std::string{"NULL"};
 
     struct DebugVisitor : url::UrlComponentDispatcher {
