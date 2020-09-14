@@ -193,6 +193,7 @@ utils::optional<std::vector<std::unique_ptr<UrlComponent>>> parse_url(const std:
         result->push_back(utils::make_unique<StringComponent>(str_from_span(gsl::make_span(iterator, end))));
         iterator = end;
       }
+      break;
       case TokenType::Slash: {
         auto end = match_slash(iterator);
         logger.log_debug("SLASH %s, next: %s", iterator, end ? end : "(null)");
@@ -200,6 +201,7 @@ utils::optional<std::vector<std::unique_ptr<UrlComponent>>> parse_url(const std:
         result->push_back(utils::make_unique<Slash>());
         iterator = end;
       }
+      break;
       case TokenType::Argument: {
         const auto next_token = std::next(pattern_it);
         auto res = match_argument(iterator, *pattern_it, next_token == pattern.end() ? nullptr : &*next_token);
@@ -207,6 +209,7 @@ utils::optional<std::vector<std::unique_ptr<UrlComponent>>> parse_url(const std:
         result->push_back(utils::make_unique<Argument>(std::move(res.first)));
         iterator = res.second;
       }
+      break;
     }
     ++pattern_it;
   }
