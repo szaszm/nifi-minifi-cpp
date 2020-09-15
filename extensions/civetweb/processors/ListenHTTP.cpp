@@ -277,6 +277,24 @@ std::string token_type_to_str(TokenType t) {
   }
   throw std::runtime_error{"invalid token type"};
 }
+
+void send_http_405(mg_connection* const conn) {
+  mg_printf(conn, "HTTP/1.1 405 Method Not Allowed\r\n"
+                  "Content-Type: text/html\r\n"
+                  "Content-Length: 0\r\n\r\n");
+}
+
+void send_http_500(mg_connection* const conn) {
+  mg_printf(conn, "HTTP/1.1 500 Internal Server Error\r\n"
+                  "Content-Type: text/html\r\n"
+                  "Content-Length: 0\r\n\r\n");
+}
+
+void send_http_503(mg_connection* const conn) {
+  mg_printf(conn, "HTTP/1.1 503 Service Unavailable\r\n"
+                  "Content-Type: text/html\r\n"
+                  "Content-Length: 0\r\n\r\n");
+}
 }  // namespace
 
 void ListenHTTP::initialize() {
@@ -407,7 +425,7 @@ void ListenHTTP::onSchedule(core::ProcessContext *context, core::ProcessSessionF
   }
 
   server_.reset(new CivetServer(options, &callbacks_, &logger_));
-  handler_.reset(new Handler(listen_path, context, sessionFactory, std::move(authDNPattern), std::move(headersAsAttributesPattern), url_pattern_));
+  handler_.reset(new Handler(listen_path, context, sessionFactory, std::move(authDNPattern), std::move(headersAsAttributesPattern), url_pattern_, this));
   server_->addHandler(listen_path, handler_.get());
 
   if (randomPort) {
@@ -462,21 +480,18 @@ ListenHTTP::Handler::Handler(std::string base_uri,
     core::ProcessSessionFactory *session_factory,
     const std::string &auth_dn_regex,
     const std::string &header_as_attrs_regex,
-    std::vector<UrlPatternToken>& pattern)
+    const std::vector<UrlPatternToken>& pattern,
+    ListenHTTP* listen_http)
     : base_uri_(std::move(base_uri)),
       auth_dn_regex_(auth_dn_regex),
       headers_as_attrs_regex_(header_as_attrs_regex),
-      pattern_(gsl::make_not_null(&pattern)),
-      logger_(logging::LoggerFactory<ListenHTTP::Handler>::getLogger()) {
+      listen_http_(listen_http),
+      logger_(logging::LoggerFactory<ListenHTTP::Handler>::getLogger()),
+      pattern_(pattern) {
   process_context_ = context;
   session_factory_ = session_factory;
 }
 
-void ListenHTTP::Handler::send_error_response(struct mg_connection *conn) {
-  mg_printf(conn, "HTTP/1.1 500 Internal Server Error\r\n"
-            "Content-Type: text/html\r\n"
-            "Content-Length: 0\r\n\r\n");
-}
 
 void ListenHTTP::Handler::set_header_attributes(const mg_request_info *req_info, const std::shared_ptr<FlowFileRecord> &flow_file) const {
   // Add filename from "filename" header value (and pattern headers)
@@ -505,13 +520,21 @@ bool ListenHTTP::Handler::handlePost(CivetServer *server, struct mg_connection *
       logger_->log_error("ListenHTTP handling POST resulted in a null request");
       return false;
   }
+  {
+    std::lock_guard<std::mutex> l{listen_http_->mutex_};
+    if (listen_http_->flowFilesOutGoingFull()) {
+      send_http_503(conn);
+      listen_http_->yield();
+      return false;
+    }
+  }
   logger_->log_debug("ListenHTTP handling POST request of length %lld", req_info->content_length);
 
   if (!auth_request(conn, req_info)) {
     return true;
   }
 
-  auto components = url::parse_url(req_info->request_uri, *pattern_);
+  auto components = url::parse_url(req_info->request_uri, pattern_);
   logger_->log_trace("url pattern: %s : %s", req_info->request_uri, [&components]{
     if(!components) return std::string{"NULL"};
 
@@ -543,7 +566,7 @@ bool ListenHTTP::Handler::handlePost(CivetServer *server, struct mg_connection *
   auto flow_file = std::static_pointer_cast<FlowFileRecord>(session->create());
 
   if (!flow_file) {
-    send_error_response(conn);
+    send_http_500(conn);
     return true;
   }
 
@@ -560,12 +583,12 @@ bool ListenHTTP::Handler::handlePost(CivetServer *server, struct mg_connection *
     session->commit();
   } catch (std::exception &exception) {
     logger_->log_error("ListenHTTP Caught Exception %s", exception.what());
-    send_error_response(conn);
+    send_http_500(conn);
     session->rollback();
     throw;
   } catch (...) {
     logger_->log_error("ListenHTTP Caught Exception Processor::onTrigger");
-    send_error_response(conn);
+    send_http_500(conn);
     session->rollback();
     throw;
   }
@@ -607,7 +630,7 @@ bool ListenHTTP::Handler::handleGet(CivetServer *server, struct mg_connection *c
   auto flow_file = std::static_pointer_cast<FlowFileRecord>(session->create());
 
   if (!flow_file) {
-    send_error_response(conn);
+    send_http_500(conn);
     return true;
   }
 
@@ -618,12 +641,12 @@ bool ListenHTTP::Handler::handleGet(CivetServer *server, struct mg_connection *c
     session->commit();
   } catch (std::exception &exception) {
     logger_->log_error("ListenHTTP Caught Exception %s", exception.what());
-    send_error_response(conn);
+    send_http_500(conn);
     session->rollback();
     throw;
   } catch (...) {
     logger_->log_error("ListenHTTP Caught Exception Processor::onTrigger");
-    send_error_response(conn);
+    send_http_500(conn);
     session->rollback();
     throw;
   }

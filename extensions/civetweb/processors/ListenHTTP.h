@@ -100,7 +100,8 @@ class ListenHTTP : public core::Processor {
             core::ProcessSessionFactory *sessionFactory,
             const std::string &authDNPattern,
             const std::string &headersAsAttributesPattern,
-            std::vector<UrlPatternToken>& pattern);
+            const std::vector<UrlPatternToken>& pattern,
+            ListenHTTP*);
     bool handlePost(CivetServer *server, struct mg_connection *conn);
     bool handleGet(CivetServer *server, struct mg_connection *conn);
     bool handleHead(CivetServer *server, struct mg_connection *conn);
@@ -126,7 +127,6 @@ class ListenHTTP : public core::Processor {
 
    private:
     // Send HTTP 500 error response to client
-    void send_error_response(struct mg_connection *conn);
     bool auth_request(mg_connection *conn, const mg_request_info *req_info) const;
     void set_header_attributes(const mg_request_info *req_info, const std::shared_ptr<FlowFileRecord> &flow_file) const;
     void write_body(mg_connection *conn, const mg_request_info *req_info, bool include_payload = true);
@@ -138,8 +138,9 @@ class ListenHTTP : public core::Processor {
     core::ProcessSessionFactory *session_factory_;
     std::shared_ptr<logging::Logger> logger_;
     std::map<std::string, response_body> response_uri_map_;
-    gsl::not_null<const std::vector<UrlPatternToken>*> pattern_;
     std::mutex uri_map_mutex_;
+    ListenHTTP* listen_http_;
+    std::vector<UrlPatternToken> pattern_;
   };
 
   class ResponseBodyReadCallback : public InputStreamCallback {
@@ -224,6 +225,7 @@ class ListenHTTP : public core::Processor {
   std::unique_ptr<CivetServer> server_;
   std::unique_ptr<Handler> handler_;
   std::string listeningPort;
+  std::mutex mutex_;
   std::vector<UrlPatternToken> url_pattern_;
 };
 
