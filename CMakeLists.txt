@@ -17,7 +17,7 @@
 # under the License.
 #
 
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.11)
 cmake_policy(SET CMP0065 OLD) # default export policy, required for self-dlopen
 
 project(nifi-minifi-cpp)
@@ -320,6 +320,9 @@ target_compile_definitions(gsl-lite INTERFACE ${GslDefinitions})
 # optional-lite
 add_library(optional-lite INTERFACE)
 target_include_directories(optional-lite INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/optional-lite-3.2.0/include")
+
+# date
+include(Date)
 
 #### Extensions ####
 SET(TEST_DIR ${CMAKE_SOURCE_DIR}/libminifi/test)
