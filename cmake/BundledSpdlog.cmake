@@ -18,10 +18,18 @@
 function(use_bundled_spdlog SOURCE_DIR BINARY_DIR)
     # Define byproducts
     if (WIN32)
-        set(BYPRODUCT "lib/spdlog$<$<CONFIG:Debug>:d>.lib")
+        if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+            set(BYPRODUCT "lib/spdlogd.lib")
+        else()
+            set(BYPRODUCT "lib/spdlog.lib")
+        endif()
     else()
         include(GNUInstallDirs)
-        set(BYPRODUCT "${CMAKE_INSTALL_LIBDIR}/libspdlog$<$<CONFIG:Debug>:d>.a")
+        if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+            set(BYPRODUCT "${CMAKE_INSTALL_LIBDIR}/libspdlogd.a")
+        else()
+            set(BYPRODUCT "${CMAKE_INSTALL_LIBDIR}/libspdlog.a")
+        endif()
     endif()
 
     # Set build options
