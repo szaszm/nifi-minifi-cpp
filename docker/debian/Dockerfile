@@ -17,7 +17,7 @@
 #
 
 # First stage: the build environment
-FROM debian:stretch AS build_deps
+FROM debian:buster AS build_deps
 LABEL maintainer="Apache NiFi <dev@nifi.apache.org>"
 
 ARG MINIFI_VERSION
@@ -26,9 +26,9 @@ ARG MINIFI_VERSION
 
 ENV MINIFI_BASE_DIR /opt/minifi
 ENV MINIFI_HOME $MINIFI_BASE_DIR/nifi-minifi-cpp-$MINIFI_VERSION
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
 
-RUN apt-get update && apt-get install -y openjdk-8-jdk libpython3.5-dev openjdk-8-source sudo git maven
+RUN apt-get update && apt-get install -y openjdk-11-jdk libpython3-all-dev openjdk-11-source sudo git maven
 
 RUN mkdir -p $MINIFI_BASE_DIR
 COPY . ${MINIFI_BASE_DIR}
