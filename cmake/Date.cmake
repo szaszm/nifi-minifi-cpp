@@ -16,6 +16,38 @@
 # under the License.
 
 include(FetchContent)
+
+if (WIN32)
+    # tzdata and windowsZones.xml from unicode cldr-common are required to be installed for date-tz operation on Windows
+    FetchContent_Declare(tzdata
+        URL         https://data.iana.org/time-zones/releases/tzdata2020e.tar.gz
+        URL_HASH    SHA256=0be1ba329eae29ae1b54057c3547b3e672f73b3ae7643aa87dac85122bec037e
+    )
+    FetchContent_GetProperties(tzdata)
+    if (NOT tzdata_POPULATED)
+        FetchContent_Populate(tzdata)
+    endif()
+
+    install(DIRECTORY ${tzdata_SOURCE_DIR}/
+        DESTINATION tzdata
+        COMPONENT tzdata
+    )
+
+    FetchContent_Declare(cldr_common
+        URL         https://unicode.org/Public/cldr/38.1/cldr-common-38.1.zip
+        URL_HASH    SHA512=3d641921c82c15b6257791229ed20db391675089927959869a5d96b17e7d0c3ad9063faf21151766eafe8ff7b85a98b37b9608f4c4f1d3f6f2b8e5565725db03
+    )
+    FetchContent_GetProperties(cldr_common)
+    if (NOT cldr_common_POPULATED)
+        FetchContent_Populate(cldr_common)
+    endif()
+
+    install(FILES ${cldr_common_SOURCE_DIR}/common/supplemental/windowsZones.xml
+        DESTINATION tzdata
+        COMPONENT tzdata
+    )
+endif()
+
 FetchContent_Declare(date_src
     GIT_REPOSITORY https://github.com/HowardHinnant/date.git
     GIT_TAG        v3.0.0  # adjust tag/branch/commit as needed

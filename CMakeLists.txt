@@ -114,14 +114,12 @@ endif()
 # Enable usage of the VERSION specifier
 include(CheckCXXCompilerFlag)
 if (WIN32)
-    add_compile_definitions(WIN32_LEAN_AND_MEAN _CRT_SECURE_NO_WARNINGS)
+    add_compile_definitions(WIN32_LEAN_AND_MEAN _CRT_SECURE_NO_WARNINGS NOMINMAX)
     add_compile_options(/W3 /utf-8)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNOMINMAX")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNOMINMAX")
   if ((MSVC_VERSION GREATER "1900") OR (MSVC_VERSION EQUAL "1900"))
-	CHECK_CXX_COMPILER_FLAG("/std:c++14" _cpp_latest_flag_supported)
+	CHECK_CXX_COMPILER_FLAG("/std:c++latest" _cpp_latest_flag_supported)
 	if (_cpp_latest_flag_supported)
-		add_compile_options("/std:c++14")
+		add_compile_options("/std:c++latest")
 	endif()
   endif()
 else()
@@ -213,6 +211,7 @@ set(PASSTHROUGH_CMAKE_ARGS -DANDROID_ABI=${ANDROID_ABI}
 		-DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=${CMAKE_FIND_ROOT_PATH_MODE_LIBRARY}
 		-DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=${CMAKE_FIND_ROOT_PATH_MODE_INCLUDE}
 		-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+		-DCOMPILE_DEFINITIONS=${COMPILE_DEFINITIONS}
 		-G${CMAKE_GENERATOR}
 		)
 
@@ -671,11 +670,11 @@ if(WIN32)
 		if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 			message("Using ${VCRUNTIME_X64_MERGEMODULE_PATH} VC Redistributable Merge Module")
 			configure_file("msi/x64.wsi" "msi/x64.wsi" @ONLY)
-			set(CPACK_WIX_EXTRA_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/msi/x64.wsi")
+			list(APPEND CPACK_WIX_EXTRA_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/msi/x64.wsi")
 		elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
 			message("Using ${VCRUNTIME_X86_MERGEMODULE_PATH} VC Redistributable Merge Module")
 			configure_file("msi/x86.wsi" "msi/x86.wsi" @ONLY)
-			set(CPACK_WIX_EXTRA_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/msi/x86.wsi")
+			list(APPEND CPACK_WIX_EXTRA_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/msi/x86.wsi")
 		else()
 			message(FATAL_ERROR "Could not determine architecture, CMAKE_SIZEOF_VOID_P is unexpected: ${CMAKE_SIZEOF_VOID_P}")
 		endif()
@@ -782,10 +781,14 @@ set(CPACK_PACKAGE_INSTALL_DIRECTORY "ApacheNiFiMiNiFi")
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
 set(CPACK_RDKAFKA_COMPONENT_INSTALL ON)
 set(CPACK_MQTT_COMPONENT_INSTALL ON)
-set(CPACK_COMPONENTS_ALL bin conf minifijni)
+if(WIN32)
+	set(CPACK_COMPONENTS_ALL bin conf minifijni tzdata)
+else()
+	set(CPACK_COMPONENTS_ALL bin conf minifijni)
+endif()
 
 
-include(CPack)
+	include(CPack)
 ### include modules
 
 if (NOT SKIP_TESTS)
