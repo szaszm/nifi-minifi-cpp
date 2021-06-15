@@ -18,17 +18,7 @@
 
 verify_enable_platform() {
     feature="$1"
-    if [ "$OS_MAJOR" = "6" ]; then
-        if [ "$feature" = "GPS_ENABLED" ]; then
-            echo "false"
-        elif [ "$feature" = "USB_ENABLED" ]; then
-            echo "false"
-        elif [ "$feature" = "TENSORFLOW_ENABLED" ]; then
-            echo "false"
-        else
-            verify_gcc_enable "$feature"
-        fi
-    else
+    if [ "$OS_MAJOR" -gt 6 ]; then
         if [ "$feature" = "USB_ENABLED" ]; then
             echo "false"
         else
@@ -38,78 +28,34 @@ verify_enable_platform() {
 }
 
 add_os_flags() {
-    if [ "$OS_MAJOR" = "6" ]; then
-        CMAKE_BUILD_COMMAND="${CMAKE_BUILD_COMMAND} -DCMAKE_CXX_FLAGS=-lrt "
+    if [ "$OS_MAJOR" -eq 7 ]; then
+        source /opt/rh/devtoolset-10/enable
     fi
 }
 install_bison() {
-    if [ "$OS_MAJOR" = "6" ]; then
-        BISON_INSTALLED="false"
-        if [ -x "$(command -v bison)" ]; then
-            BISON_VERSION=$(bison --version | head -n 1 | awk '{print $4}')
-            BISON_MAJOR=$(echo "$BISON_VERSION" | cut -d. -f1)
-            if (( BISON_MAJOR >= 3 )); then
-                BISON_INSTALLED="true"
-            fi
-        fi
-        if [ "$BISON_INSTALLED" = "false" ]; then
-            wget https://ftp.gnu.org/gnu/bison/bison-3.0.4.tar.xz
-            tar xvf bison-3.0.4.tar.xz
-            pushd bison-3.0.4 || exit 1
-            ./configure
-            make
-            make install
-            popd || exit 2
-        fi
-
-    else
-        INSTALLED+=("bison")
-    fi
+    INSTALLED+=("bison")
 }
 
 install_libusb() {
-    if [ "$OS_MAJOR" = "6" ]; then
-        sudo yum -y install libtool libudev-devel patch
-        #	git clone --branch v1.0.18 https://github.com/libusb/libusb.git
-        git clone https://github.com/libusb/libusb.git
-        pushd libusb || exit 3
-        git checkout v1.0.18
-        ./bootstrap.sh
-        ./configure
-        make
-        sudo make install
-        popd || exit 4
-        rm -rf libusb
-    else
-        INSTALLED+=("libusb-devel")
-    fi
-
+    INSTALLED+=("libusb-devel")
 }
-
 
 
 bootstrap_cmake(){
     sudo yum -y install wget
-    if [ "$OS_MAJOR" = "6" ]; then
+    if [ "$OS_MAJOR" = "7" ]; then
         sudo yum -y install centos-release-scl
-        sudo yum -y install devtoolset-6
         sudo yum -y install epel-release
         sudo yum -y install cmake3
         if [ "$NO_PROMPT" = "true" ]; then
-            scl enable devtoolset-6 bash ./bootstrap.sh -n
+            scl enable devtoolset-10 "bash ./bootstrap.sh -n"
         else
-            scl enable devtoolset-6 bash ./bootstrap.sh
+            scl enable devtoolset-10 "bash ./bootstrap.sh"
         fi
-    else
-        wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-        sudo yum -y install epel-release-latest-7.noarch.rpm
-        sudo yum -y install cmake3
     fi
 }
 build_deps(){
-    # Install epel-release so that cmake3 will be available for installation
-
-    COMMAND="sudo yum -y install gcc gcc-c++ libuuid libuuid-devel libtool patch"
+    COMMAND="sudo yum -y install libuuid libuuid-devel libtool patch epel-release devtoolset-10"
     INSTALLED=()
     for option in "${OPTIONS[@]}" ; do
         option_value="${!option}"
@@ -160,5 +106,4 @@ build_deps(){
     done
 
     ${COMMAND}
-
 }
