@@ -78,6 +78,7 @@ cd "${docker_dir}/test/integration"
 exec
   behave "${BEHAVE_OPTS[@]}" "features/file_system_operations.feature" -n "Get and put operations run in a simple flow" &&
   behave "${BEHAVE_OPTS[@]}" "features/file_system_operations.feature" -n "PutFile does not overwrite a file that already exists" &&
+  behave "${BEHAVE_OPTS[@]}" "features/file_system_operations.feature" -n "MiNiFi is capable of manipulating flowfiles of different sizes" &&
   behave "${BEHAVE_OPTS[@]}" "features/s2s.feature" -n "A MiNiFi instance produces and transfers data to a NiFi instance via s2s" &&
   behave "${BEHAVE_OPTS[@]}" "features/s2s.feature" -n "Zero length files are transfered between via s2s if the \"drop empty\" connection property is false" &&
   behave "${BEHAVE_OPTS[@]}" "features/s2s.feature" -n "Zero length files are not transfered between via s2s if the \"drop empty\" connection property is true" &&

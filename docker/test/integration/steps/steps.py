@@ -174,6 +174,11 @@ def step_impl(context):
 def step_impl(context, content, path):
     context.test.add_test_data(path, content)
 
+@given("a file with {size} of content is present in \"{path}\"")
+def step_impl(context, size, path):
+    context.test.add_large_test_file_save_hash(path, size)
+
+# NiFi setups
 
 @given("a file with filename \"{file_name}\" and content \"{content}\" is present in \"{path}\"")
 def step_impl(context, file_name, content, path):
@@ -274,12 +279,14 @@ def step_impl(context, content, file_name, path, seconds):
 def step_impl(context, content, duration):
     context.test.check_for_file_with_content_generated(content, timeparse(duration))
 
-
 @then("{number_of_files:d} flowfiles are placed in the monitored directory in {duration}")
 @then("{number_of_files:d} flowfile is placed in the monitored directory in {duration}")
 def step_impl(context, number_of_files, duration):
     context.test.check_for_multiple_files_generated(number_of_files, timeparse(duration))
 
+@then("a flowfile with matching content is placed in the monitored directory in less than {duration}")
+def step_impl(context, duration):
+    context.test.check_for_file_with_matching_hash_content_generated(timeparse(duration))
 
 @then("at least one empty flowfile is placed in the monitored directory in less than {duration}")
 def step_impl(context, duration):

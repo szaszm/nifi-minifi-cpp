@@ -16,6 +16,7 @@ from minifi.validators.NoFileOutPutValidator import NoFileOutPutValidator
 from minifi.validators.SingleFileOutputValidator import SingleFileOutputValidator
 from minifi.validators.MultiFileOutputValidator import MultiFileOutputValidator
 
+from minifi.validators.SingleFileContentHashValidator import SingleFileContentHashValidator
 
 class MiNiFi_integration_test():
     def __init__(self, context):
@@ -157,6 +158,10 @@ class MiNiFi_integration_test():
     def add_test_data(self, path, test_data, file_name=str(uuid.uuid4())):
         self.docker_directory_bindings.put_file_to_docker_path(self.test_id, path, file_name, test_data.encode('utf-8'))
 
+    def add_large_test_file_save_hash(self, path, data_size):
+        file_name = str(uuid.uuid4())
+        self.saved_md5_hash = self.docker_directory_bindings.generate_file_to_docker_path_and_calc_md5_checksum(self.test_id, path, file_name, data_size)
+
     def put_test_resource(self, file_name, contents):
         self.docker_directory_bindings.put_test_resource(self.test_id, file_name, contents)
 
@@ -183,6 +188,11 @@ class MiNiFi_integration_test():
         output_validator = MultiFileOutputValidator(file_count, subdir)
         output_validator.set_output_dir(self.file_system_observer.get_output_dir())
         self.check_output(timeout_seconds, output_validator, file_count, subdir)
+
+    def check_for_file_with_matching_hash_content_generated(self, timeout_seconds, subdir=''):
+        output_validator = SingleFileContentHashValidator(self.saved_md5_hash)
+        output_validator.set_output_dir(self.file_system_observer.get_output_dir())
+        self.check_output(timeout_seconds, output_validator, 1, subdir)
 
     def check_for_multiple_empty_files_generated(self, timeout_seconds, subdir=''):
         output_validator = EmptyFilesOutPutValidator()
