@@ -23,6 +23,14 @@ get_toolset_name() {
     esac
 }
 
+install_pkgs() {
+    if [ "$OS_MAJOR" -gt 7 ]; then
+        sudo dnf -y install $*
+    else
+        sudo yum -y install $*
+    fi
+}
+
 verify_enable_platform() {
     feature="$1"
     if [ "$OS_MAJOR" -gt 6 ]; then
@@ -49,13 +57,14 @@ install_libusb() {
 
 bootstrap_cmake(){
     case "$OS_MAJOR" in
-        7) sudo yum -y install centos-release-scl epel-release cmake3 ;;
-        8) sudo yum -y install cmake ;;
+        7) install_pkgs epel-release cmake3 ;;
+        *) install_pkgs cmake ;;
     esac
     extra_bootstrap_flags=""
     if [ "$NO_PROMPT" = "true" ]; then extra_bootstrap_flags="$extra_bootstrap_flags -n"; fi
     get_toolset_name
     if [ -n "$TOOLSET_NAME" ]; then
+        install_pkgs centos-release-scl
         scl enable $TOOLSET_NAME "bash ./bootstrap.sh $extra_bootstrap_flags"
     else
         bash ./bootstrap.sh $extra_bootstrap_flags
@@ -64,7 +73,7 @@ bootstrap_cmake(){
 
 build_deps() {
     get_toolset_name
-    COMMAND="sudo yum -y install libuuid libuuid-devel libtool patch epel-release $TOOLSET_NAME"
+    COMMAND="install_pkgs libuuid libuuid-devel libtool patch epel-release $TOOLSET_NAME"
     INSTALLED=()
     for option in "${OPTIONS[@]}" ; do
         option_value="${!option}"
