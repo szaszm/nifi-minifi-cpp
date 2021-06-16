@@ -16,6 +16,13 @@
 # specific language governing permissions and limitations
 # under the License.
 
+get_toolset_name() {
+    case "$OS_MAJOR" in
+        7) TOOLSET_NAME=devtoolset-10 ;;
+        8) TOOLSET_NAME=gcc-toolset-10 ;;
+    esac
+}
+
 verify_enable_platform() {
     feature="$1"
     if [ "$OS_MAJOR" -gt 6 ]; then
@@ -28,9 +35,8 @@ verify_enable_platform() {
 }
 
 add_os_flags() {
-    if [ "$OS_MAJOR" -eq 7 ]; then
-        source /opt/rh/devtoolset-10/enable
-    fi
+    get_toolset_name
+    source /opt/rh/$TOOLSET_NAME/enable
 }
 install_bison() {
     INSTALLED+=("bison")
@@ -42,20 +48,23 @@ install_libusb() {
 
 
 bootstrap_cmake(){
-    sudo yum -y install wget
-    if [ "$OS_MAJOR" = "7" ]; then
-        sudo yum -y install centos-release-scl
-        sudo yum -y install epel-release
-        sudo yum -y install cmake3
-        if [ "$NO_PROMPT" = "true" ]; then
-            scl enable devtoolset-10 "bash ./bootstrap.sh -n"
-        else
-            scl enable devtoolset-10 "bash ./bootstrap.sh"
-        fi
+    case "$OS_MAJOR" in
+        7) sudo yum -y install centos-release-scl epel-release cmake3 ;;
+        8) sudo yum -y install cmake ;;
+    esac
+    extra_bootstrap_flags=""
+    if [ "$NO_PROMPT" = "true" ]; then extra_bootstrap_flags="$extra_bootstrap_flags -n"; fi
+    get_toolset_name
+    if [ -n "$TOOLSET_NAME" ]; then
+        scl enable $TOOLSET_NAME "bash ./bootstrap.sh $extra_bootstrap_flags"
+    else
+        bash ./bootstrap.sh $extra_bootstrap_flags
     fi
 }
-build_deps(){
-    COMMAND="sudo yum -y install libuuid libuuid-devel libtool patch epel-release devtoolset-10"
+
+build_deps() {
+    get_toolset_name
+    COMMAND="sudo yum -y install libuuid libuuid-devel libtool patch epel-release $TOOLSET_NAME"
     INSTALLED=()
     for option in "${OPTIONS[@]}" ; do
         option_value="${!option}"
