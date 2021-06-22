@@ -49,17 +49,14 @@ constexpr T intdiv_ceil(T numerator, T denominator) {
       : numerator / denominator + (numerator % denominator != 0));
 }
 
-#if __cplusplus > 201703L
-using std::identity;
-#else
 // from https://stackoverflow.com/questions/15202474
+// To be replaced by std::identity when out lowest supported libc++ includes it. https://reviews.llvm.org/D98151
 struct identity {
     template<typename U>
     constexpr auto operator()(U&& v) const noexcept -> decltype(std::forward<U>(v)) {
         return std::forward<U>(v);
     }
 };
-#endif /* < C++20 */
 
 using gsl::owner;
 

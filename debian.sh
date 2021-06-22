@@ -22,9 +22,22 @@ verify_enable_platform(){
 }
 add_os_flags() {
   CMAKE_BUILD_COMMAND="${CMAKE_BUILD_COMMAND}"
+  CC=gcc
+  CXX=g++
+  if [ "$VERSION_CODENAME" = buster ]; then
+    CC=clang-12
+    CXX=clang++-12
+    CXXFLAGS="$CXXFLAGS -stdlib=libc++"
+    CMAKE_BUILD_COMMAND="${CMAKE_BUILD_COMMAND} -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX -DCMAKE_CXX_FLAGS=-stdlib=libc++"
+    export CC
+    export CXX
+    export CXXFLAGS
+  fi
 }
 bootstrap_cmake(){
-  sudo apt-get -y install cmake
+  sudo bash -c 'source /etc/os-release; grep "$VERSION_CODENAME-backports" /etc/apt/sources.list &>/dev/null || echo "deb http://deb.debian.org/debian $VERSION_CODENAME-backports main" >> /etc/apt/sources.list'
+  sudo apt-get -y update
+  sudo apt-get -t buster-backports install -y cmake
 }
 build_deps(){
   sudo apt-get -y update
@@ -34,7 +47,17 @@ build_deps(){
   if [ "$RETVAL" -ne "0" ]; then
     sudo apt-get install -y libssl-dev > /dev/null
   fi
-  COMMAND="sudo apt-get -y install cmake gcc g++ zlib1g-dev uuid uuid-dev"
+  compiler_pkgs="gcc g++"
+  if [ "$VERSION_CODENAME" = buster ]; then
+    compiler_pkgs="clang-12 clang++-12"
+    sudo apt install -y wget lsb-release software-properties-common gnupg
+    pushd /tmp
+    wget https://apt.llvm.org/llvm.sh
+    chmod +x llvm.sh
+    sudo ./llvm.sh 12
+    popd
+  fi
+  COMMAND="sudo apt-get -y install $compiler_pkgs zlib1g-dev uuid uuid-dev"
   export DEBIAN_FRONTEND=noninteractive
   INSTALLED=()
   INSTALLED+=("libbz2-dev")
