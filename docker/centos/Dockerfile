@@ -27,7 +27,7 @@ ARG MINIFI_VERSION
 ENV MINIFI_BASE_DIR /opt/minifi
 ENV MINIFI_HOME $MINIFI_BASE_DIR/nifi-minifi-cpp-$MINIFI_VERSION
 
-RUN yum -y install java-1.8.0-openjdk java-1.8.0-openjdk-devel python36-devel gcc gcc-c++ sudo git which maven make libarchive
+RUN yum -y install java-1.8.0-openjdk java-1.8.0-openjdk-devel python36-devel sudo git which maven make libarchive
 
 RUN mkdir -p $MINIFI_BASE_DIR
 COPY . ${MINIFI_BASE_DIR}
@@ -38,6 +38,6 @@ ARG ENABLE_JNI
 RUN cd $MINIFI_BASE_DIR \
 	&& ./bootstrap.sh -t \
 	&& cd build \
-	&& cmake3 -DUSE_SHARED_LIBS=  -DENABLE_MQTT=ON -DENABLE_LIBRDKAFKA=ON -DPORTABLE=ON -DENABLE_COAP=ON -DCMAKE_BUILD_TYPE=Release -DSKIP_TESTS=true -DENABLE_JNI=$ENABLE_JNI . \
-	&& make -j$(nproc) package
+	&& scl enable devtoolset-10 -- cmake3 -DUSE_SHARED_LIBS=  -DENABLE_MQTT=ON -DENABLE_LIBRDKAFKA=ON -DPORTABLE=ON -DENABLE_COAP=ON -DCMAKE_BUILD_TYPE=Release -DSKIP_TESTS=true -DENABLE_JNI=$ENABLE_JNI .. \
+	&& scl enable devtoolset-10 -- make -j$(nproc) package
 
