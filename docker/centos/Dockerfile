@@ -36,10 +36,8 @@ FROM build_deps AS release
 ARG ENABLE_JNI
 # Perform the build
 RUN cd $MINIFI_BASE_DIR \
-	&& ./bootstrap.sh -e -t \
-	&& rm -rf build \
-	&& mkdir build \
+	&& ./bootstrap.sh -t \
 	&& cd build \
-	&& cmake3 -DUSE_SHARED_LIBS=  -DENABLE_MQTT=ON -DENABLE_LIBRDKAFKA=ON -DPORTABLE=ON -DENABLE_COAP=ON -DCMAKE_BUILD_TYPE=Release -DSKIP_TESTS=true -DENABLE_JNI=$ENABLE_JNI .. \
+	&& cmake3 -DUSE_SHARED_LIBS=  -DENABLE_MQTT=ON -DENABLE_LIBRDKAFKA=ON -DPORTABLE=ON -DENABLE_COAP=ON -DCMAKE_BUILD_TYPE=Release -DSKIP_TESTS=true -DENABLE_JNI=$ENABLE_JNI . \
 	&& make -j$(nproc) package
 
