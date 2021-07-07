@@ -57,7 +57,10 @@ install_libusb() {
 
 bootstrap_cmake(){
     case "$OS_MAJOR" in
-        7) install_pkgs epel-release cmake3 ;;
+        7)
+            install_pkgs epel-release
+            install_pkgs cmake3
+            ;;
         *) install_pkgs cmake ;;
     esac
     extra_bootstrap_flags=""
@@ -67,6 +70,8 @@ bootstrap_cmake(){
         install_pkgs centos-release-scl
         scl enable $TOOLSET_NAME "bash ./bootstrap.sh $extra_bootstrap_flags"
     else
+        # cli flags splitting is intentional
+        # shellcheck disable=SC2086
         bash ./bootstrap.sh $extra_bootstrap_flags
     fi
 }
