@@ -210,7 +210,7 @@ jobs:
           sudo apt install -y ccache
           echo "PATH=/usr/lib/ccache:$PATH" >> $GITHUB_ENV
       - id: build
-        run: ./bootstrap.sh -e -t && cd build && cmake -DSTRICT_GSL_CHECKS=AUDIT .. && make debian
+        run: mkdir build && cd build && cmake -DSTRICT_GSL_CHECKS=AUDIT .. && make debian
   centos:
     name: "centos"
     runs-on: ubuntu-20.04
@@ -232,7 +232,7 @@ jobs:
           sudo apt install -y ccache
           echo "PATH=/usr/lib/ccache:$PATH" >> $GITHUB_ENV
       - id: build
-        run: ./bootstrap.sh -e -t && cd build && cmake -DSTRICT_GSL_CHECKS=AUDIT .. && make centos
+        run: mkdir build && cd build && cmake -DSTRICT_GSL_CHECKS=AUDIT .. && make centos
   fedora:
     name: "fedora"
     runs-on: ubuntu-20.04
@@ -254,7 +254,7 @@ jobs:
           sudo apt install -y ccache
           echo "PATH=/usr/lib/ccache:$PATH" >> $GITHUB_ENV
       - id: build
-        run: ./bootstrap.sh -e -t && cd build && cmake -DSTRICT_GSL_CHECKS=AUDIT .. && make fedora
+        run: mkdir build && cd build && cmake -DSTRICT_GSL_CHECKS=AUDIT .. && make fedora
   ubuntu_18_04:
     name: "ubuntu-18.04"
     runs-on: ubuntu-18.04
@@ -278,9 +278,12 @@ jobs:
           echo -e "127.0.0.1\t$HOSTNAME" | sudo tee -a /etc/hosts > /dev/null
       - id: build
         run: |
+          ./bootstrap.sh -e -t
+          cd build
           export CC=gcc-11
           export CXX=g++-11
-          ./bootstrap.sh -e -t && cd build && cmake -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX -DSTRICT_GSL_CHECKS=AUDIT .. && make u18
+          cmake -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX -DSTRICT_GSL_CHECKS=AUDIT ..
+          make u18
   docker_integration_tests:
     name: "Docker integration tests"
     runs-on: ubuntu-20.04
@@ -289,7 +292,11 @@ jobs:
       - id: checkout
         uses: actions/checkout@v2
       - id: build
-        run: mkdir build && cd build && cmake -DUSE_SHARED_LIBS= -DSTRICT_GSL_CHECKS=AUDIT -DENABLE_JNI=OFF -DDISABLE_JEMALLOC=ON -DDISABLE_SCRIPTING=ON -DENABLE_AWS=ON -DENABLE_LIBRDKAFKA=ON -DENABLE_AZURE=ON .. && make docker
+        run: |
+          ./bootstrap.sh -e -t
+          cd build
+          cmake -DUSE_SHARED_LIBS= -DSTRICT_GSL_CHECKS=AUDIT -DENABLE_JNI=OFF -DDISABLE_JEMALLOC=ON -DDISABLE_SCRIPTING=ON -DENABLE_AWS=ON -DENABLE_LIBRDKAFKA=ON -DENABLE_AZURE=ON ..
+          make docker
       - id: install_deps
         run: |
           sudo apt update
