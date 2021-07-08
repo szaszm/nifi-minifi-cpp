@@ -21,7 +21,8 @@ verify_enable_platform(){
   verify_gcc_enable "$feature"
 }
 add_os_flags() {
-  CMAKE_BUILD_COMMAND="${CMAKE_BUILD_COMMAND}"
+  #CMAKE_BUILD_COMMAND="${CMAKE_BUILD_COMMAND}"
+  :
 }
 bootstrap_cmake(){
   sudo bash -c 'source /etc/os-release; grep "$VERSION_CODENAME-backports" /etc/apt/sources.list &>/dev/null || echo "deb http://deb.debian.org/debian $VERSION_CODENAME-backports main" >> /etc/apt/sources.list'

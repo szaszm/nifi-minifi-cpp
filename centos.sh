@@ -25,9 +25,9 @@ get_toolset_name() {
 
 install_pkgs() {
     if [ "$OS_MAJOR" -gt 7 ]; then
-        sudo dnf -y install $*
+        sudo dnf -y install "$@"
     else
-        sudo yum -y install $*
+        sudo yum -y install "$@"
     fi
 }
 
