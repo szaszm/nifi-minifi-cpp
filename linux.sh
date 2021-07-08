@@ -16,6 +16,6 @@
 # specific language governing permissions and limitations
 # under the License.
 verify_gcc_enable(){
-  feature="$1"
-  [ \( "$COMPILER_MAJOR" -eq 8 -a "$COMPILER_MINOR" -ge 2 \) -o "$COMPILER_MAJOR" -gt 8 ] && echo true || echo false
+  #feature="$1"
+  { [ "$COMPILER_MAJOR" -eq 8 ] && [ "$COMPILER_MINOR" -ge 2 ] || [ "$COMPILER_MAJOR" -gt 8 ]; } && echo true || echo false
 }
