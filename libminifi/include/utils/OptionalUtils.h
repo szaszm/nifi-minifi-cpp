@@ -38,8 +38,8 @@ using nonstd::nullopt;
 using nonstd::make_optional;
 
 template<typename T>
-optional<detail::remove_cvref_t<T>> optional_from_ptr(T&& obj) {
-  return obj == nullptr ? nullopt : optional<detail::remove_cvref_t<T>>{ std::forward<T>(obj) };
+optional<utils::remove_cvref_t<T>> optional_from_ptr(T&& obj) {
+  return obj == nullptr ? nullopt : optional<utils::remove_cvref_t<T>>{ std::forward<T>(obj) };
 }
 
 // two partial specializations because nonstd::optional<T> might or might not be the same as std::optional<T>,
