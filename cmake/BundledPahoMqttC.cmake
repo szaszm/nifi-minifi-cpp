@@ -18,7 +18,7 @@
 function(use_bundled_pahomqttc SOURCE_DIR BINARY_DIR)
     # Define patch step
     set(PATCH_FILE "${SOURCE_DIR}/thirdparty/paho.mqtt.c/paho.mqtt.c.patch")
-    set(PAHO_MQTT_C_PATCH_COMMAND "${PATCH_EXECUTABLE}" -p1 -R -s -f --dry-run -i "${PATCH_FILE}" || "${Patch_EXECUTABLE}" -p1 -N -i "${PATCH_FILE}")
+    set(PAHO_MQTT_C_PATCH_COMMAND "${Patch_EXECUTABLE}" -p1 -R -s -f --dry-run -i "${PATCH_FILE}" || "${Patch_EXECUTABLE}" -p1 -N -i "${PATCH_FILE}")
 
     # Define byproducts
     if (WIN32)
