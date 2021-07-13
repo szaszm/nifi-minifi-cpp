@@ -275,10 +275,7 @@ target_include_directories(concurrentqueue SYSTEM INTERFACE "${CMAKE_CURRENT_SOU
 
 # RapidJSON
 add_library(RapidJSON INTERFACE)
-target_include_directories(RapidJSON SYSTEM INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/rapidjson-1.1.0/include")
-# RapidJSON iterator comparison relies on conversion and that generates ambiguity in overload resolution starting with C++20
-# Disabling warning, because I believe this is a bug in the standard, not rapidjson, but there is no defect report yet
-target_compile_options(RapidJSON INTERFACE $<$<CXX_COMPILER_ID:Clang>:-Wno-ambiguous-reversed-operator>)
+target_include_directories(RapidJSON SYSTEM INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/rapidjson-48fbd8cd202ca54031fe799db2ad44ffa8e77c13/include")
 
 # Cron
 add_library(cron INTERFACE)
