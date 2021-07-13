@@ -21,7 +21,7 @@ function(use_bundled_libuvc SOURCE_DIR BINARY_DIR)
 
     # Define patch step
     set(PATCH_FILE "${SOURCE_DIR}/thirdparty/libuvc/libuvc.patch")
-    set(LIBUVC_PATCH_COMMAND "${PATCH_EXECUTABLE}" -p1 -R -s -f --dry-run -i "${PATCH_FILE}" || "${Patch_EXECUTABLE}" -p1 -N -i "${PATCH_FILE}")
+    set(LIBUVC_PATCH_COMMAND "${Patch_EXECUTABLE}" -p1 -R -s -f --dry-run -i "${PATCH_FILE}" || "${Patch_EXECUTABLE}" -p1 -N -i "${PATCH_FILE}")
 
     # Define patch step
     if (WIN32)
