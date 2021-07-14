@@ -16,6 +16,10 @@
  */
 #pragma once
 
+#ifdef GetObject
+#undef GetObject
+#endif
+
 #include <string>
 #include <utility>
 #include "rapidjson/document.h"
