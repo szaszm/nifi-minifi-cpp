@@ -115,7 +115,7 @@ Through JNI extensions you can run NiFi processors using NARs. The JNI extension
 * gcc 4.8.4 or greater
 * g++ 4.8.4 or greater
 * bison 3.0.x (3.2 has been shown to fail builds)
-* flex 2.5 or greater
+* flex 2.6 or greater
 
 ##### External Projects
 

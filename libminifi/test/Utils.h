@@ -22,11 +22,11 @@
 
 #include <string>
 #include <utility>
-#include "rapidjson/document.h"
 
 #ifdef GetObject
 #undef GetObject
 #endif
+#include "rapidjson/document.h"
 
 #define FIELD_ACCESSOR(field) \
   template<typename T> \

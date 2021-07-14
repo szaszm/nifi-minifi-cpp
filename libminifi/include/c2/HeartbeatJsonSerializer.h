@@ -27,6 +27,9 @@
 #endif
 #define RAPIDJSON_ASSERT(x) if(!(x)) throw std::logic_error("rapidjson exception"); //NOLINT
 
+#ifdef GetObject
+#undef GetObject
+#endif
 #include "rapidjson/document.h"
 
 namespace org {
