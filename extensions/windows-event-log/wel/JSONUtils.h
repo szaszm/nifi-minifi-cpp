@@ -23,8 +23,11 @@
 #include <stdexcept>  // for the RAPIDJSON_ASSERT redefine
 #include <string>
 
-
 #include "pugixml.hpp"
+
+#ifdef GetObject
+#undef GetObject
+#endif
 #include "rapidjson/document.h"
 
 namespace org {
