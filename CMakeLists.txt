@@ -125,7 +125,7 @@ endif()
 # Enable usage of the VERSION specifier
 if (WIN32)
     add_compile_definitions(WIN32_LEAN_AND_MEAN _CRT_SECURE_NO_WARNINGS NOMINMAX)
-    add_compile_options(/W3 /utf-8)
+    add_compile_options(/W3 /utf-8 /MP)
 endif()
 
 if (WIN32)
@@ -186,8 +186,8 @@ find_package(Patch REQUIRED)
 
 # Setup passthrough args used by third parties
 if (WIN32)
-	set(PASSTHROUGH_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w")
-	set(PASSTHROUGH_CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /w")
+	set(PASSTHROUGH_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w /MP")
+	set(PASSTHROUGH_CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /w /MP")
 else()
 	set(PASSTHROUGH_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
 	set(PASSTHROUGH_CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
