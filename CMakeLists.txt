@@ -34,6 +34,14 @@ include(CheckIncludeFile)
 include(FeatureSummary)
 include(ExternalProject)
 
+# Setup conan, must stay before CMAKE_MODULE_PATH adjustment
+if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+	include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+	conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
+else()
+	message(WARNING "The file conanbuildinfo.cmake doesn't exist, you have to run conan install first")
+endif()
+
 # Provide custom modules for the project
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 include(WholeArchive)
@@ -278,10 +286,6 @@ else()
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DDISABLE_CURL")
 endif()
 
-# spdlog
-include(BundledSpdlog)
-use_bundled_spdlog(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
-
 # yaml-cpp
 include(BundledYamlCpp)
 use_bundled_yamlcpp(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
@@ -380,13 +384,6 @@ endif()
 ## Add the rocks DB extension
 option(DISABLE_ROCKSDB "Disables the RocksDB extension." OFF)
 if (NOT DISABLE_ROCKSDB)
-	if (BUILD_ROCKSDB)
-		include(BundledRocksDB)
-		use_bundled_rocksdb(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
-	else()
-		list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/rocksdb/sys")
-		find_package(RocksDB REQUIRED)
-	endif()
 	createExtension(ROCKSDB-REPOS "ROCKSDB REPOS" "This Enables persistent provenance, flowfile, and content repositories using RocksDB" "extensions/rocksdb-repos" "${TEST_DIR}/rocksdb-tests")
 endif()
 
@@ -521,8 +518,6 @@ endif()
 ## OpenCV Extensions
 option(ENABLE_OPENCV "Enables the OpenCV extensions." OFF)
 if (ENABLE_OPENCV)
-	include(BundledOpenCV)
-	use_bundled_opencv(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 	createExtension(OPENCV-EXTENSIONS "OPENCV EXTENSIONS" "This enables OpenCV support" "extensions/opencv" "extensions/opencv/tests")
 endif()
 

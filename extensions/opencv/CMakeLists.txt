@@ -24,7 +24,7 @@ file(GLOB SOURCES  "*.cpp")
 add_library(minifi-opencv STATIC ${SOURCES})
 
 target_link_libraries(minifi-opencv ${LIBMINIFI})
-target_link_libraries(minifi-opencv OPENCV::libopencv)
+target_link_libraries(minifi-opencv CONAN_PKG::opencv)
 
 SET (OPENCV-EXTENSION minifi-opencv PARENT_SCOPE)
 register_extension(minifi-opencv)

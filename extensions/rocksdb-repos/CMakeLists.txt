@@ -25,7 +25,7 @@ add_library(minifi-rocksdb-repos STATIC ${SOURCES})
 set_property(TARGET minifi-rocksdb-repos PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 target_link_libraries(minifi-rocksdb-repos ${LIBMINIFI} Threads::Threads)
-target_link_libraries(minifi-rocksdb-repos RocksDB::RocksDB)
+target_link_libraries(minifi-rocksdb-repos CONAN_PKG::rocksdb)
 
 SET (ROCKSDB-REPOS minifi-rocksdb-repos PARENT_SCOPE)
 register_extension(minifi-rocksdb-repos)
