@@ -21,6 +21,7 @@
 
 #include <memory>
 #include "core/Core.h"
+#include <Windows.h>
 
 void RunAsServiceIfNeeded();
 HANDLE GetTerminationEventHandle(bool* isStartedByService);

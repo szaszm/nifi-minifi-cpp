@@ -32,6 +32,10 @@
 #include "core/Core.h"
 #include "utils/gsl.h"
 
+#ifdef WIN32
+#include <io.h>
+#endif
+
 namespace org {
 namespace apache {
 namespace nifi {

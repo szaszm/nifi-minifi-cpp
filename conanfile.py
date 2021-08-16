@@ -75,3 +75,7 @@ class MinificppConan(ConanFile):
             self.requires("rocksdb/6.20.3")
         if self.options.with_opencv:
             self.requires("opencv/4.5.2")
+
+    def config_options(self):
+        if self.settings.os != "Linux":
+            del self.options["opencv"].with_gtk
