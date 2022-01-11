@@ -19,19 +19,16 @@
 #ifndef LIBMINIFI_INCLUDE_UTILS_GENERALUTILS_H_
 #define LIBMINIFI_INCLUDE_UTILS_GENERALUTILS_H_
 
+#include <concepts>
 #include <memory>
 #include <type_traits>
 #include <utility>
 
 #include "gsl.h"
 
-namespace org {
-namespace apache {
-namespace nifi {
-namespace minifi {
-namespace utils {
+namespace org::apache::nifi::minifi::utils {
 
-template<typename T, typename = typename std::enable_if<std::is_integral<T>::value>::type>
+template<std::integral T>
 constexpr T intdiv_ceil(T numerator, T denominator) {
   // note: division and remainder is 1 instruction on x86
   return gsl_Expects(denominator != 0), ((numerator >= 0) != (denominator > 0)
@@ -99,17 +96,6 @@ struct dereference_t {
 
 constexpr detail::dereference_t dereference{};
 
-#if __cpp_lib_remove_cvref >= 201711L
-using std::remove_cvref_t;
-#else
-template<typename T>
-using remove_cvref_t = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
-#endif
-
-}  // namespace utils
-}  // namespace minifi
-}  // namespace nifi
-}  // namespace apache
-}  // namespace org
+}  // namespace org::apache::nifi::minifi::utils
 
 #endif  // LIBMINIFI_INCLUDE_UTILS_GENERALUTILS_H_

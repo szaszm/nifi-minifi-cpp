@@ -18,6 +18,7 @@
 #ifndef LIBMINIFI_INCLUDE_UTILS_OPTIONALUTILS_H_
 #define LIBMINIFI_INCLUDE_UTILS_OPTIONALUTILS_H_
 
+#include <concepts>
 #include <functional>
 #include <optional>
 #include <type_traits>
@@ -33,8 +34,8 @@ namespace minifi {
 namespace utils {
 
 template<typename T>
-std::optional<utils::remove_cvref_t<T>> optional_from_ptr(T&& obj) {
-  return obj == nullptr ? std::nullopt : std::optional<utils::remove_cvref_t<T>>{ std::forward<T>(obj) };
+std::optional<std::remove_cvref_t<T>> optional_from_ptr(T&& obj) {
+  return obj == nullptr ? std::nullopt : std::optional<std::remove_cvref_t<T>>{ std::forward<T>(obj) };
 }
 
 template<typename, typename = void>
@@ -104,8 +105,8 @@ struct or_else_wrapper {
 
 // orElse implementation
 template<typename SourceType, typename F>
-auto operator|(std::optional<SourceType> o, or_else_wrapper<F> f) noexcept(noexcept(std::invoke(std::forward<F>(f.function))))
-    -> typename std::enable_if<std::is_same<decltype(std::invoke(std::forward<F>(f.function))), void>::value, std::optional<SourceType>>::type {
+requires std::invocable<F> && std::same_as<std::invoke_result_t<F>, void>
+std::optional<SourceType> operator|(std::optional<SourceType> o, or_else_wrapper<F> f) noexcept(noexcept(std::invoke(std::forward<F>(f.function)))) {
   if (o.has_value()) {
     return o;
   } else {
@@ -115,8 +116,8 @@ auto operator|(std::optional<SourceType> o, or_else_wrapper<F> f) noexcept(noexc
 }
 
 template<typename SourceType, typename F>
-auto operator|(std::optional<SourceType> o, or_else_wrapper<F> f) noexcept(noexcept(std::invoke(std::forward<F>(f.function))))
-    -> typename std::enable_if<std::is_same<typename std::decay<decltype(std::invoke(std::forward<F>(f.function)))>::type, std::optional<SourceType>>::value, std::optional<SourceType>>::type {
+requires std::invocable<F> && std::same_as<std::invoke_result_t<F>, std::optional<SourceType>>
+std::optional<SourceType> operator|(std::optional<SourceType> o, or_else_wrapper<F> f) noexcept(noexcept(std::invoke(std::forward<F>(f.function)))) {
   if (o.has_value()) {
     return o;
   } else {
