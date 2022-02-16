@@ -26,7 +26,7 @@ function(use_bundled_libssh2 SOURCE_DIR BINARY_DIR)
         set(BYPRODUCT "lib/libssh2.lib")
     else()
         include(GNUInstallDirs)
-        set(BYPRODUCT "${CMAKE_INSTALL_LIBDIR}/libssh2.a")
+        set(BYPRODUCT "lib/libssh2.a")
     endif()
 
     # Set build options

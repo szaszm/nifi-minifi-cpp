@@ -22,10 +22,10 @@ function(use_bundled_osspuuid SOURCE_DIR BINARY_DIR)
 
     # Define patch step
     # if already applied, reverse application should succeed
-    set(PC ${Bash_EXECUTABLE} -c "set -x && (\"${Patch_EXECUTABLE}\" -p1 -N -i \"${SOURCE_DIR}/thirdparty/ossp-uuid/ossp-uuid-mac-fix.patch\" &&\
-            \"${Patch_EXECUTABLE}\" -p1 -N -i \"${SOURCE_DIR}/thirdparty/ossp-uuid/ossp-uuid-no-prog.patch\") ||\
-            (\"${Patch_EXECUTABLE}\" -p1 -R --dry-run -i \"${SOURCE_DIR}/thirdparty/ossp-uuid/ossp-uuid-mac-fix.patch\" &&\
-            \"${Patch_EXECUTABLE}\" -p1 -R --dry-run -i \"${SOURCE_DIR}/thirdparty/ossp-uuid/ossp-uuid-no-prog.patch\")")
+    set(PC ${Bash_EXECUTABLE} -c "set -x && \
+            (\"${Patch_EXECUTABLE}\" -p1 -N -i \"${SOURCE_DIR}/thirdparty/ossp-uuid/ossp-uuid-mac-fix.patch\" || \"${Patch_EXECUTABLE}\" -p1 -R --dry-run -i \"${SOURCE_DIR}/thirdparty/ossp-uuid/ossp-uuid-mac-fix.patch\") &&\
+	    (\"${Patch_EXECUTABLE}\" -p1 -N -i \"${SOURCE_DIR}/thirdparty/ossp-uuid/ossp-uuid-no-prog.patch\" || \"${Patch_EXECUTABLE}\" -p1 -R --dry-run -i \"${SOURCE_DIR}/thirdparty/ossp-uuid/ossp-uuid-no-prog.patch\") &&\
+	    (\"${Patch_EXECUTABLE}\" -p1 -N -i \"${SOURCE_DIR}/thirdparty/ossp-uuid/aarch64-support.patch\" || \"${Patch_EXECUTABLE}\" -p1 -R --dry-run -i \"${SOURCE_DIR}/thirdparty/ossp-uuid/aarch64-support.patch\")")
 
     # Define byproducts
     set(BYPRODUCTS "lib/libuuid.a"
@@ -38,7 +38,7 @@ function(use_bundled_osspuuid SOURCE_DIR BINARY_DIR)
     ENDFOREACH(BYPRODUCT)
 
     # Build project
-    set(CONFIGURE_COMMAND ./configure "CC=${CMAKE_C_COMPILER}" "CXX=${CMAKE_CXX_COMPILER}" "CFLAGS=${PASSTHROUGH_CMAKE_C_FLAGS} -fPIC" "CXXFLAGS=${PASSTHROUGH_CMAKE_CXX_FLAGS} -fPIC" --enable-shared=no --with-cxx --without-perl --without-php --without-pgsql "--prefix=${BINARY_DIR}/thirdparty/ossp-uuid-install")
+    set(CONFIGURE_COMMAND ./configure "CC=${CMAKE_C_COMPILER}" "CXX=${CMAKE_CXX_COMPILER}" "CFLAGS=${PASSTHROUGH_CMAKE_C_FLAGS} -fPIC" "CXXFLAGS=${PASSTHROUGH_CMAKE_CXX_FLAGS} -fPIC" --enable-shared=no --with-cxx --without-perl --without-php --without-pgsql "--prefix=${BINARY_DIR}/thirdparty/ossp-uuid-install" --build=aarch64-linux-gnu --target=aarch64-linux-gnu)
     string(TOLOWER "${CMAKE_BUILD_TYPE}" build_type)
     if(NOT build_type MATCHES debug)
         list(APPEND CONFIGURE_COMMAND --enable-debug=yes)

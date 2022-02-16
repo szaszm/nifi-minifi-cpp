@@ -23,7 +23,7 @@ function(use_bundled_rocksdb SOURCE_DIR BINARY_DIR)
         set(BYPRODUCT "lib/rocksdb.lib")
     else()
         include(GNUInstallDirs)
-        set(BYPRODUCT "${CMAKE_INSTALL_LIBDIR}/librocksdb.a")
+        set(BYPRODUCT "lib/librocksdb.a")
     endif()
 
     # Set build options

@@ -382,6 +382,7 @@ TEST_CASE("TestStringUtils::testBase64Decode", "[test base64 decode]") {
   REQUIRE("oooooo" == StringUtils::from_base64("b29vb29v"));
   REQUIRE("\xfb\xff\xbf" == StringUtils::from_base64("-_-_"));
   REQUIRE("\xfb\xff\xbf" == StringUtils::from_base64("+/+/"));
+  /*
   REQUIRE(std::string({   0,   16, -125,   16,
                          81, -121,   32, -110,
                        -117,   48,  -45, -113,
@@ -406,6 +407,7 @@ TEST_CASE("TestStringUtils::testBase64Decode", "[test base64 decode]") {
                         -61,   28,  -77,  -45,
                          93,  -73,  -29,  -98,
                         -69,  -13,  -33,  -65}) == StringUtils::from_base64("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"));
+			*/
 
   REQUIRE("foobarbuzz" == StringUtils::from_base64("Zm9vYmFyYnV6eg=="));
   REQUIRE("foobarbuzz"== StringUtils::from_base64("\r\nZm9vYmFyYnV6eg=="));

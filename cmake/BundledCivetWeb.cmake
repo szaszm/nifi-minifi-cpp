@@ -28,7 +28,7 @@ function(use_bundled_civetweb SOURCE_DIR BINARY_DIR)
     else()
 		set(PREFIX "lib")
       include(GNUInstallDirs)
-      set(LIBDIR "${CMAKE_INSTALL_LIBDIR}")
+      set(LIBDIR "lib")
       set(SUFFIX "a")
 
     endif()

@@ -24,7 +24,7 @@ function(use_bundled_open62541 SOURCE_DIR BINARY_DIR)
         set(BYPRODUCT "lib/open62541.lib")
     else()
         include(GNUInstallDirs)
-        set(BYPRODUCT "${CMAKE_INSTALL_LIBDIR}/libopen62541.a")
+        set(BYPRODUCT "lib/libopen62541.a")
     endif()
 
     # Set build options

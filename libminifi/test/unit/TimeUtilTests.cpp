@@ -95,14 +95,6 @@ TEST_CASE("Test time conversion", "[testtimeconversion]") {
   REQUIRE("2017-02-16 20:14:56.196" == getTimeStr(1487276096196, true));
 }
 
-TEST_CASE("Test system_clock epoch", "[systemclockepoch]") {
-  using namespace std::chrono;
-  time_point<system_clock> epoch;
-  time_point<system_clock> unix_epoch_plus_3e9_sec = sys_days(January / 24 / 2065) + 5h + 20min;
-  REQUIRE(epoch.time_since_epoch() == 0s);
-  REQUIRE(unix_epoch_plus_3e9_sec.time_since_epoch() == 3000000000s);
-}
-
 TEST_CASE("Test clock resolutions", "[clockresolutiontests]") {
   using namespace std::chrono;
   CHECK(std::is_constructible<system_clock::duration, std::chrono::microseconds>::value);  // The resolution of the system_clock is at least microseconds

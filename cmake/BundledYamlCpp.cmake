@@ -32,6 +32,7 @@ function(use_bundled_yamlcpp SOURCE_DIR BINARY_DIR)
     # Set build options
     set(YAMLCPP_CMAKE_ARGS ${PASSTHROUGH_CMAKE_ARGS}
             "-DCMAKE_INSTALL_PREFIX=${BINARY_DIR}/thirdparty/yaml-cpp-install"
+	    "-DCMAKE_INSTALL_LIBDIR=${CMAKE_INSTALL_LIBDIR}"
             "-DCMAKE_DEBUG_POSTFIX="
             "-DBUILD_SHARED_LIBS=OFF"
             "-DYAML_CPP_BUILD_TESTS=OFF"
