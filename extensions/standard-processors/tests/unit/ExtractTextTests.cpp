@@ -144,7 +144,7 @@ TEST_CASE("Test usage of ExtractText in regex mode", "[extracttextRegexTest]") {
 
   std::shared_ptr<core::Processor> maprocessor = plan->addProcessor("ExtractText", "testExtractText", core::Relationship("success", "description"), true);
   plan->setProperty(maprocessor, org::apache::nifi::minifi::processors::ExtractText::RegexMode.getName(), "true");
-  plan->setProperty(maprocessor, org::apache::nifi::minifi::processors::ExtractText::IgnoreCaptureGroupZero.getName(), "true");
+  plan->setProperty(maprocessor, org::apache::nifi::minifi::processors::ExtractText::IncludeCaptureGroupZero.getName(), "true");
   plan->setProperty(maprocessor, org::apache::nifi::minifi::processors::ExtractText::EnableRepeatingCaptureGroup.getName(), "true");
   plan->setProperty(maprocessor, "RegexAttr", "Speed limit ([0-9]+)", true);
   plan->setProperty(maprocessor, "InvalidRegex", "[Invalid)A(F)", true);
