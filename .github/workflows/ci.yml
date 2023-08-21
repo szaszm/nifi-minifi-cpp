@@ -96,7 +96,10 @@ jobs:
         with:
           python-version: '3.11'
       - name: Set up Lua
-        uses: xpol/setup-lua@v0.3
+        run: |
+          iex "& {$(irm get.scoop.sh)} -RunAsAdmin"
+          scoop install lua
+        shell: powershell
       - name: Set up NASM for OpenSSL
         uses: ilammy/setup-nasm@v1
       - id: install-sqliteodbc-driver
@@ -108,6 +111,7 @@ jobs:
       - name: build
         run: |
           for /f "usebackq delims=" %%i in (`vswhere.exe -latest -property installationPath`) do if exist "%%i\Common7\Tools\vsdevcmd.bat" call "%%i\Common7\Tools\vsdevcmd.bat" -arch=x64 -host_arch=x64
+          set "LUA_DIR=%USERPROFILE%\scoop\apps\lua\current"
           win_build_vs.bat ..\b /64 /CI /S /A /PDH /SPLUNK /GCP /ELASTIC /K /L /R /Z /N /RO /PR /PYTHON_SCRIPTING /LUA_SCRIPTING /MQTT /SCCACHE /NINJA
           sccache --show-stats
         shell: cmd
