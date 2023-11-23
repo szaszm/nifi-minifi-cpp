@@ -98,7 +98,7 @@ class AttributeRollingWindow final : public core::AbstractProcessor<AttributeRol
   standard::utils::RollingWindow<std::chrono::time_point<std::chrono::system_clock>, double> state_;
 
   std::optional<std::chrono::milliseconds> time_window_{};
-  std::optional<size_t> window_length_{};
+  std::optional<uint64_t> window_length_{};
   std::string attribute_name_prefix_;
   std::shared_ptr<core::logging::Logger> logger_ = core::logging::LoggerFactory<AttributeRollingWindow>::getLogger(uuid_);
 };
