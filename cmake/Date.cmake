@@ -46,8 +46,8 @@ if (WIN32)
 endif()
 
 FetchContent_Declare(date_src
-    URL         https://github.com/HowardHinnant/date/archive/1ead6715dec030d340a316c927c877a3c4e5a00c.tar.gz  # master as of 2024-06-28
-    URL_HASH    SHA256=8b4096b7b49e06d756f4aa0949151863ab7b812679a1646039fab6e821d3c049
+    URL         https://github.com/szaszm/date/archive/master.tar.gz
+    URL_HASH    SHA256=182bc56dc95c8a6e8eeaf182fe5fafc01173ddf36c5024b3c79df9ece1ecb2c0
 )
 FetchContent_GetProperties(date_src)
 if (NOT date_src_POPULATED)
