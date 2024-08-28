@@ -120,7 +120,7 @@ class FileReaderCallback {
 
     while (hasMoreToRead() && !found_delimiter) {
       if (begin_ == end_) {
-        input_stream_.read(reinterpret_cast<char *>(buffer_.data()), gsl::narrow<std::streamsize>(buffer_.size()));
+        input_stream_.read(buffer_.data(), gsl::narrow<std::streamsize>(buffer_.size()));
 
         const auto num_bytes_read = input_stream_.gcount();
         logger_->log_trace("Read {} bytes of input", std::intmax_t{num_bytes_read});
@@ -307,6 +307,8 @@ void TailFile::onSchedule(core::ProcessContext& context, core::ProcessSessionFac
   if (context.getProperty(BatchSize, batch_size) && batch_size != 0) {
     batch_size_ = batch_size;
   }
+
+  result_format_ = utils::parseEnumProperty<TailResultFormat>(context, ResultFormat);
 }
 
 void TailFile::parseAttributeProviderServiceProperty(core::ProcessContext& context) {
