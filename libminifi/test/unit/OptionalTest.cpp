@@ -87,8 +87,8 @@ TEST_CASE("optional toExpected") {
   nonstd::expected<int, int> expected_from_value_int = opt_with_value | utils::toExpected(9);
   nonstd::expected<int, int> expected_from_null_opt_int = opt_without_value | utils::toExpected(9);
 
-  CHECK(expected_from_value_ec == 5);
-  CHECK(expected_from_value_int == 5);
+  CHECK(expected_from_value_ec.value() == 5);
+  CHECK(expected_from_value_int.value() == 5);
 
   REQUIRE_FALSE(expected_from_null_opt_ec);
   CHECK(expected_from_null_opt_ec.error() == std::make_error_code(std::io_errc::stream));
@@ -100,5 +100,5 @@ TEST_CASE("optional orThrow") {
   std::optional<int> opt_without_value = std::nullopt;
 
   REQUIRE_THROWS_WITH(opt_without_value | utils::orThrow("should throw"), "should throw");
-  CHECK((opt_with_value | utils::orThrow("should be 5")) == 5);
+  CHECK((opt_with_value | utils::orThrow("should be 5")).value() == 5);
 }

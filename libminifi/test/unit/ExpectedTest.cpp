@@ -341,7 +341,7 @@ TEST_CASE("expected orElse", "[expected][orElse]") {
     nonstd::expected<int, int> e = 21;
     auto ret = std::move(e) | utils::orElse(fail);
     REQUIRE(ret);
-    REQUIRE(ret == 21);
+    REQUIRE(*ret == 21);
   }
 
 
@@ -349,7 +349,7 @@ TEST_CASE("expected orElse", "[expected][orElse]") {
     nonstd::expected<int, eptr> e = 21;
     auto ret = std::move(e) | utils::orElse(efail);
     REQUIRE(ret);
-    REQUIRE(ret == 21);
+    REQUIRE(*ret == 21);
   }
 
   {

@@ -385,9 +385,9 @@ TEST_CASE("Validating data transfer speed") {
 }
 
 TEST_CASE("Data transfer speed parsing") {
-  CHECK(processors::invoke_http::parseDataTransferSpeed("10 kB/s") == 10_KiB);
-  CHECK(processors::invoke_http::parseDataTransferSpeed("20 MB/s") == 20_MiB);
-  CHECK(processors::invoke_http::parseDataTransferSpeed("19 TB/s") == 19_TiB);
+  CHECK(processors::invoke_http::parseDataTransferSpeed("10 kB/s").value() == 10_KiB);
+  CHECK(processors::invoke_http::parseDataTransferSpeed("20 MB/s").value() == 20_MiB);
+  CHECK(processors::invoke_http::parseDataTransferSpeed("19 TB/s").value() == 19_TiB);
   CHECK(processors::invoke_http::parseDataTransferSpeed("1KBinvalidsuffix") == nonstd::make_unexpected(make_error_code(core::ParsingErrorCode::GeneralParsingError)));
   CHECK(processors::invoke_http::parseDataTransferSpeed("1KB") == nonstd::make_unexpected(make_error_code(core::ParsingErrorCode::GeneralParsingError)));
 }
