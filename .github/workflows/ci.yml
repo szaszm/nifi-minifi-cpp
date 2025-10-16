@@ -340,7 +340,7 @@ jobs:
             base_commit=$(git log -n2 --format=format:%H ${head_commit} | tail -n1)
           fi
           echo "Collecting added/copied/modified/renamed/type-changed .cpp files from ${base_commit} to ${head_commit}"
-          echo "files=$(git diff --name-only --diff-filter=ACMRT ${base_commit} ${head_commit} | grep '\.cpp$' | xargs)" >> $GITHUB_OUTPUT
+          echo "files=$(find controller/ core-framework/ encrypt-config/ extension-framework/ extensions/ libminifi/ minifi-api/ minifi_main/ -iname \*.cpp -print0 | xargs -0)" >> $GITHUB_OUTPUT
       - name: clang-tidy
         run: |
           # https://stackoverflow.com/questions/58466701/clang-tidy-cant-locate-stdlib-headers

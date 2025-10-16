@@ -53,7 +53,7 @@ class ClassLoaderImpl : public ClassLoader {
 
   [[nodiscard]] std::unique_ptr<CoreComponent> instantiate(const std::string &class_name, const std::string &name, const utils::Identifier &uuid, std::function<bool(CoreComponent*)> filter) override;
 
-  [[nodiscard]] CoreComponent* instantiateRaw(const std::string &class_name, const std::string &name, std::function<bool(CoreComponent*)> filter) override;
+  [[nodiscard]] gsl::owner<CoreComponent*> instantiateRaw(const std::string &class_name, const std::string &name, std::function<bool(CoreComponent*)> filter) override;
 
   ~ClassLoaderImpl() override = default;
 
@@ -116,13 +116,13 @@ class ProcessorFactoryWrapper : public ObjectFactoryImpl {
     return std::unique_ptr<CoreComponent>{createRaw(name, uuid)};
   }
 
-  [[nodiscard]] CoreComponent* createRaw(const std::string &name) override {
+  [[nodiscard]] gsl::owner<CoreComponent*> createRaw(const std::string &name) override {
     return createRaw(name, utils::IdGenerator::getIdGenerator()->generate());
   }
 
-  [[nodiscard]] CoreComponent* createRaw(const std::string &name, const utils::Identifier &uuid) override {
+  [[nodiscard]] gsl::owner<CoreComponent*> createRaw(const std::string &name, const utils::Identifier &uuid) override {
     auto logger = logging::LoggerFactoryBase::getAliasedLogger(getClassName(), uuid);
-    return new Processor(name, uuid, factory_->create({.uuid = uuid, .name = name, .logger = logger}));  // NOLINT(cppcoreguidelines-owning-memory)
+    return new Processor(name, uuid, factory_->create({.uuid = uuid, .name = name, .logger = logger}));
   }
 
   [[nodiscard]] std::string getGroupName() const override {
@@ -221,7 +221,7 @@ std::unique_ptr<CoreComponent> ClassLoaderImpl::instantiate(const std::string &c
   return nullptr;
 }
 
-CoreComponent* ClassLoaderImpl::instantiateRaw(const std::string &class_name, const std::string &name, std::function<bool(CoreComponent*)> filter) {
+gsl::owner<CoreComponent*> ClassLoaderImpl::instantiateRaw(const std::string &class_name, const std::string &name, std::function<bool(CoreComponent*)> filter) {
   std::lock_guard<std::mutex> lock(internal_mutex_);
   // allow subsequent classes to override functionality (like ProcessContextBuilder)
   for (auto& child_loader : class_loaders_) {
