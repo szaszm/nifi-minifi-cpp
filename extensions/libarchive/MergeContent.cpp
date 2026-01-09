@@ -64,6 +64,7 @@ void MergeContent::onSchedule(core::ProcessContext& context, core::ProcessSessio
   demarcator_ = context.getProperty(Demarcator).value_or("");
   keepPath_ = utils::parseBoolProperty(context, KeepPath);
   attributeStrategy_ = context.getProperty(AttributeStrategy).value_or("");
+  zipPassword_ = context.getProperty(Password).value_or("");
 
   validatePropertyOptions();
 
@@ -250,7 +251,12 @@ bool MergeContent::processBin(core::ProcessSession &session, std::unique_ptr<Bin
     mergeBin = std::make_unique<TarMerge>();
     mimeType = "application/tar";
   } else if (mergeFormat_ == merge_content_options::MERGE_FORMAT_ZIP_VALUE) {
-    mergeBin = std::make_unique<ZipMerge>();
+    std::optional zip_password = zipPassword_;
+    if (zip_password->empty()) {
+      // empty password is treated as no password
+      zip_password = std::nullopt;
+    }
+    mergeBin = std::make_unique<ZipMerge>(zip_password);
     mimeType = "application/zip";
   } else {
     logger_->log_error("Merge format not supported {}", mergeFormat_);
@@ -316,7 +322,8 @@ void TarMerge::merge(core::ProcessSession &session,
 
 void ZipMerge::merge(core::ProcessSession &session,
     std::deque<std::shared_ptr<core::FlowFile>> &flows, FlowFileSerializer& serializer, const std::shared_ptr<core::FlowFile>& merge_flow) {
-  session.write(merge_flow, ArchiveMerge::WriteCallback{merge_content_options::MERGE_FORMAT_ZIP_VALUE, flows, serializer});
+  const char* zip_password_arg = zip_password.has_value() ? zip_password.value().c_str() : nullptr;
+  session.write(merge_flow, ArchiveMerge::WriteCallback{merge_content_options::MERGE_FORMAT_ZIP_VALUE, flows, serializer, zip_password_arg});
   std::string fileName;
   merge_flow->getAttribute(core::SpecialFlowAttribute::FILENAME, fileName);
   if (flows.size() == 1) {

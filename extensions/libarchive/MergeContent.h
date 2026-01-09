@@ -158,11 +158,13 @@ class ArchiveMerge {
   // Nest Callback Class for write stream
   class WriteCallback {
    public:
-    WriteCallback(std::string_view merge_type, std::deque<std::shared_ptr<core::FlowFile>> &flows, FlowFileSerializer& serializer)
+    WriteCallback(std::string_view merge_type, std::deque<std::shared_ptr<core::FlowFile>> &flows, FlowFileSerializer& serializer,
+      const char* zip_password = nullptr)
         : merge_type_(merge_type),
           flows_(flows),
-          serializer_(serializer) {
-    }
+          serializer_(serializer),
+          zip_password(zip_password)
+    { }
 
     std::string merge_type_;
     std::deque<std::shared_ptr<core::FlowFile>> &flows_;
@@ -170,6 +172,7 @@ class ArchiveMerge {
     size_t size_ = 0;
     std::shared_ptr<core::logging::Logger> logger_ = core::logging::LoggerFactory<ArchiveMerge>::getLogger();
     FlowFileSerializer& serializer_;
+    const char* zip_password;
 
     static la_ssize_t archive_write(struct archive* /*arch*/, void *context, const void *buff, size_t size) {
       auto* callback = static_cast<WriteCallback *>(context);
@@ -203,8 +206,12 @@ class ArchiveMerge {
       }
       archive_write_set_bytes_per_block(arch.get(), 0);
       archive_write_add_filter_none(arch.get());
+      if (zip_password) {
+        archive_write_set_options(arch.get(), "encryption=aes256");
+        archive_write_set_passphrase(arch.get(), zip_password);
+      }
       stream_ = stream;
-      archive_write_open(arch.get(), this, nullptr, archive_write, nullptr);
+      archive_write_open2(arch.get(), this, nullptr, &archive_write, nullptr, nullptr);
 
       for (const auto& flow : flows_) {
         auto entry = archive_entry_unique_ptr{archive_entry_new()};
@@ -242,8 +249,14 @@ class TarMerge: public ArchiveMerge, public MergeBin {
 
 class ZipMerge: public ArchiveMerge, public MergeBin {
  public:
+  ZipMerge() = default;
+  explicit ZipMerge(std::optional<std::string> zip_password)
+    :zip_password{std::move(zip_password)} {}
+
   void merge(core::ProcessSession &session, std::deque<std::shared_ptr<core::FlowFile>> &flows,
              FlowFileSerializer& serializer, const std::shared_ptr<core::FlowFile> &merge_flow) override;
+
+  std::optional<std::string> zip_password = std::nullopt;
 };
 
 class AttributeMerger {
@@ -352,6 +365,10 @@ class MergeContent : public processors::BinFiles {
       .withAllowedValues({merge_content_options::ATTRIBUTE_STRATEGY_KEEP_COMMON, merge_content_options::ATTRIBUTE_STRATEGY_KEEP_ALL_UNIQUE})
       .withDefaultValue(merge_content_options::ATTRIBUTE_STRATEGY_KEEP_COMMON)
       .build();
+  EXTENSIONAPI static constexpr auto Password = core::PropertyDefinitionBuilder<>::createProperty("Password")
+      .withDescription("When the Merge Format is ZIP and this property is not empty, the generated ZIP archive is encrypted with this password using WinZip AES-256 encryption.")
+      .isSensitive(true)
+      .build();
   EXTENSIONAPI static constexpr auto Properties = utils::array_cat(BinFiles::Properties, std::to_array<core::PropertyReference>({
       MergeStrategy,
       MergeFormat,
@@ -361,7 +378,8 @@ class MergeContent : public processors::BinFiles {
       Header,
       Footer,
       Demarcator,
-      AttributeStrategy
+      AttributeStrategy,
+      Password
   }));
 
 
@@ -401,6 +419,7 @@ class MergeContent : public processors::BinFiles {
   std::string footerContent_;
   std::string demarcatorContent_;
   std::string attributeStrategy_;
+  std::string zipPassword_;
   static std::string readContent(const std::string& path);
 };
 
