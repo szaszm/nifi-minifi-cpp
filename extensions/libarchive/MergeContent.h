@@ -207,8 +207,14 @@ class ArchiveMerge {
       archive_write_set_bytes_per_block(arch.get(), 0);
       archive_write_add_filter_none(arch.get());
       if (zip_password) {
-        archive_write_set_options(arch.get(), "encryption=aes256");
-        archive_write_set_passphrase(arch.get(), zip_password);
+        if (archive_write_set_options(arch.get(), "encryption=aes256") != ARCHIVE_OK) {
+          logger_->log_error("failed to enable ZIP password encryption: {}", archive_error_string(arch.get()));
+          return -1;
+        }
+        if (archive_write_set_passphrase(arch.get(), zip_password) != ARCHIVE_OK) {
+          logger_->log_error("failed to set ZIP password: {}", archive_error_string(arch.get()));
+          return -1;
+        }
       }
       stream_ = stream;
       archive_write_open2(arch.get(), this, nullptr, &archive_write, nullptr, nullptr);

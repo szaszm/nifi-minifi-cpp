@@ -1,8 +1,7 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 4c1f8770..642ac000 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.17 FATAL_ERROR)
+diff -rupN a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt	2025-06-01 15:27:30.000000000 -0400
++++ b/CMakeLists.txt	2026-01-19 20:26:38.197796214 -0500
+@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.17 FATA
  
  PROJECT(libarchive C)
  #
@@ -11,10 +10,18 @@ index 4c1f8770..642ac000 100644
  if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${libarchive_BINARY_DIR}/bin)
  endif()
-diff --git a/libarchive/CMakeLists.txt b/libarchive/CMakeLists.txt
-index fd997db4..ce1ad6dd 100644
---- a/libarchive/CMakeLists.txt
-+++ b/libarchive/CMakeLists.txt
+@@ -851,7 +851,7 @@ IF(ENABLE_OPENSSL AND NOT CMAKE_SYSTEM_N
+     SET(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
+     LA_CHECK_INCLUDE_FILE("openssl/evp.h" HAVE_OPENSSL_EVP_H)
+     LA_CHECK_INCLUDE_FILE("openssl/opensslv.h" HAVE_OPENSSL_OPENSSLV_H)
+-    CHECK_FUNCTION_EXISTS(PKCS5_PBKDF2_HMAC_SHA1 HAVE_PKCS5_PBKDF2_HMAC_SHA1)
++    SET(HAVE_PKCS5_PBKDF2_HMAC_SHA1 1)  # Broken check on Rocky Linux 8, but the function is present
+   ENDIF(OPENSSL_FOUND)
+ ELSE()
+   SET(OPENSSL_FOUND FALSE) # Override cached value
+diff -rupN a/libarchive/CMakeLists.txt b/libarchive/CMakeLists.txt
+--- a/libarchive/CMakeLists.txt	2025-06-01 15:27:30.000000000 -0400
++++ b/libarchive/CMakeLists.txt	2026-01-19 20:25:19.758497119 -0500
 @@ -174,51 +174,6 @@ SET(libarchive_SOURCES
    xxhash.c
  )
