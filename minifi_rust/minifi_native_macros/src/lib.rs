@@ -52,3 +52,24 @@ pub fn controller_service_api(_attr: TokenStream, item: TokenStream) -> TokenStr
 
     TokenStream::from(expanded)
 }
+
+#[proc_macro_derive(PropertyType)]
+pub fn derive_property_type(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    let name = &input.ident;
+
+    let expanded = quote! {
+        impl ::minifi_native::PropertyType for #name {
+            type Output = #name;
+            const EXPECTED_CONSTRAINTS: ::minifi_native::PropertyConstraints =
+                ::minifi_native::PropertyConstraints::AllowedValues(
+                    <#name as ::strum::VariantNames>::VARIANTS
+                );
+            fn parse(s: &str) -> Result<Self::Output, ::minifi_native::MinifiError> {
+                s.parse::<#name>().map_err(Into::into)
+            }
+        }
+    };
+
+    TokenStream::from(expanded)
+}

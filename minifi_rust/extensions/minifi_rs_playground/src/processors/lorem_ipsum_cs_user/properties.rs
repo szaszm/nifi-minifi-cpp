@@ -17,7 +17,8 @@
 
 use crate::controller_services::lorem_ipsum_controller_service::LoremIpsumControllerService;
 use minifi_native::ComponentIdentifier;
-use minifi_native::{Property, StandardPropertyValidator};
+use minifi_native::Property;
+use minifi_native::PropertyConstraints::{AllowedType, AllowedValues};
 use strum::VariantNames;
 
 pub(crate) const CONTROLLER_SERVICE: Property = Property {
@@ -27,9 +28,7 @@ pub(crate) const CONTROLLER_SERVICE: Property = Property {
     is_sensitive: false,
     supports_expr_lang: false,
     default_value: None,
-    validator: StandardPropertyValidator::AlwaysValidValidator,
-    allowed_values: &[],
-    allowed_type: Some(LoremIpsumControllerService::CLASS_NAME),
+    constraints: AllowedType(LoremIpsumControllerService::CLASS_NAME),
 };
 
 pub(crate) const WRITE_METHOD: Property = Property {
@@ -39,7 +38,5 @@ pub(crate) const WRITE_METHOD: Property = Property {
     is_sensitive: false,
     supports_expr_lang: false,
     default_value: Some(super::WriteMethod::Buffer.into_str()),
-    validator: StandardPropertyValidator::AlwaysValidValidator,
-    allowed_values: super::WriteMethod::VARIANTS,
-    allowed_type: None,
+    constraints: AllowedValues(super::WriteMethod::VARIANTS),
 };

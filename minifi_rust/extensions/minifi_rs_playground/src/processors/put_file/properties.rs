@@ -15,10 +15,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
+use super::ConflictResolutionStrategy;
+use minifi_native::PropertyConstraints::{AllowedValues, Validator};
 use minifi_native::{Property, StandardPropertyValidator};
 use strum::VariantNames;
-
-use super::ConflictResolutionStrategy;
 pub(crate) const DIRECTORY: Property = Property {
     name: "Directory",
     description: "The output directory to which to put files",
@@ -26,9 +26,7 @@ pub(crate) const DIRECTORY: Property = Property {
     is_sensitive: false,
     supports_expr_lang: true,
     default_value: Some("."),
-    validator: StandardPropertyValidator::NonBlankValidator,
-    allowed_values: &[],
-    allowed_type: None,
+    constraints: Validator(StandardPropertyValidator::NonBlankValidator),
 };
 
 pub(crate) const CONFLICT_RESOLUTION: Property = Property {
@@ -38,9 +36,7 @@ pub(crate) const CONFLICT_RESOLUTION: Property = Property {
     is_sensitive: false,
     supports_expr_lang: false,
     default_value: Some(ConflictResolutionStrategy::Fail.into_str()),
-    validator: StandardPropertyValidator::AlwaysValidValidator,
-    allowed_values: ConflictResolutionStrategy::VARIANTS,
-    allowed_type: None,
+    constraints: AllowedValues(ConflictResolutionStrategy::VARIANTS),
 };
 
 pub(crate) const CREATE_DIRS: Property = Property {
@@ -50,9 +46,7 @@ pub(crate) const CREATE_DIRS: Property = Property {
     is_sensitive: false,
     supports_expr_lang: false,
     default_value: Some("true"),
-    validator: StandardPropertyValidator::BoolValidator,
-    allowed_values: &[],
-    allowed_type: None,
+    constraints: Validator(StandardPropertyValidator::BoolValidator),
 };
 
 pub(crate) const MAX_FILE_COUNT: Property = Property {
@@ -62,7 +56,5 @@ pub(crate) const MAX_FILE_COUNT: Property = Property {
     is_sensitive: false,
     supports_expr_lang: false,
     default_value: None, // Diverged from the original implementation, u64 with no default describes the behavior better
-    validator: StandardPropertyValidator::U64Validator,
-    allowed_values: &[],
-    allowed_type: None,
+    constraints: Validator(StandardPropertyValidator::U64Validator),
 };

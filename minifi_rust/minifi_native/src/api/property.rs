@@ -15,6 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
+use crate::PropertyConstraints::NoConstraints;
 use crate::StandardPropertyValidator::{
     BoolValidator, DataSizeValidator, TimePeriodValidator, U64Validator,
 };
@@ -26,7 +27,6 @@ use std::time::Duration;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum StandardPropertyValidator {
-    AlwaysValidValidator,
     NonBlankValidator,
     TimePeriodValidator,
     BoolValidator,
@@ -34,6 +34,20 @@ pub enum StandardPropertyValidator {
     U64Validator,
     DataSizeValidator,
     PortValidator,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum PropertyConstraints {
+    NoConstraints,
+    Validator(StandardPropertyValidator),
+    AllowedValues(&'static [&'static str]),
+    AllowedType(&'static str),
+}
+
+impl From<StandardPropertyValidator> for PropertyConstraints {
+    fn from(value: StandardPropertyValidator) -> Self {
+        PropertyConstraints::Validator(value)
+    }
 }
 
 #[derive(Debug)]
@@ -44,69 +58,100 @@ pub struct Property {
     pub is_sensitive: bool,
     pub supports_expr_lang: bool,
     pub default_value: Option<&'static str>,
-    pub validator: StandardPropertyValidator,
-    pub allowed_values: &'static [&'static str],
-    pub allowed_type: Option<&'static str>,
+    pub constraints: PropertyConstraints,
+}
+
+pub trait PropertyType {
+    type Output;
+    const EXPECTED_CONSTRAINTS: PropertyConstraints = PropertyConstraints::NoConstraints;
+
+    fn parse(s: &str) -> Result<Self::Output, MinifiError>;
+}
+
+macro_rules! impl_from_str_property {
+    ($t:ty, $validator:expr) => {
+        impl PropertyType for $t {
+            type Output = $t;
+            const EXPECTED_CONSTRAINTS: PropertyConstraints = $validator;
+
+            fn parse(s: &str) -> Result<Self::Output, MinifiError> {
+                s.parse::<$t>().map_err(Into::into)
+            }
+        }
+    };
+    ($t:ty) => {
+        impl_from_str_property!($t, PropertyConstraints::NoConstraints);
+    };
+}
+
+impl_from_str_property!(String);
+impl_from_str_property!(std::path::PathBuf);
+impl_from_str_property!(f64);
+impl_from_str_property!(f32);
+impl_from_str_property!(i64);
+impl_from_str_property!(i32);
+impl_from_str_property!(bool, PropertyConstraints::Validator(BoolValidator));
+impl_from_str_property!(u64, PropertyConstraints::Validator(U64Validator));
+impl_from_str_property!(u32, PropertyConstraints::Validator(U64Validator));
+impl_from_str_property!(usize, PropertyConstraints::Validator(U64Validator));
+
+impl PropertyType for Duration {
+    type Output = Duration;
+    const EXPECTED_CONSTRAINTS: PropertyConstraints =
+        PropertyConstraints::Validator(TimePeriodValidator);
+    fn parse(s: &str) -> Result<Self::Output, MinifiError> {
+        humantime::parse_duration(s).map_err(Into::into)
+    }
+}
+
+pub struct DataSize;
+impl PropertyType for DataSize {
+    type Output = u64;
+    const EXPECTED_CONSTRAINTS: PropertyConstraints =
+        PropertyConstraints::Validator(DataSizeValidator);
+    fn parse(s: &str) -> Result<Self::Output, MinifiError> {
+        byte_unit::Byte::from_str(s)
+            .map(|b| b.as_u64())
+            .map_err(Into::into)
+    }
 }
 
 pub trait GetProperty {
-    fn get_property(&self, property: &Property) -> Result<Option<String>, MinifiError>;
-    fn get_bool_property(&self, property: &Property) -> Result<Option<bool>, MinifiError> {
-        if property.validator != BoolValidator {
+    fn get_raw_property(&self, property: &Property) -> Result<Option<String>, MinifiError>;
+
+    fn get_property<T: PropertyType>(
+        &self,
+        property: &Property,
+    ) -> Result<Option<T::Output>, MinifiError> {
+        if T::EXPECTED_CONSTRAINTS != NoConstraints
+            && T::EXPECTED_CONSTRAINTS != property.constraints
+        {
             return Err(MinifiError::validation_err(format!(
-                "to use get_bool_property {:?} must have BoolValidator",
-                property
+                "to use get_property for this type, {:?} must have validator {:?}",
+                property.name,
+                T::EXPECTED_CONSTRAINTS
             )));
         }
 
-        if let Some(property_val) = self.get_property(property)? {
-            Ok(Some(bool::from_str(&property_val)?))
+        if let Some(property_val) = self.get_raw_property(property)? {
+            Ok(Some(T::parse(&property_val)?))
         } else {
             Ok(None)
         }
     }
 
-    fn get_duration_property(&self, property: &Property) -> Result<Option<Duration>, MinifiError> {
-        if property.validator != TimePeriodValidator {
+    fn get_req_property<T: PropertyType>(
+        &self,
+        property: &Property,
+    ) -> Result<T::Output, MinifiError> {
+        if !property.is_required {
             return Err(MinifiError::validation_err(format!(
-                "to use get_duration_property {:?} must have TimePeriodValidator",
-                property
+                "to use get_req_property, {:?} must be required",
+                property.name
             )));
         }
-
-        if let Some(property_val) = self.get_property(property)? {
-            Ok(Some(humantime::parse_duration(property_val.as_str())?))
-        } else {
-            Ok(None)
-        }
-    }
-
-    fn get_size_property(&self, property: &Property) -> Result<Option<u64>, MinifiError> {
-        if property.validator != DataSizeValidator {
-            return Err(MinifiError::validation_err(format!(
-                "to use get_size_property {:?} must have DataSizeValidator",
-                property
-            )));
-        }
-        if let Some(property_val) = self.get_property(property)? {
-            Ok(Some(byte_unit::Byte::from_str(&property_val)?.as_u64()))
-        } else {
-            Ok(None)
-        }
-    }
-
-    fn get_u64_property(&self, property: &Property) -> Result<Option<u64>, MinifiError> {
-        if property.validator != U64Validator {
-            return Err(MinifiError::validation_err(format!(
-                "to use get_u64_property {:?} must have U64Validator",
-                property
-            )));
-        }
-        if let Some(property_val) = self.get_property(property)? {
-            Ok(Some(u64::from_str(&property_val)?))
-        } else {
-            Ok(None)
-        }
+        self.get_property::<T>(property)?
+            .ok_or_else(|| MinifiError::missing_required_property(property.name))
     }
 }
 
