@@ -10,6 +10,7 @@ use minifi_native::{
 };
 use std::collections::HashMap;
 use std::io::Cursor;
+use minifi_native::error;
 
 pub(crate) const SUCCESS: Relationship = Relationship {
     name: "success",
@@ -105,17 +106,20 @@ impl FlowFileTransform for DrawBoundingBox {
         let line_thickness = unwrap_or_route!(
             context.get_req_property::<u32>(&LINE_THICKNESS),
             &FAILURE,
-            logger
+            logger,
+            "getting LINE_THICKNESS"
         );
         let line_color = unwrap_or_route!(
             context.get_req_property::<LineColor>(&LINE_COLOR),
             &FAILURE,
-            logger
+            logger,
+            "getting LINE_COLOR"
         );
         let boxes = unwrap_or_route!(
             context.get_req_property::<BoundingBoxes>(&BOUNDING_BOXES),
             &FAILURE,
-            logger
+            logger,
+            "bounding boxes"
         );
 
         let mut image_bytes = Vec::new();
@@ -152,7 +156,7 @@ impl ProcessorDefinition for DrawBoundingBox {
     const SUPPORTS_DYNAMIC_RELATIONSHIPS: bool = false;
     const OUTPUT_ATTRIBUTES: &'static [OutputAttribute] = &[];
     const RELATIONSHIPS: &'static [Relationship] = &[SUCCESS, FAILURE];
-    const PROPERTIES: &'static [Property] = &[BOUNDING_BOXES];
+    const PROPERTIES: &'static [Property] = &[BOUNDING_BOXES, LINE_COLOR, LINE_THICKNESS];
 }
 
 #[cfg(test)]
