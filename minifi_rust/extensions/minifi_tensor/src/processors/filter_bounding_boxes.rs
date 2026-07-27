@@ -15,7 +15,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use crate::processors::filter_bounding_boxes::processor_definition::{BACKGROUND_CLASS_INDEX, BOX_FORMAT, BOX_OUTPUT_INDEX, CONFIDENCE_THRESHOLD, FAILURE, IOU_THRESHOLD, OUTPUT_ATTRIBUTE_NAME, SCORE_ACTIVATION, SCORE_OUTPUT_INDEX, SUCCESS};
+use crate::processors::filter_bounding_boxes::processor_definition::{
+    BACKGROUND_CLASS_INDEX, BOX_FORMAT, BOX_OUTPUT_INDEX, CONFIDENCE_THRESHOLD, FAILURE,
+    IOU_THRESHOLD, OUTPUT_ATTRIBUTE_NAME, SCORE_ACTIVATION, SCORE_OUTPUT_INDEX, SUCCESS,
+};
 use crate::utils::bounding_box::BoundingBox;
 use minifi_native::error;
 use minifi_native::macros::{ComponentIdentifier, PropertyType};
@@ -385,21 +388,16 @@ impl FlowFileTransform for FilterBoundingBoxes {
         attributes.insert("mime.type".to_string(), "application/json".to_string());
 
         match context.get_property::<String>(&OUTPUT_ATTRIBUTE_NAME)? {
-            None => {        Ok(TransformedFlowFile::new(
+            None => Ok(TransformedFlowFile::new(
                 &SUCCESS,
                 Some(json_output),
                 attributes,
-            ))}
+            )),
             Some(output_attr) => {
                 attributes.insert(output_attr, serde_json::to_string(&filtered_boxes).unwrap());
-                Ok(TransformedFlowFile::new(
-                    &SUCCESS,
-                    None,
-                    attributes,
-                ))
+                Ok(TransformedFlowFile::new(&SUCCESS, None, attributes))
             }
         }
-
     }
 }
 

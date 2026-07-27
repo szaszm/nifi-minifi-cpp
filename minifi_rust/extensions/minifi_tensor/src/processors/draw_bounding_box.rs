@@ -1,6 +1,7 @@
 use crate::utils::bounding_box::BoundingBoxes;
 use image::{ImageFormat, Rgb, load_from_memory};
 use minifi_native::PropertyConstraints::NoConstraints;
+use minifi_native::error;
 use minifi_native::macros::ComponentIdentifier;
 use minifi_native::{
     FlowFileTransform, GetAttribute, GetControllerService, GetId, GetProperty, InputStream, Logger,
@@ -10,7 +11,6 @@ use minifi_native::{
 };
 use std::collections::HashMap;
 use std::io::Cursor;
-use minifi_native::error;
 
 pub(crate) const SUCCESS: Relationship = Relationship {
     name: "success",
@@ -130,7 +130,8 @@ impl FlowFileTransform for DrawBoundingBox {
                 .map(|dyn_img| dyn_img.to_rgb8())
                 .map_err(|_e| MinifiError::UnknownError),
             &FAILURE,
-            logger
+            logger,
+            "loading_img_from_memory"
         );
 
         boxes
@@ -161,7 +162,7 @@ impl ProcessorDefinition for DrawBoundingBox {
 
 #[cfg(test)]
 mod tests {
-    use crate::processors::draw_bounding_box::{LINE_COLOR, LineColor};
+    use crate::processors::draw_bounding_box::{LINE_COLOR, LINE_THICKNESS, LineColor};
     use minifi_native::{GetProperty, MockControllerServiceContext};
 
     #[test]
@@ -172,5 +173,14 @@ mod tests {
             .expect("we should parse this");
         let green = image::Rgb([0, 255, 0]);
         assert_eq!(default_color, green);
+    }
+
+    #[test]
+    fn test_parsing_line_thickness() {
+        let mock_context = MockControllerServiceContext::default();
+        let default_thickness = mock_context
+            .get_req_property::<u32>(&LINE_THICKNESS)
+            .expect("we should parse this");
+        assert_eq!(default_thickness, 5);
     }
 }
