@@ -15,6 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
+use minifi_native::PropertyConstraints::Validator;
 use minifi_native::{Property, StandardPropertyValidator};
 
 pub(crate) const DIRECTORY: Property = Property {
@@ -24,33 +25,27 @@ pub(crate) const DIRECTORY: Property = Property {
     is_sensitive: false,
     supports_expr_lang: true,
     default_value: None,
-    validator: StandardPropertyValidator::NonBlankValidator,
-    allowed_values: &[],
-    allowed_type: None,
+    constraints: Validator(StandardPropertyValidator::NonBlankValidator),
 };
 
 pub(crate) const RECURSE: Property = Property {
     name: "Recurse Subdirectories",
     description: "Indicates whether or not to pull files from subdirectories",
-    is_required: false,
+    is_required: true,
     is_sensitive: false,
     supports_expr_lang: false,
     default_value: Some("true"),
-    validator: StandardPropertyValidator::BoolValidator,
-    allowed_values: &[],
-    allowed_type: None,
+    constraints: Validator(StandardPropertyValidator::BoolValidator),
 };
 
 pub(crate) const KEEP_SOURCE_FILE: Property = Property {
     name: "Keep Source File",
     description: "If true, the file is not deleted after it has been copied to the Content Repository",
-    is_required: false,
+    is_required: true,
     is_sensitive: false,
     supports_expr_lang: false,
     default_value: Some("false"),
-    validator: StandardPropertyValidator::BoolValidator,
-    allowed_values: &[],
-    allowed_type: None,
+    constraints: Validator(StandardPropertyValidator::BoolValidator),
 };
 
 pub(crate) const MIN_AGE: Property = Property {
@@ -60,9 +55,7 @@ pub(crate) const MIN_AGE: Property = Property {
     is_sensitive: false,
     supports_expr_lang: false,
     default_value: None,
-    validator: StandardPropertyValidator::TimePeriodValidator,
-    allowed_values: &[],
-    allowed_type: None,
+    constraints: Validator(StandardPropertyValidator::TimePeriodValidator),
 };
 
 pub(crate) const MAX_AGE: Property = Property {
@@ -72,9 +65,7 @@ pub(crate) const MAX_AGE: Property = Property {
     is_sensitive: false,
     supports_expr_lang: false,
     default_value: None,
-    validator: StandardPropertyValidator::TimePeriodValidator,
-    allowed_values: &[],
-    allowed_type: None,
+    constraints: Validator(StandardPropertyValidator::TimePeriodValidator),
 };
 
 pub(crate) const MIN_SIZE: Property = Property {
@@ -84,9 +75,7 @@ pub(crate) const MIN_SIZE: Property = Property {
     is_sensitive: false,
     supports_expr_lang: false,
     default_value: None,
-    validator: StandardPropertyValidator::DataSizeValidator,
-    allowed_values: &[],
-    allowed_type: None,
+    constraints: Validator(StandardPropertyValidator::DataSizeValidator),
 };
 
 pub(crate) const MAX_SIZE: Property = Property {
@@ -96,9 +85,7 @@ pub(crate) const MAX_SIZE: Property = Property {
     is_sensitive: false,
     supports_expr_lang: false,
     default_value: None,
-    validator: StandardPropertyValidator::DataSizeValidator,
-    allowed_values: &[],
-    allowed_type: None,
+    constraints: Validator(StandardPropertyValidator::DataSizeValidator),
 };
 
 pub(crate) const IGNORE_HIDDEN_FILES: Property = Property {
@@ -108,9 +95,7 @@ pub(crate) const IGNORE_HIDDEN_FILES: Property = Property {
     is_sensitive: false,
     supports_expr_lang: false,
     default_value: Some("true"),
-    validator: StandardPropertyValidator::BoolValidator,
-    allowed_values: &[],
-    allowed_type: None,
+    constraints: Validator(StandardPropertyValidator::BoolValidator),
 };
 
 pub(crate) const POLLING_INTERVAL: Property = Property {
@@ -120,9 +105,7 @@ pub(crate) const POLLING_INTERVAL: Property = Property {
     is_sensitive: false,
     supports_expr_lang: false,
     default_value: None,
-    validator: StandardPropertyValidator::TimePeriodValidator,
-    allowed_values: &[],
-    allowed_type: None,
+    constraints: Validator(StandardPropertyValidator::TimePeriodValidator),
 };
 
 pub(crate) const BATCH_SIZE: Property = Property {
@@ -132,7 +115,5 @@ pub(crate) const BATCH_SIZE: Property = Property {
     is_sensitive: false,
     supports_expr_lang: false,
     default_value: Some("10"),
-    validator: StandardPropertyValidator::U64Validator,
-    allowed_values: &[],
-    allowed_type: None,
+    constraints: Validator(StandardPropertyValidator::U64Validator),
 };

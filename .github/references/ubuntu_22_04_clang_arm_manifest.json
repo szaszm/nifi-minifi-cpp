@@ -12211,13 +12211,749 @@
                             "expressionLanguageScope": "NONE",
                             "defaultValue": "false"
                         },
-                        "Maximum File Age": {
-                            "name": "Maximum File Age",
-                            "description": "The maximum age that a file must be in order to be pulled;  any file older than this amount of time (according to last modification date) will be ignored",
-                            "validator": "TIME_PERIOD_VALIDATOR",
-                            "required": "false",
-                            "sensitive": "false",
-                            "expressionLanguageScope": "NONE"
+                        "name": "Proxy Configuration Service",
+                        "description": "Specifies the Proxy Configuration Controller Service to proxy network requests. When used, this will override any values specified for Proxy Host, Proxy Port, Proxy Username, and Proxy Password properties.",
+                        "validator": "VALID",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE"
+                    },
+                    "Proxy Host": {
+                        "name": "Proxy Host",
+                        "description": "Proxy host name or IP. Use https:// prefix for HTTPS proxy. DEPRECATED, please use Proxy Configuration Service instead.",
+                        "validator": "VALID",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE"
+                    },
+                    "Proxy Password": {
+                        "name": "Proxy Password",
+                        "description": "Password to set when authenticating against proxy. DEPRECATED, please use Proxy Configuration Service instead.",
+                        "validator": "VALID",
+                        "required": "false",
+                        "sensitive": "true",
+                        "expressionLanguageScope": "NONE"
+                    },
+                    "Proxy Port": {
+                        "name": "Proxy Port",
+                        "description": "The port number of the proxy host. DEPRECATED, please use Proxy Configuration Service instead.",
+                        "validator": "VALID",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE"
+                    },
+                    "Proxy Username": {
+                        "name": "Proxy Username",
+                        "description": "Username to set when authenticating against proxy. DEPRECATED, please use Proxy Configuration Service instead.",
+                        "validator": "VALID",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE"
+                    },
+                    "Region": {
+                        "name": "Region",
+                        "description": "AWS Region",
+                        "validator": "VALID",
+                        "required": "true",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "us-west-2",
+                        "allowableValues": [
+                            {
+                                "value": "af-south-1",
+                                "displayName": "af-south-1"
+                            },
+                            {
+                                "value": "ap-east-1",
+                                "displayName": "ap-east-1"
+                            },
+                            {
+                                "value": "ap-east-2",
+                                "displayName": "ap-east-2"
+                            },
+                            {
+                                "value": "ap-northeast-1",
+                                "displayName": "ap-northeast-1"
+                            },
+                            {
+                                "value": "ap-northeast-2",
+                                "displayName": "ap-northeast-2"
+                            },
+                            {
+                                "value": "ap-northeast-3",
+                                "displayName": "ap-northeast-3"
+                            },
+                            {
+                                "value": "ap-south-1",
+                                "displayName": "ap-south-1"
+                            },
+                            {
+                                "value": "ap-south-2",
+                                "displayName": "ap-south-2"
+                            },
+                            {
+                                "value": "ap-southeast-1",
+                                "displayName": "ap-southeast-1"
+                            },
+                            {
+                                "value": "ap-southeast-2",
+                                "displayName": "ap-southeast-2"
+                            },
+                            {
+                                "value": "ap-southeast-3",
+                                "displayName": "ap-southeast-3"
+                            },
+                            {
+                                "value": "ap-southeast-4",
+                                "displayName": "ap-southeast-4"
+                            },
+                            {
+                                "value": "ap-southeast-5",
+                                "displayName": "ap-southeast-5"
+                            },
+                            {
+                                "value": "ap-southeast-6",
+                                "displayName": "ap-southeast-6"
+                            },
+                            {
+                                "value": "ap-southeast-7",
+                                "displayName": "ap-southeast-7"
+                            },
+                            {
+                                "value": "ca-central-1",
+                                "displayName": "ca-central-1"
+                            },
+                            {
+                                "value": "ca-west-1",
+                                "displayName": "ca-west-1"
+                            },
+                            {
+                                "value": "cn-north-1",
+                                "displayName": "cn-north-1"
+                            },
+                            {
+                                "value": "cn-northwest-1",
+                                "displayName": "cn-northwest-1"
+                            },
+                            {
+                                "value": "eu-central-1",
+                                "displayName": "eu-central-1"
+                            },
+                            {
+                                "value": "eu-central-2",
+                                "displayName": "eu-central-2"
+                            },
+                            {
+                                "value": "eu-isoe-west-1",
+                                "displayName": "eu-isoe-west-1"
+                            },
+                            {
+                                "value": "eu-north-1",
+                                "displayName": "eu-north-1"
+                            },
+                            {
+                                "value": "eu-south-1",
+                                "displayName": "eu-south-1"
+                            },
+                            {
+                                "value": "eu-south-2",
+                                "displayName": "eu-south-2"
+                            },
+                            {
+                                "value": "eu-west-1",
+                                "displayName": "eu-west-1"
+                            },
+                            {
+                                "value": "eu-west-2",
+                                "displayName": "eu-west-2"
+                            },
+                            {
+                                "value": "eu-west-3",
+                                "displayName": "eu-west-3"
+                            },
+                            {
+                                "value": "eusc-de-east-1",
+                                "displayName": "eusc-de-east-1"
+                            },
+                            {
+                                "value": "il-central-1",
+                                "displayName": "il-central-1"
+                            },
+                            {
+                                "value": "me-central-1",
+                                "displayName": "me-central-1"
+                            },
+                            {
+                                "value": "me-south-1",
+                                "displayName": "me-south-1"
+                            },
+                            {
+                                "value": "mx-central-1",
+                                "displayName": "mx-central-1"
+                            },
+                            {
+                                "value": "sa-east-1",
+                                "displayName": "sa-east-1"
+                            },
+                            {
+                                "value": "us-east-1",
+                                "displayName": "us-east-1"
+                            },
+                            {
+                                "value": "us-east-2",
+                                "displayName": "us-east-2"
+                            },
+                            {
+                                "value": "us-gov-east-1",
+                                "displayName": "us-gov-east-1"
+                            },
+                            {
+                                "value": "us-gov-west-1",
+                                "displayName": "us-gov-west-1"
+                            },
+                            {
+                                "value": "us-iso-east-1",
+                                "displayName": "us-iso-east-1"
+                            },
+                            {
+                                "value": "us-iso-west-1",
+                                "displayName": "us-iso-west-1"
+                            },
+                            {
+                                "value": "us-isob-east-1",
+                                "displayName": "us-isob-east-1"
+                            },
+                            {
+                                "value": "us-isof-east-1",
+                                "displayName": "us-isof-east-1"
+                            },
+                            {
+                                "value": "us-isob-west-1",
+                                "displayName": "us-isob-west-1"
+                            },
+                            {
+                                "value": "us-isof-south-1",
+                                "displayName": "us-isof-south-1"
+                            },
+                            {
+                                "value": "us-west-1",
+                                "displayName": "us-west-1"
+                            },
+                            {
+                                "value": "us-west-2",
+                                "displayName": "us-west-2"
+                            }
+                        ]
+                    },
+                    "Requester Pays": {
+                        "name": "Requester Pays",
+                        "description": "If true, indicates that the requester consents to pay any charges associated with retrieving objects from the S3 bucket. This sets the 'x-amz-request-payer' header to 'requester'.",
+                        "validator": "BOOLEAN_VALIDATOR",
+                        "required": "true",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "false"
+                    },
+                    "Secret Key": {
+                        "name": "Secret Key",
+                        "description": "AWS account secret key",
+                        "validator": "VALID",
+                        "required": "false",
+                        "sensitive": "true",
+                        "expressionLanguageScope": "NONE"
+                    },
+                    "Use Default Credentials": {
+                        "name": "Use Default Credentials",
+                        "description": "If true, uses the Default Credential chain, including EC2 instance profiles or roles, environment variables, default user credentials, etc.",
+                        "validator": "BOOLEAN_VALIDATOR",
+                        "required": "true",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "false"
+                    },
+                    "Version": {
+                        "name": "Version",
+                        "description": "The Version of the Object to download",
+                        "validator": "VALID",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "FLOWFILE_ATTRIBUTES"
+                    }
+                },
+                "inputRequirement": "INPUT_REQUIRED",
+                "isSingleThreaded": "false",
+                "supportedRelationships": [
+                    {
+                        "name": "failure",
+                        "description": "FlowFiles are routed to failure relationship"
+                    },
+                    {
+                        "name": "success",
+                        "description": "FlowFiles are routed to success relationship"
+                    }
+                ],
+                "typeDescription": "This Processor retrieves the contents of an S3 Object and writes it to the content of a FlowFile.",
+                "supportsDynamicRelationships": "false",
+                "supportsDynamicProperties": "true",
+                "type": "org.apache.nifi.minifi.aws.processors.FetchS3Object"
+            },
+            {
+                "propertyDescriptors": {
+                    "Completion Strategy": {
+                        "name": "Completion Strategy",
+                        "description": "Specifies what to do with the original file on the server once it has been pulled into NiFi. If the Completion Strategy fails, a warning will be logged but the data will still be transferred.",
+                        "validator": "VALID",
+                        "required": "true",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "None",
+                        "allowableValues": [
+                            {
+                                "value": "None",
+                                "displayName": "None"
+                            },
+                            {
+                                "value": "Move File",
+                                "displayName": "Move File"
+                            },
+                            {
+                                "value": "Delete File",
+                                "displayName": "Delete File"
+                            }
+                        ]
+                    },
+                    "Connection Timeout": {
+                        "name": "Connection Timeout",
+                        "description": "Amount of time to wait before timing out while creating a connection",
+                        "validator": "TIME_PERIOD_VALIDATOR",
+                        "required": "true",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "30 sec"
+                    },
+                    "Create Directory": {
+                        "name": "Create Directory",
+                        "description": "Specifies whether or not the remote directory should be created if it does not exist.",
+                        "validator": "BOOLEAN_VALIDATOR",
+                        "required": "true",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "false"
+                    },
+                    "Data Timeout": {
+                        "name": "Data Timeout",
+                        "description": "When transferring a file between the local and remote system, this value specifies how long is allowed to elapse without any data being transferred between systems",
+                        "validator": "TIME_PERIOD_VALIDATOR",
+                        "required": "true",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "30 sec"
+                    },
+                    "Disable Directory Listing": {
+                        "name": "Disable Directory Listing",
+                        "description": "Control how 'Move Destination Directory' is created when 'Completion Strategy' is 'Move File' and 'Create Directory' is enabled. If set to 'true', directory listing is not performed prior to create missing directories. By default, this processor executes a directory listing command to see target directory existence before creating missing directories. However, there are situations that you might need to disable the directory listing such as the following. Directory listing might fail with some permission setups (e.g. chmod 100) on a directory. Also, if any other SFTP client created the directory after this processor performed a listing and before a directory creation request by this processor is finished, then an error is returned because the directory already exists.",
+                        "validator": "BOOLEAN_VALIDATOR",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "false"
+                    },
+                    "Host Key File": {
+                        "name": "Host Key File",
+                        "description": "If supplied, the given file will be used as the Host Key; otherwise, no use host key file will be used",
+                        "validator": "VALID",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE"
+                    },
+                    "Hostname": {
+                        "name": "Hostname",
+                        "description": "The fully qualified hostname or IP address of the remote system",
+                        "validator": "VALID",
+                        "required": "true",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "FLOWFILE_ATTRIBUTES"
+                    },
+                    "Http Proxy Password": {
+                        "name": "Http Proxy Password",
+                        "description": "Http Proxy Password",
+                        "validator": "VALID",
+                        "required": "false",
+                        "sensitive": "true",
+                        "expressionLanguageScope": "FLOWFILE_ATTRIBUTES"
+                    },
+                    "Http Proxy Username": {
+                        "name": "Http Proxy Username",
+                        "description": "Http Proxy Username",
+                        "validator": "VALID",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "FLOWFILE_ATTRIBUTES"
+                    },
+                    "Move Destination Directory": {
+                        "name": "Move Destination Directory",
+                        "description": "The directory on the remote server to move the original file to once it has been ingested into NiFi. This property is ignored unless the Completion Strategy is set to 'Move File'. The specified directory must already exist on the remote system if 'Create Directory' is disabled, or the rename will fail.",
+                        "validator": "VALID",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "FLOWFILE_ATTRIBUTES"
+                    },
+                    "Password": {
+                        "name": "Password",
+                        "description": "Password for the user account",
+                        "validator": "VALID",
+                        "required": "false",
+                        "sensitive": "true",
+                        "expressionLanguageScope": "FLOWFILE_ATTRIBUTES"
+                    },
+                    "Port": {
+                        "name": "Port",
+                        "description": "The port that the remote system is listening on for file transfers",
+                        "validator": "VALID",
+                        "required": "true",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "FLOWFILE_ATTRIBUTES"
+                    },
+                    "Private Key Passphrase": {
+                        "name": "Private Key Passphrase",
+                        "description": "Password for the private key",
+                        "validator": "VALID",
+                        "required": "false",
+                        "sensitive": "true",
+                        "expressionLanguageScope": "FLOWFILE_ATTRIBUTES"
+                    },
+                    "Private Key Path": {
+                        "name": "Private Key Path",
+                        "description": "The fully qualified path to the Private Key file",
+                        "validator": "VALID",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "FLOWFILE_ATTRIBUTES"
+                    },
+                    "Proxy Host": {
+                        "name": "Proxy Host",
+                        "description": "The fully qualified hostname or IP address of the proxy server",
+                        "validator": "VALID",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "FLOWFILE_ATTRIBUTES"
+                    },
+                    "Proxy Port": {
+                        "name": "Proxy Port",
+                        "description": "The port of the proxy server",
+                        "validator": "VALID",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "FLOWFILE_ATTRIBUTES"
+                    },
+                    "Proxy Type": {
+                        "name": "Proxy Type",
+                        "description": "Specifies the Proxy Configuration Controller Service to proxy network requests. If set, it supersedes proxy settings configured per component. Supported proxies: HTTP + AuthN, SOCKS + AuthN",
+                        "validator": "VALID",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "DIRECT",
+                        "allowableValues": [
+                            {
+                                "value": "DIRECT",
+                                "displayName": "DIRECT"
+                            },
+                            {
+                                "value": "HTTP",
+                                "displayName": "HTTP"
+                            },
+                            {
+                                "value": "SOCKS",
+                                "displayName": "SOCKS"
+                            }
+                        ]
+                    },
+                    "Remote File": {
+                        "name": "Remote File",
+                        "description": "The fully qualified filename on the remote system",
+                        "validator": "VALID",
+                        "required": "true",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "FLOWFILE_ATTRIBUTES"
+                    },
+                    "Send Keep Alive On Timeout": {
+                        "name": "Send Keep Alive On Timeout",
+                        "description": "Indicates whether or not to send a single Keep Alive message when SSH socket times out",
+                        "validator": "BOOLEAN_VALIDATOR",
+                        "required": "true",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "true"
+                    },
+                    "Strict Host Key Checking": {
+                        "name": "Strict Host Key Checking",
+                        "description": "Indicates whether or not strict enforcement of hosts keys should be applied",
+                        "validator": "BOOLEAN_VALIDATOR",
+                        "required": "true",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "false"
+                    },
+                    "Use Compression": {
+                        "name": "Use Compression",
+                        "description": "Indicates whether or not ZLIB compression should be used when transferring files",
+                        "validator": "BOOLEAN_VALIDATOR",
+                        "required": "true",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "false"
+                    },
+                    "Username": {
+                        "name": "Username",
+                        "description": "Username",
+                        "validator": "VALID",
+                        "required": "true",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "FLOWFILE_ATTRIBUTES"
+                    }
+                },
+                "inputRequirement": "INPUT_REQUIRED",
+                "isSingleThreaded": "false",
+                "supportedRelationships": [
+                    {
+                        "name": "comms.failure",
+                        "description": "Any FlowFile that could not be fetched from the remote server due to a communications failure will be transferred to this Relationship."
+                    },
+                    {
+                        "name": "not.found",
+                        "description": "Any FlowFile for which we receive a 'Not Found' message from the remote server will be transferred to this Relationship."
+                    },
+                    {
+                        "name": "permission.denied",
+                        "description": "Any FlowFile that could not be fetched from the remote server due to insufficient permissions will be transferred to this Relationship."
+                    },
+                    {
+                        "name": "success",
+                        "description": "All FlowFiles that are received are routed to success"
+                    }
+                ],
+                "typeDescription": "Fetches the content of a file from a remote SFTP server and overwrites the contents of an incoming FlowFile with the content of the remote file.",
+                "supportsDynamicRelationships": "false",
+                "supportsDynamicProperties": "false",
+                "type": "org.apache.nifi.minifi.processors.FetchSFTP"
+            },
+            {
+                "propertyDescriptors": {
+                    "Path": {
+                        "name": "Path",
+                        "description": "The path within the archive to focus (\"/\" to focus the total archive)",
+                        "validator": "VALID",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE"
+                    }
+                },
+                "inputRequirement": "INPUT_ALLOWED",
+                "isSingleThreaded": "false",
+                "supportedRelationships": [
+                    {
+                        "name": "success",
+                        "description": "success operational on the flow record"
+                    }
+                ],
+                "typeDescription": "Allows manipulation of entries within an archive (e.g. TAR) by focusing on one entry within the archive at a time. When an archive entry is focused, that entry is treated as the content of the FlowFile and may be manipulated independently of the rest of the archive. To restore the FlowFile to its original state, use UnfocusArchiveEntry.",
+                "supportsDynamicRelationships": "false",
+                "supportsDynamicProperties": "false",
+                "type": "org.apache.nifi.minifi.processors.FocusArchiveEntry"
+            },
+            {
+                "propertyDescriptors": {
+                    "Max Batch Size": {
+                        "name": "Max Batch Size",
+                        "description": "The maximum number of flow files to process at a time. If unset, all FlowFiles will be processed at once.",
+                        "validator": "NON_NEGATIVE_INTEGER_VALIDATOR",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE"
+                    }
+                },
+                "inputRequirement": "INPUT_REQUIRED",
+                "isSingleThreaded": "false",
+                "supportedRelationships": [
+                    {
+                        "name": "enrichment",
+                        "description": "A clone of the incoming FlowFile will be routed to this relationship, after adding appropriate attributes."
+                    },
+                    {
+                        "name": "original",
+                        "description": "The incoming FlowFile will be routed to this relationship, after adding appropriate attributes."
+                    }
+                ],
+                "typeDescription": "Used in conjunction with the JoinEnrichmentAttributes processor, this processor is responsible for adding the attributes that are necessary for the JoinEnrichmentAttributes processor to perform its function. Each incoming FlowFile will be cloned. The original FlowFile will have appropriate attributes added and then be transferred to the 'original' relationship. The clone will have appropriate attributes added and then be routed to the 'enrichment' relationship.",
+                "supportsDynamicRelationships": "false",
+                "supportsDynamicProperties": "false",
+                "type": "org.apache.nifi.minifi.standard.ForkEnrichment"
+            },
+            {
+                "propertyDescriptors": {
+                    "Batch Size": {
+                        "name": "Batch Size",
+                        "description": "The number of FlowFiles to be transferred in each invocation",
+                        "validator": "INTEGER_VALIDATOR",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "1"
+                    },
+                    "Custom Text": {
+                        "name": "Custom Text",
+                        "description": "If Data Format is text and if Unique FlowFiles is false, then this custom text will be used as content of the generated FlowFiles and the File Size will be ignored. Finally, if Expression Language is used, evaluation will be performed only once per batch of generated FlowFiles",
+                        "validator": "VALID",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "FLOWFILE_ATTRIBUTES"
+                    },
+                    "Data Format": {
+                        "name": "Data Format",
+                        "description": "Specifies whether the data should be Text or Binary",
+                        "validator": "VALID",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "Binary",
+                        "allowableValues": [
+                            {
+                                "value": "Text",
+                                "displayName": "Text"
+                            },
+                            {
+                                "value": "Binary",
+                                "displayName": "Binary"
+                            }
+                        ]
+                    },
+                    "File Size": {
+                        "name": "File Size",
+                        "description": "The size of the file that will be used",
+                        "validator": "DATA_SIZE_VALIDATOR",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "1 kB"
+                    },
+                    "Unique FlowFiles": {
+                        "name": "Unique FlowFiles",
+                        "description": "If true, each FlowFile that is generated will be unique. If false, a random value will be generated and all FlowFiles will get the same content but this offers much higher throughput (but see the description of Custom Text for special non-random use cases)",
+                        "validator": "BOOLEAN_VALIDATOR",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "true"
+                    }
+                },
+                "inputRequirement": "INPUT_FORBIDDEN",
+                "isSingleThreaded": "false",
+                "supportedRelationships": [
+                    {
+                        "name": "success",
+                        "description": "success operational on the flow record"
+                    }
+                ],
+                "typeDescription": "This processor creates FlowFiles with random data or custom content. GenerateFlowFile is useful for load testing, configuration, and simulation.",
+                "supportsDynamicRelationships": "false",
+                "supportsDynamicProperties": "false",
+                "type": "org.apache.nifi.minifi.processors.GenerateFlowFile"
+            },
+            {
+                "propertyDescriptors": {
+                    "Batch Size": {
+                        "name": "Batch Size",
+                        "description": "The number of FlowFiles to be transferred in each invocation",
+                        "validator": "NON_NEGATIVE_INTEGER_VALIDATOR",
+                        "required": "true",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "1"
+                    },
+                    "Custom Text": {
+                        "name": "Custom Text",
+                        "description": "If Data Format is text and if Unique FlowFiles is false, then this custom text will be used as content of the generated FlowFiles and the File Size will be ignored. Finally, if Expression Language is used, evaluation will be performed only once per batch of generated FlowFiles",
+                        "validator": "VALID",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "FLOWFILE_ATTRIBUTES"
+                    },
+                    "Data Format": {
+                        "name": "Data Format",
+                        "description": "Specifies whether the data should be Text or Binary",
+                        "validator": "VALID",
+                        "required": "true",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "Binary",
+                        "allowableValues": [
+                            {
+                                "value": "Text",
+                                "displayName": "Text"
+                            },
+                            {
+                                "value": "Binary",
+                                "displayName": "Binary"
+                            }
+                        ]
+                    },
+                    "File Size": {
+                        "name": "File Size",
+                        "description": "The size of the file that will be used",
+                        "validator": "DATA_SIZE_VALIDATOR",
+                        "required": "true",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "FLOWFILE_ATTRIBUTES",
+                        "defaultValue": "1 kB"
+                    },
+                    "Unique FlowFiles": {
+                        "name": "Unique FlowFiles",
+                        "description": "If true, each FlowFile that is generated will be unique. If false, a random value will be generated and all FlowFiles will get the same content but this offers much higher throughput (but see the description of Custom Text for special non-random use cases)",
+                        "validator": "BOOLEAN_VALIDATOR",
+                        "required": "true",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "true"
+                    }
+                },
+                "inputRequirement": "INPUT_FORBIDDEN",
+                "isSingleThreaded": "false",
+                "supportedRelationships": [
+                    {
+                        "name": "success",
+                        "description": "success"
+                    }
+                ],
+                "typeDescription": "RUST TEST PROCESSOR: This processor creates FlowFiles with random data or custom content. GenerateFlowFile is useful for load testing, configuration, and simulation.",
+                "supportsDynamicRelationships": "false",
+                "supportsDynamicProperties": "false",
+                "type": "minifi_rs_playground.processors.generate_flow_file.GenerateFlowFileRs"
+            },
+            {
+                "propertyDescriptors": {
+                    "Bucket Name": {
+                        "name": "Bucket Name",
+                        "description": "The name of bucket to access.",
+                        "validator": "NON_BLANK_VALIDATOR",
+                        "required": "true",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "FLOWFILE_ATTRIBUTES",
+                        "defaultValue": "default"
+                    },
+                    "Collection Name": {
+                        "name": "Collection Name",
+                        "description": "Collection to use inside the bucket scope. If not specified, the _default collection is used.",
+                        "validator": "NON_BLANK_VALIDATOR",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "FLOWFILE_ATTRIBUTES"
+                    },
+                    "Couchbase Cluster Controller Service": {
+                        "typeProvidedByValue": {
+                            "type": "org.apache.nifi.minifi.couchbase.controllers.CouchbaseClusterService",
+                            "group": "org.apache.nifi.minifi",
+                            "artifact": "minifi-couchbase"
                         },
                         "Maximum File Size": {
                             "name": "Maximum File Size",
@@ -12235,13 +12971,297 @@
                             "sensitive": "false",
                             "expressionLanguageScope": "NONE"
                         },
-                        "Minimum File Size": {
-                            "name": "Minimum File Size",
-                            "description": "The minimum size that a file can be in order to be pulled",
-                            "validator": "DATA_SIZE_VALIDATOR",
-                            "required": "false",
-                            "sensitive": "false",
-                            "expressionLanguageScope": "NONE"
+                        "name": "SSL Context Service",
+                        "description": "The SSL Context Service used to provide client certificate information for TLS/SSL (https) connections.",
+                        "validator": "VALID",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE"
+                    },
+                    "Send Message Body": {
+                        "name": "Send Message Body",
+                        "description": "If true, sends the HTTP message body on POST/PUT/PATCH requests (default). If false, suppresses the message body and content-type header for these requests.",
+                        "validator": "BOOLEAN_VALIDATOR",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "true"
+                    },
+                    "Upload Speed Limit": {
+                        "name": "Upload Speed Limit",
+                        "description": "Maximum upload speed, e.g. '500 KB/s'. Leave this empty if you want no limit.",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE"
+                    },
+                    "Use Chunked Encoding": {
+                        "name": "Use Chunked Encoding",
+                        "description": "When POST'ing, PUT'ing or PATCH'ing content set this property to true in order to not pass the 'Content-length' header and instead send 'Transfer-Encoding' with a value of 'chunked'. This will enable the data transfer mechanism which was introduced in HTTP 1.1 to pass data of unknown lengths in chunks.",
+                        "validator": "BOOLEAN_VALIDATOR",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "false"
+                    },
+                    "invokehttp-proxy-password": {
+                        "name": "invokehttp-proxy-password",
+                        "displayName": "Proxy Password",
+                        "description": "Password to set when authenticating against proxy",
+                        "validator": "VALID",
+                        "required": "false",
+                        "sensitive": "true",
+                        "expressionLanguageScope": "NONE"
+                    },
+                    "invokehttp-proxy-username": {
+                        "name": "invokehttp-proxy-username",
+                        "displayName": "Proxy Username",
+                        "description": "Username to set when authenticating against proxy",
+                        "validator": "VALID",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE"
+                    },
+                    "send-message-body": {
+                        "name": "send-message-body",
+                        "displayName": "Send Body",
+                        "description": "DEPRECATED. Only kept for backwards compatibility, no functionality is included.",
+                        "validator": "BOOLEAN_VALIDATOR",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "true"
+                    }
+                },
+                "inputRequirement": "INPUT_ALLOWED",
+                "isSingleThreaded": "false",
+                "supportedRelationships": [
+                    {
+                        "name": "failure",
+                        "description": "The original FlowFile will be routed on any type of connection failure, timeout or general exception. It will have new attributes detailing the request."
+                    },
+                    {
+                        "name": "no retry",
+                        "description": "The original FlowFile will be routed on any status code that should NOT be retried (1xx, 3xx, 4xx status codes). It will have new attributes detailing the request."
+                    },
+                    {
+                        "name": "response",
+                        "description": "A Response FlowFile will be routed upon success (2xx status codes). If the 'Always Output Response' property is true then the response will be sent to this relationship regardless of the status code received."
+                    },
+                    {
+                        "name": "retry",
+                        "description": "The original FlowFile will be routed on any status code that can be retried (5xx status codes). It will have new attributes detailing the request."
+                    },
+                    {
+                        "name": "success",
+                        "description": "The original FlowFile will be routed upon success (2xx status codes). It will have new attributes detailing the success of the request."
+                    }
+                ],
+                "typeDescription": "An HTTP client processor which can interact with a configurable HTTP Endpoint. The destination URL and HTTP Method are configurable. FlowFile attributes are converted to HTTP headers and the FlowFile contents are included as the body of the request (if the HTTP Method is PUT, POST or PATCH).",
+                "supportsDynamicRelationships": "false",
+                "supportsDynamicProperties": "false",
+                "type": "org.apache.nifi.minifi.processors.InvokeHTTP"
+            },
+            {
+                "propertyDescriptors": {
+                    "Max Batch Size": {
+                        "name": "Max Batch Size",
+                        "description": "The maximum number of flow files to process at a time. If unset, all FlowFiles will be processed at once.",
+                        "validator": "NON_NEGATIVE_INTEGER_VALIDATOR",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE"
+                    },
+                    "Timeout": {
+                        "name": "Timeout",
+                        "description": "Specifies the maximum amount of time to wait for the second FlowFile once the first arrives at the processor, after which point the first FlowFile will be routed to the 'timeout' relationship.",
+                        "validator": "TIME_PERIOD_VALIDATOR",
+                        "required": "false",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE"
+                    }
+                },
+                "inputRequirement": "INPUT_REQUIRED",
+                "isSingleThreaded": "true",
+                "supportedRelationships": [
+                    {
+                        "name": "invalid",
+                        "description": "Any FlowFiles without the requisite attributes will be routed here"
+                    },
+                    {
+                        "name": "joined",
+                        "description": "The resultant FlowFile with Records joined together from both the original and enrichment FlowFiles will be routed to this relationship"
+                    },
+                    {
+                        "name": "original",
+                        "description": "Both of the incoming FlowFiles ('original' and 'enrichment') will be routed to this Relationship. I.e., this is the 'original' version of both of these FlowFiles."
+                    },
+                    {
+                        "name": "timeout",
+                        "description": "If one of the incoming FlowFiles (i.e., the 'original' FlowFile or the 'enrichment' FlowFile) arrives to this Processor but the other does not arrive within the configured Timeout period, the FlowFile that did arrive is routed to this relationship."
+                    }
+                ],
+                "typeDescription": "Rejoins the forked FlowFiles coming from ForkEnrichment processor, the resulting FlowFile will have the Original's content and all attributes from both of them (prioritizing Enrichment's).",
+                "supportsDynamicRelationships": "false",
+                "supportsDynamicProperties": "false",
+                "type": "org.apache.nifi.minifi.standard.JoinEnrichmentAttributes"
+            },
+            {
+                "propertyDescriptors": {
+                    "Jolt Specification": {
+                        "name": "Jolt Specification",
+                        "description": "Jolt Specification for transformation of JSON data. The value for this property may be the text of a Jolt specification or the path to a file containing a Jolt specification. 'Jolt Specification' must be set, or the value is ignored if the Jolt Sort Transformation is selected.",
+                        "validator": "VALID",
+                        "required": "true",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE"
+                    },
+                    "Jolt Transformation DSL": {
+                        "name": "Jolt Transformation DSL",
+                        "description": "Specifies the Jolt Transformation that should be used with the provided specification.",
+                        "validator": "VALID",
+                        "required": "true",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "Shift",
+                        "allowableValues": [
+                            {
+                                "value": "Shift",
+                                "displayName": "Shift"
+                            }
+                        ]
+                    }
+                },
+                "inputRequirement": "INPUT_REQUIRED",
+                "isSingleThreaded": "false",
+                "supportedRelationships": [
+                    {
+                        "name": "failure",
+                        "description": "If a FlowFile fails processing for any reason (for example, the FlowFile is not valid JSON), it will be routed to this relationship"
+                    },
+                    {
+                        "name": "success",
+                        "description": "The FlowFile with transformed content will be routed to this relationship"
+                    }
+                ],
+                "typeDescription": "Applies a list of Jolt specifications to the flowfile JSON payload. A new FlowFile is created with transformed content and is routed to the 'success' relationship. If the JSON transform fails, the original FlowFile is routed to the 'failure' relationship.",
+                "supportsDynamicRelationships": "false",
+                "supportsDynamicProperties": "false",
+                "type": "org.apache.nifi.minifi.processors.JoltTransformJSON"
+            },
+            {
+                "propertyDescriptors": {
+                    "Throw in onSchedule": {
+                        "name": "Throw in onSchedule",
+                        "description": "Set to throw expcetion during onSchedule call",
+                        "validator": "BOOLEAN_VALIDATOR",
+                        "required": "true",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "false"
+                    },
+                    "Throw in onTrigger": {
+                        "name": "Throw in onTrigger",
+                        "description": "Set to throw expcetion during onTrigger call",
+                        "validator": "BOOLEAN_VALIDATOR",
+                        "required": "true",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "false"
+                    }
+                },
+                "inputRequirement": "INPUT_ALLOWED",
+                "isSingleThreaded": "false",
+                "supportedRelationships": [],
+                "typeDescription": "This processor can throw exceptions in onTrigger and onSchedule calls based on configuration. Only for testing purposes.",
+                "supportsDynamicRelationships": "false",
+                "supportsDynamicProperties": "false",
+                "type": "org.apache.nifi.minifi.processors.KamikazeProcessor"
+            },
+            {
+                "propertyDescriptors": {
+                    "Schedule Behaviour": {
+                        "name": "Schedule Behaviour",
+                        "description": "What to do during the on_schedule method",
+                        "validator": "VALID",
+                        "required": "true",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "ReturnOk",
+                        "allowableValues": [
+                            {
+                                "value": "ReturnErr",
+                                "displayName": "ReturnErr"
+                            },
+                            {
+                                "value": "ReturnOk",
+                                "displayName": "ReturnOk"
+                            },
+                            {
+                                "value": "GetNotRegisteredProperty",
+                                "displayName": "GetNotRegisteredProperty"
+                            },
+                            {
+                                "value": "GetInvalidControllerService",
+                                "displayName": "GetInvalidControllerService"
+                            },
+                            {
+                                "value": "Panic",
+                                "displayName": "Panic"
+                            }
+                        ]
+                    },
+                    "Trigger Behaviour": {
+                        "name": "Trigger Behaviour",
+                        "description": "What to do during the trigger method",
+                        "validator": "VALID",
+                        "required": "true",
+                        "sensitive": "false",
+                        "expressionLanguageScope": "NONE",
+                        "defaultValue": "ReturnOk",
+                        "allowableValues": [
+                            {
+                                "value": "ReturnErr",
+                                "displayName": "ReturnErr"
+                            },
+                            {
+                                "value": "ReturnOk",
+                                "displayName": "ReturnOk"
+                            },
+                            {
+                                "value": "GetNotRegisteredProperty",
+                                "displayName": "GetNotRegisteredProperty"
+                            },
+                            {
+                                "value": "GetInvalidControllerService",
+                                "displayName": "GetInvalidControllerService"
+                            },
+                            {
+                                "value": "Panic",
+                                "displayName": "Panic"
+                            }
+                        ]
+                    }
+                },
+                "inputRequirement": "INPUT_ALLOWED",
+                "isSingleThreaded": "false",
+                "supportedRelationships": [
+                    {
+                        "name": "success",
+                        "description": "success relationship"
+                    }
+                ],
+                "typeDescription": "RUST TEST PROCESSOR: This processor can fail or panic in on_trigger and on_schedule calls based on configuration. Only for testing purposes.",
+                "supportsDynamicRelationships": "false",
+                "supportsDynamicProperties": "false",
+                "type": "minifi_rs_playground.processors.kamikaze_processor.KamikazeProcessorRs"
+            },
+            {
+                "propertyDescriptors": {
+                    "Azure Storage Credentials Service": {
+                        "typeProvidedByValue": {
+                            "type": "org.apache.nifi.minifi.azure.controllers.AzureStorageCredentialsService",
+                            "group": "org.apache.nifi.minifi",
+                            "artifact": "minifi-azure"
                         },
                         "Polling Interval": {
                             "name": "Polling Interval",

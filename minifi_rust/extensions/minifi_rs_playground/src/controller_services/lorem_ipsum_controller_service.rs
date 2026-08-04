@@ -16,6 +16,7 @@
 // under the License.
 
 use lipsum::lipsum;
+use minifi_native::PropertyConstraints::Validator;
 use minifi_native::macros::ComponentIdentifier;
 use minifi_native::{
     ControllerServiceDefinition, EnableControllerService, GetProperty, Logger, MinifiError,
@@ -29,9 +30,7 @@ const LENGTH: Property = Property {
     is_sensitive: false,
     supports_expr_lang: false,
     default_value: Some("25"),
-    validator: StandardPropertyValidator::U64Validator,
-    allowed_values: &[],
-    allowed_type: None,
+    constraints: Validator(StandardPropertyValidator::U64Validator),
 };
 
 #[derive(Debug, ComponentIdentifier)]
@@ -44,11 +43,7 @@ impl EnableControllerService for LoremIpsumControllerService {
     where
         Self: Sized,
     {
-        let length = context
-            .get_u64_property(&LENGTH)?
-            .ok_or(MinifiError::missing_required_property("Length is required"))?;
-
-        let data = lipsum(length as usize);
+        let data = lipsum(context.get_req_property::<usize>(&LENGTH)?);
         Ok(Self { data })
     }
 }

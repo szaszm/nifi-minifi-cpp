@@ -15,7 +15,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use minifi_native::{Property, StandardPropertyValidator};
+use minifi_native::Property;
+use minifi_native::PropertyConstraints::NoConstraints;
 
 pub(crate) const PERMISSIONS: Property = Property {
     name: "Permissions",
@@ -24,9 +25,7 @@ pub(crate) const PERMISSIONS: Property = Property {
     is_sensitive: false,
     supports_expr_lang: false,
     default_value: None,
-    validator: StandardPropertyValidator::AlwaysValidValidator,
-    allowed_values: &[],
-    allowed_type: None,
+    constraints: NoConstraints,
 };
 
 pub(crate) const DIRECTORY_PERMISSIONS: Property = Property {
@@ -36,7 +35,5 @@ pub(crate) const DIRECTORY_PERMISSIONS: Property = Property {
     is_sensitive: false,
     supports_expr_lang: false,
     default_value: None,
-    validator: StandardPropertyValidator::AlwaysValidValidator,
-    allowed_values: &[],
-    allowed_type: None,
+    constraints: NoConstraints,
 };
