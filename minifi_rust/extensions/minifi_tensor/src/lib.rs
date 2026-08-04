@@ -28,6 +28,7 @@ mod services;
 mod utils;
 
 minifi_native::declare_minifi_extension!(
+    group_name: "my.group.tnsr",
     processors: [
         (FlowFileTransformProcessorType, MultiThreaded, ImageToTensor),
         (FlowFileTransformProcessorType, MultiThreaded, InvokeTractModel),
