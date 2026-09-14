@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["minifi_native_sys", "minifi_native", "minifi_native_macros", "minifi_rs_behave", "extensions/*"]
+members = ["minifi_native_sys", "minifi_native", "minifi_native_macros", "minifi_rs_behave", "pqdif", "extensions/*"]
 
 [profile.release]
 panic = "abort"

@@ -37,6 +37,13 @@ Copyright (c) Microsoft Corporation.
 This includes CodeCoverage.cmake from the bilke/cmake-modules project (https://github.com/bilke/cmake-modules)
 Copyright (c) 2012 - 2017, Lars Bilke
 
+This bundles PQDIF tag definitions from Grid Protection Alliance's GSF.PQDIF (MIT licensed) project (https://github.com/GridProtectionAlliance/gsf):
+Copyright (c) 2015 Grid Protection Alliance
+The vendored data file is
+  Source/Libraries/GSF.PQDIF/TagDefinitions.xml
+and can be found in minifi_rust/pqdif/tags/tag_definitions.xml. The MIT license
+text is preserved alongside it as minifi_rust/pqdif/tags/LICENSE-GSF-PQDIF.
+
 **********************
 THIRD PARTY COMPONENTS
 **********************
