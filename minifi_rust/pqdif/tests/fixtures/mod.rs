@@ -18,4 +18,9 @@
 //! Builders that hand-construct valid PQDIF byte arrays for integration
 //! tests. Documented byte-by-byte so this doubles as a decoder-of-the-decoder.
 
+// Each integration test binary compiles the fixtures module afresh, and
+// unused-code lints fire per-binary — so a builder used only by
+// `logical_smoke.rs` looks dead when compiled into `physical_smoke.rs`. Silence
+// the noise at the shared entry point rather than annotating every builder.
+#[allow(dead_code)]
 pub mod synthetic;

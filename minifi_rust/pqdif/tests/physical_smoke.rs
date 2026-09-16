@@ -15,12 +15,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-//! Integration test: walk the record chain of the synthetic fixture with
-//! `PhysicalParser` and check the shape of the resulting element trees.
+//! Integration tests: walk the physical layer of the synthetic fixtures and
+//! check the shape of the resulting element trees, plus the guardrails
+//! (checksum verification, cycle detection).
 
 use std::io::Cursor;
 
-use pqdif::PhysicalParser;
+use pqdif::{PhysicalParser, PqdifError};
 
 mod fixtures;
 
@@ -75,7 +76,7 @@ fn checksum_mismatch_is_detected() {
     let err = parser
         .next_record()
         .expect_err("checksum mismatch should be raised");
-    assert!(matches!(err, pqdif::PqdifError::ChecksumMismatch { .. }));
+    assert!(matches!(err, PqdifError::ChecksumMismatch { .. }));
 }
 
 #[test]
@@ -88,4 +89,48 @@ fn checksum_verification_can_be_disabled() {
     // Corrupted body: decoding still succeeds because checksums are off; the
     // decoded element tree may still be sensible enough to walk the chain.
     let _ = parser.next_record();
+}
+
+#[test]
+fn self_referential_next_record_triggers_cycle_error() {
+    let bytes = fixtures::synthetic::build_with_cycle();
+    let mut parser = PhysicalParser::new(Cursor::new(&bytes)).expect("open");
+    // First pull yields the Container.
+    let _ = parser.next_record().expect("first pull ok").expect("present");
+    // Second pull yields the DataSource whose next_record_pos loops back to
+    // itself.
+    let ds = parser
+        .next_record()
+        .expect("second pull ok")
+        .expect("present");
+    let ds_offset = ds.offset;
+    // Third pull revisits the DataSource offset → cycle detection fires.
+    match parser.next_record() {
+        Err(PqdifError::RecordCycle(off)) => assert_eq!(off, ds_offset),
+        other => panic!("expected RecordCycle, got {other:?}"),
+    }
+}
+
+#[test]
+fn zlib_compressed_chain_walks_and_decompresses() {
+    let (bytes, _samples) = fixtures::synthetic::build_zlib_compressed();
+    let mut parser = PhysicalParser::new(Cursor::new(&bytes)).expect("open");
+
+    // Container — uncompressed regardless of settings.
+    let container = parser.next_record().expect("ok").expect("present");
+    assert_eq!(
+        container.header.type_tag,
+        uuid::uuid!("89738606-f1c3-11cf-9d89-0080c72e70a3"),
+    );
+
+    // DataSource — body was compressed on disk; the parser transparently
+    // decompresses it and the decoded element tree looks the same as the
+    // uncompressed fixture.
+    let data_source = parser.next_record().expect("ok").expect("present");
+    assert_eq!(data_source.body.children.len(), 2);
+
+    let observation = parser.next_record().expect("ok").expect("present");
+    assert_eq!(observation.body.children.len(), 3);
+
+    assert!(parser.next_record().expect("terminator").is_none());
 }
