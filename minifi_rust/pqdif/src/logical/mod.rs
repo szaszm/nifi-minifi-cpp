@@ -46,5 +46,5 @@ mod util;
 pub use container::ContainerRecord;
 pub use data_source::{ChannelDefinition, DataSourceRecord, SeriesDefinition};
 pub use observation::{ChannelInstance, ObservationRecord, SeriesInstance};
-pub use parser::LogicalParser;
+pub use parser::{LogicalParser, OpenOptions};
 pub use record_type::RecordType;

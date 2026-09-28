@@ -33,6 +33,24 @@ use crate::logical::observation::ObservationRecord;
 use crate::logical::record_type::RecordType;
 use crate::physical::parser::PhysicalParser;
 
+/// Options controlling how [`LogicalParser::open_with_options`] reads a file.
+#[derive(Debug, Clone, Copy)]
+pub struct OpenOptions {
+    /// If `true` (the default), the Adler-32 checksum in each record's header
+    /// is verified against the on-disk body bytes and a mismatch raises
+    /// [`PqdifError::ChecksumMismatch`]. Set to `false` to accept files
+    /// produced by writers that ship a zero checksum.
+    pub verify_checksums: bool,
+}
+
+impl Default for OpenOptions {
+    fn default() -> Self {
+        Self {
+            verify_checksums: true,
+        }
+    }
+}
+
 /// Iterator over the typed records inside a PQDIF file.
 pub struct LogicalParser<R: Read + Seek> {
     physical: PhysicalParser<R>,
@@ -49,7 +67,23 @@ impl<R: Read + Seek> LogicalParser<R> {
     ///
     /// Fails if the file's first record is not a Container.
     pub fn open(reader: R) -> Result<(Self, ContainerRecord), PqdifError> {
+        Self::open_with_options(reader, OpenOptions::default())
+    }
+
+    /// Like [`Self::open`], but applies `options` to the underlying physical
+    /// parser before reading the Container record.
+    ///
+    /// Use this to open files that ship with a zero Adler-32 checksum — a
+    /// common quirk of third-party writers (the reference GSF implementation
+    /// computes but does not verify on read). Constructing a `LogicalParser`
+    /// via [`Self::open`] and then calling [`Self::verify_checksums`] is too
+    /// late for the Container record, which is decoded during `open`.
+    pub fn open_with_options(
+        reader: R,
+        options: OpenOptions,
+    ) -> Result<(Self, ContainerRecord), PqdifError> {
         let mut physical = PhysicalParser::new(reader)?;
+        physical.verify_checksums(options.verify_checksums);
         let first = physical
             .next_record()?
             .ok_or(PqdifError::BadHeader("file has no records"))?;

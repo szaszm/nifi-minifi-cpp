@@ -35,7 +35,7 @@ use uuid::Uuid;
 
 /// GUID from `RECORD_SIGNATURE` in the crate (repeated verbatim so the
 /// fixture is self-contained).
-const SIGNATURE: Uuid = uuid::uuid!("4b1c9187-e88e-11cf-9d89-0080c72e70a3");
+const SIGNATURE: Uuid = uuid::uuid!("4a111440-e49f-11cf-9900-505144494600");
 
 // Record-level GUIDs.
 const CONTAINER_TAG: Uuid = uuid::uuid!("89738606-f1c3-11cf-9d89-0080c72e70a3");
@@ -77,9 +77,11 @@ const PT_CHAR_1: u8 = 10;
 const PT_CHAR_2: u8 = 11;
 
 // Element types.
-const ET_SCALAR: u8 = 1;
-const ET_VECTOR: u8 = 2;
-const ET_COLLECTION: u8 = 3;
+// Match the reference `GSF.PQDIF/Physical/Element.cs` enum values:
+// Collection = 1, Scalar = 2, Vector = 3.
+const ET_COLLECTION: u8 = 1;
+const ET_SCALAR: u8 = 2;
+const ET_VECTOR: u8 = 3;
 
 // Compression enumeration values (from tag_definitions.xml).
 const ID_COMP_STYLE_RECORDLEVEL: u32 = 2;
@@ -486,7 +488,7 @@ fn write_record(out: &mut Vec<u8>, type_tag: Uuid, next_record_pos: u32, body: &
     header[40..44].copy_from_slice(&next_record_pos.to_le_bytes());
     // 44..60 zero-filled.
     let checksum = adler32(body);
-    header[60..64].copy_from_slice(&checksum.to_le_bytes());
+    header[44..48].copy_from_slice(&checksum.to_le_bytes());
     out.extend_from_slice(&header);
     out.extend_from_slice(body);
 }
@@ -799,6 +801,7 @@ fn write_element(out: &mut Vec<u8>, header_pos: usize, elem: &FElem) {
             write_guid(&mut h[0..16], *tag);
             h[16] = ET_SCALAR;
             h[17] = *physical_type;
+            h[18] = 1; // isEmbedded — GSF writer's marker.
             h[20..24].copy_from_slice(embedded);
             // 24..28 zero (padding).
             out[header_pos..header_pos + 28].copy_from_slice(&h);

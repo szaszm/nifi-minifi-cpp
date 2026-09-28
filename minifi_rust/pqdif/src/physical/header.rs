@@ -17,7 +17,8 @@
 
 //! The 64-byte record header at the start of every PQDIF record.
 //!
-//! Byte layout (little-endian throughout):
+//! Byte layout (little-endian throughout), matching the reference
+//! `GSF.PQDIF/Physical/RecordHeader.cs`:
 //!
 //! | offset | length | field                                          |
 //! |-------:|-------:|------------------------------------------------|
@@ -26,9 +27,8 @@
 //! |    32  |     4  | `header_size` — always `64`                    |
 //! |    36  |     4  | `body_size` — length of the (on-disk) body     |
 //! |    40  |     4  | `next_record_pos` — absolute file offset       |
-//! |    44  |    12  | reserved / unused (zero-filled)                |
-//! |    56  |     4  | reserved (zero-filled)                         |
-//! |    60  |     4  | `checksum` — Adler-32 over the on-disk body    |
+//! |    44  |     4  | `checksum` — Adler-32 over the on-disk body    |
+//! |    48  |    16  | reserved / unused (zero-filled)                |
 //!
 //! The signature is the same GUID every record carries so parsers can quickly
 //! confirm they are reading a PQDIF file; `type_tag` is what tells the
@@ -46,9 +46,11 @@ pub const HEADER_LEN: usize = 64;
 
 /// PQDIF signature GUID present at the start of every record.
 ///
-/// The reference implementation calls this `SignatureGuid` and hard-codes it
-/// as `4b1c9187-e88e-11cf-9d89-0080c72e70a3`.
-pub const RECORD_SIGNATURE: Uuid = uuid::uuid!("4b1c9187-e88e-11cf-9d89-0080c72e70a3");
+/// The reference implementation (`GSF.PQDIF/Physical/Record.cs`) declares this
+/// as `Record.Signature = new Guid("4a111440-e49f-11cf-9900-505144494600")`.
+/// The trailing eight bytes spell `\x99\x00PQDIF\x00` on the wire, which is
+/// how a hex dump of a real PQDIF file lets you spot the format at a glance.
+pub const RECORD_SIGNATURE: Uuid = uuid::uuid!("4a111440-e49f-11cf-9900-505144494600");
 
 /// Decoded record header.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -93,10 +95,10 @@ impl RecordHeader {
         let header_size = u32::from_le_bytes(bytes[32..36].try_into().unwrap());
         let body_size = u32::from_le_bytes(bytes[36..40].try_into().unwrap());
         let next_record_pos = u32::from_le_bytes(bytes[40..44].try_into().unwrap());
-        // bytes[44..60] are reserved / unused. We do not validate them —
+        let checksum = u32::from_le_bytes(bytes[44..48].try_into().unwrap());
+        // bytes[48..64] are reserved / unused. We do not validate them —
         // GSF ignores them on read and different writers have been observed
         // to leave them as garbage.
-        let checksum = u32::from_le_bytes(bytes[60..64].try_into().unwrap());
 
         if header_size as usize != HEADER_LEN {
             return Err(PqdifError::BadHeader("header_size must be 64"));
@@ -179,7 +181,7 @@ mod tests {
         buf[32..36].copy_from_slice(&64u32.to_le_bytes());
         buf[36..40].copy_from_slice(&123u32.to_le_bytes());
         buf[40..44].copy_from_slice(&456u32.to_le_bytes());
-        buf[60..64].copy_from_slice(&0xdeadbeef_u32.to_le_bytes());
+        buf[44..48].copy_from_slice(&0xdeadbeef_u32.to_le_bytes());
 
         let h = RecordHeader::parse(&buf).unwrap();
         assert_eq!(h.signature, RECORD_SIGNATURE);

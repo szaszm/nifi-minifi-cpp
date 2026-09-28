@@ -50,9 +50,12 @@
 //! - **Checksum verification is on by default.** Grid Protection Alliance's
 //!   `GSF.PQDIF` computes the Adler-32 checksum on read but does not verify
 //!   it. This crate does, because it is intended to process files from
-//!   untrusted sources in a data-collection agent. Use
+//!   untrusted sources in a data-collection agent. Real-world writers ship
+//!   this field zero far more often than they compute it; open such files
+//!   with [`LogicalParser::open_with_options`](logical::LogicalParser::open_with_options)
+//!   or toggle
 //!   [`PhysicalParser::verify_checksums`](physical::PhysicalParser::verify_checksums)
-//!   to opt out.
+//!   on the underlying physical parser.
 //! - **`Read + Seek` is required.** PQDIF is a linked list of records via
 //!   absolute file offsets; supporting pure `Read` would require buffering
 //!   the whole file. The two calling shapes that matter — `std::fs::File`
@@ -78,7 +81,7 @@ pub mod timestamp;
 pub use error::PqdifError;
 pub use logical::{
     ChannelInstance, ContainerRecord, DataSourceRecord, LogicalParser, ObservationRecord,
-    RecordType, SeriesInstance,
+    OpenOptions, RecordType, SeriesInstance,
 };
 pub use physical::{
     CollectionElement, Element, PhysicalParser, PhysicalRecord, PhysicalType, RecordHeader,

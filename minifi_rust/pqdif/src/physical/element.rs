@@ -23,9 +23,10 @@
 //! | offset | length | field                                                    |
 //! |-------:|-------:|----------------------------------------------------------|
 //! |     0  |    16  | `tag` GUID                                                |
-//! |    16  |     1  | element type — 1=Scalar, 2=Vector, 3=Collection           |
+//! |    16  |     1  | element type — 1=Collection, 2=Scalar, 3=Vector           |
 //! |    17  |     1  | physical type — see [`crate::physical::PhysicalType`]     |
-//! |    18  |     2  | reserved / unused                                         |
+//! |    18  |     1  | `isEmbedded` — 1 iff a scalar's value fits in the payload |
+//! |    19  |     1  | reserved / unused                                         |
 //! |    20  |     8  | payload slot — embedded value **or** `(link_offset, padded_size)` |
 //!
 //! # Embedding rule (strictly `< 8`)
@@ -61,9 +62,11 @@ use crate::physical::physical_type::PhysicalType;
 /// Byte length of a single element header.
 pub const ELEMENT_HEADER_LEN: usize = 28;
 
-const ELEMENT_TYPE_SCALAR: u8 = 1;
-const ELEMENT_TYPE_VECTOR: u8 = 2;
-const ELEMENT_TYPE_COLLECTION: u8 = 3;
+// Element-type discriminants match the reference `GSF.PQDIF/Physical/Element.cs`
+// enum: `Collection = 1, Scalar = 2, Vector = 3`.
+const ELEMENT_TYPE_COLLECTION: u8 = 1;
+const ELEMENT_TYPE_SCALAR: u8 = 2;
+const ELEMENT_TYPE_VECTOR: u8 = 3;
 
 /// One node in the element tree.
 #[derive(Debug, Clone)]
@@ -235,10 +238,11 @@ fn decode_element(header: &[u8], body: &[u8]) -> Result<Element, PqdifError> {
     let tag = read_guid(&header[0..16]);
     let element_type = header[16];
     let physical_type_byte = header[17];
+    let is_embedded = header[18] != 0;
     let payload = &header[20..28];
 
     match element_type {
-        ELEMENT_TYPE_SCALAR => decode_scalar(tag, physical_type_byte, payload, body),
+        ELEMENT_TYPE_SCALAR => decode_scalar(tag, physical_type_byte, is_embedded, payload, body),
         ELEMENT_TYPE_VECTOR => decode_vector(tag, physical_type_byte, payload, body),
         ELEMENT_TYPE_COLLECTION => decode_collection(tag, payload, body),
         other => Err(PqdifError::UnknownElementType(other)),
@@ -248,16 +252,25 @@ fn decode_element(header: &[u8], body: &[u8]) -> Result<Element, PqdifError> {
 fn decode_scalar(
     tag: Uuid,
     physical_type_byte: u8,
+    is_embedded: bool,
     payload: &[u8],
     body: &[u8],
 ) -> Result<Element, PqdifError> {
     let ty = PhysicalType::from_byte(physical_type_byte)?;
     let size = ty.byte_size();
-    let value = if size < 8 {
-        // Embedded: value is in the first `size` bytes of the 8-byte payload.
+    // The wire's `isEmbedded` byte is authoritative. GSF's writer sets it to 1
+    // iff the value fits in the 8-byte payload slot (i.e. `size <= 8`); older
+    // GSF writers occasionally embed Real8 (size == 8) values by keeping this
+    // byte set, so we follow the flag rather than a size-based heuristic. Non-
+    // scalars never set it; their payload is always a `(link, padded_size)`.
+    let value = if is_embedded {
+        if size > payload.len() {
+            return Err(PqdifError::BadHeader(
+                "isEmbedded set but physical type does not fit the payload slot",
+            ));
+        }
         payload[..size].to_vec()
     } else {
-        // Linked: (link_offset, padded_size).
         let link_offset = i32::from_le_bytes(payload[0..4].try_into().unwrap());
         let padded_size = i32::from_le_bytes(payload[4..8].try_into().unwrap());
         if link_offset < 0 || padded_size < 0 {
@@ -270,7 +283,10 @@ fn decode_scalar(
         if end > body.len() {
             return Err(PqdifError::Truncated);
         }
-        // Sanity: padded_size must cover the raw size.
+        // padded_size is padding, not authoritative — some writers leave it
+        // stale — but if it is stored at all it must at least cover the raw
+        // size. GSF's writer stores `padSize = ((raw + 3) / 4) * 4`; a value
+        // smaller than that is inconsistent enough to reject.
         if (padded_size as usize) < size {
             return Err(PqdifError::BadHeader("padded_size smaller than raw size"));
         }
@@ -378,12 +394,13 @@ mod tests {
         let mut body = vec![0u8; 68];
         body[0..4].copy_from_slice(&2i32.to_le_bytes());
 
-        // Real4 header — embedded 3.5_f32.
-        write_element_header(&mut body[4..32], real4_tag, ELEMENT_TYPE_SCALAR, PhysicalType::Real4 as u8);
+        // Real4 header — embedded 3.5_f32. Header lives at body[4..32]; the
+        // payload slot inside that header is header[20..28] = body[24..32].
+        write_element_header(&mut body[4..32], real4_tag, ELEMENT_TYPE_SCALAR, PhysicalType::Real4 as u8, true);
         body[24..28].copy_from_slice(&3.5_f32.to_le_bytes());
 
         // Real8 header — linked at body offset 60, padded_size=8.
-        write_element_header(&mut body[32..60], real8_tag, ELEMENT_TYPE_SCALAR, PhysicalType::Real8 as u8);
+        write_element_header(&mut body[32..60], real8_tag, ELEMENT_TYPE_SCALAR, PhysicalType::Real8 as u8, false);
         body[52..56].copy_from_slice(&60i32.to_le_bytes());
         body[56..60].copy_from_slice(&8i32.to_le_bytes());
         body[60..68].copy_from_slice(&2.5_f64.to_le_bytes());
@@ -419,7 +436,7 @@ mod tests {
         //  36..48: three i32 values
         let mut body = vec![0u8; 48];
         body[0..4].copy_from_slice(&1i32.to_le_bytes());
-        write_element_header(&mut body[4..32], tag, ELEMENT_TYPE_VECTOR, PhysicalType::Integer4 as u8);
+        write_element_header(&mut body[4..32], tag, ELEMENT_TYPE_VECTOR, PhysicalType::Integer4 as u8, false);
         body[24..28].copy_from_slice(&32i32.to_le_bytes());
         body[28..32].copy_from_slice(&12i32.to_le_bytes());
         body[32..36].copy_from_slice(&3i32.to_le_bytes());
@@ -455,17 +472,24 @@ mod tests {
         let tag = uuid::uuid!("44444444-4444-4444-4444-444444444444");
         let mut body = vec![0u8; 32];
         body[0..4].copy_from_slice(&1i32.to_le_bytes());
-        write_element_header(&mut body[4..32], tag, 99, PhysicalType::Integer4 as u8);
+        write_element_header(&mut body[4..32], tag, 99, PhysicalType::Integer4 as u8, false);
         assert!(matches!(decode_body(&body), Err(PqdifError::UnknownElementType(99))));
     }
 
-    /// Test helper — write a 28-byte element header at `out`.
-    fn write_element_header(out: &mut [u8], tag: Uuid, element_type: u8, physical_type: u8) {
+    /// Test helper — write a 28-byte element header at `out`. `is_embedded`
+    /// controls byte 18 and only has any effect for Scalar elements.
+    fn write_element_header(
+        out: &mut [u8],
+        tag: Uuid,
+        element_type: u8,
+        physical_type: u8,
+        is_embedded: bool,
+    ) {
         assert_eq!(out.len(), ELEMENT_HEADER_LEN);
         crate::physical::header::write_guid(tag, &mut out[0..16]);
         out[16] = element_type;
         out[17] = physical_type;
-        out[18] = 0;
+        out[18] = if is_embedded { 1 } else { 0 };
         out[19] = 0;
         // payload cleared by caller.
     }

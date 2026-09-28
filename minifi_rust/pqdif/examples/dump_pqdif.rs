@@ -17,22 +17,48 @@
 
 //! Minimal `.pqd` dumper.
 //!
-//! Usage: `cargo run -p pqdif --example dump_pqdif -- <path>`
+//! Usage: `cargo run -p pqdif --example dump_pqdif -- [--no-verify-checksums] <path>`
 //!
 //! Prints the Container record fields, then one summary line per
 //! Observation record. Useful as a smoke test against real files —
 //! synthetic fixtures live in the crate's `tests/`.
+//!
+//! Pass `--no-verify-checksums` to open files whose writer did not populate
+//! the Adler-32 checksum field. This is common in the wild: the reference
+//! GSF implementation computes checksums on read but does not require them
+//! to match, and several third-party writers ship files with the field
+//! left as `0x00000000`.
 
 use std::env;
 use std::fs::File;
 use std::io::BufReader;
 use std::process::ExitCode;
 
-use pqdif::LogicalParser;
+use pqdif::{LogicalParser, OpenOptions};
 
 fn main() -> ExitCode {
-    let Some(path) = env::args().nth(1) else {
-        eprintln!("usage: dump_pqdif <path-to-.pqd>");
+    let mut args = env::args().skip(1);
+    let mut verify = true;
+    let mut path: Option<String> = None;
+    for arg in args.by_ref() {
+        match arg.as_str() {
+            "--no-verify-checksums" => verify = false,
+            "-h" | "--help" => {
+                eprintln!("usage: dump_pqdif [--no-verify-checksums] <path-to-.pqd>");
+                return ExitCode::SUCCESS;
+            }
+            other if other.starts_with("--") => {
+                eprintln!("unknown flag: {other}");
+                return ExitCode::from(2);
+            }
+            _ => {
+                path = Some(arg);
+                break;
+            }
+        }
+    }
+    let Some(path) = path else {
+        eprintln!("usage: dump_pqdif [--no-verify-checksums] <path-to-.pqd>");
         return ExitCode::from(2);
     };
 
@@ -44,13 +70,17 @@ fn main() -> ExitCode {
         }
     };
 
-    let (mut parser, container) = match LogicalParser::open(BufReader::new(file)) {
-        Ok(v) => v,
-        Err(e) => {
-            eprintln!("open failed: {e}");
-            return ExitCode::from(1);
-        }
+    let options = OpenOptions {
+        verify_checksums: verify,
     };
+    let (mut parser, container) =
+        match LogicalParser::open_with_options(BufReader::new(file), options) {
+            Ok(v) => v,
+            Err(e) => {
+                eprintln!("open failed: {e}");
+                return ExitCode::from(1);
+            }
+        };
 
     println!("Container:");
     println!("  writer_version   = {}", container.writer_version);
