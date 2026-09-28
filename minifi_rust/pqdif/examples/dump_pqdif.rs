@@ -17,34 +17,53 @@
 
 //! Minimal `.pqd` dumper.
 //!
-//! Usage: `cargo run -p pqdif --example dump_pqdif -- [--no-verify-checksums] <path>`
+//! Usage: `cargo run -p pqdif --example dump_pqdif -- [--checksums=MODE] <path>`
 //!
 //! Prints the Container record fields, then one summary line per
 //! Observation record. Useful as a smoke test against real files —
 //! synthetic fixtures live in the crate's `tests/`.
 //!
-//! Pass `--no-verify-checksums` to open files whose writer did not populate
-//! the Adler-32 checksum field. This is common in the wild: the reference
-//! GSF implementation computes checksums on read but does not require them
-//! to match, and several third-party writers ship files with the field
-//! left as `0x00000000`.
+//! `--checksums=MODE` selects the Adler-32 verification policy:
+//!
+//! - `always` (default) — every record must carry a matching checksum.
+//! - `when-present` — verify records with a non-zero checksum, accept those
+//!   that leave the field `0x00000000`. The right choice for real files from
+//!   a trusted source, since writers vary in whether they populate it: the
+//!   reference GSF implementation computes checksums on read but does not
+//!   require them to match, and several third-party writers omit them.
+//! - `never` — skip verification entirely.
+//!
+//! `--no-verify-checksums` is kept as an alias for `--checksums=never`.
 
 use std::env;
 use std::fs::File;
 use std::io::BufReader;
 use std::process::ExitCode;
 
-use pqdif::{LogicalParser, OpenOptions};
+use pqdif::{ChecksumMode, LogicalParser, OpenOptions};
+
+const USAGE: &str = "usage: dump_pqdif [--checksums=always|when-present|never] <path-to-.pqd>";
 
 fn main() -> ExitCode {
     let mut args = env::args().skip(1);
-    let mut verify = true;
+    let mut checksum_mode = ChecksumMode::default();
     let mut path: Option<String> = None;
     for arg in args.by_ref() {
         match arg.as_str() {
-            "--no-verify-checksums" => verify = false,
+            "--no-verify-checksums" => checksum_mode = ChecksumMode::Never,
+            flag if flag.starts_with("--checksums=") => {
+                checksum_mode = match flag.trim_start_matches("--checksums=") {
+                    "always" => ChecksumMode::Always,
+                    "when-present" => ChecksumMode::WhenPresent,
+                    "never" => ChecksumMode::Never,
+                    other => {
+                        eprintln!("unknown checksum mode {other:?}\n{USAGE}");
+                        return ExitCode::from(2);
+                    }
+                };
+            }
             "-h" | "--help" => {
-                eprintln!("usage: dump_pqdif [--no-verify-checksums] <path-to-.pqd>");
+                eprintln!("{USAGE}");
                 return ExitCode::SUCCESS;
             }
             other if other.starts_with("--") => {
@@ -58,7 +77,7 @@ fn main() -> ExitCode {
         }
     }
     let Some(path) = path else {
-        eprintln!("usage: dump_pqdif [--no-verify-checksums] <path-to-.pqd>");
+        eprintln!("{USAGE}");
         return ExitCode::from(2);
     };
 
@@ -70,9 +89,7 @@ fn main() -> ExitCode {
         }
     };
 
-    let options = OpenOptions {
-        verify_checksums: verify,
-    };
+    let options = OpenOptions { checksum_mode };
     let (mut parser, container) =
         match LogicalParser::open_with_options(BufReader::new(file), options) {
             Ok(v) => v,

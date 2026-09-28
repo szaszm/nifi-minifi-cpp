@@ -31,24 +31,30 @@ use crate::logical::container::ContainerRecord;
 use crate::logical::data_source::DataSourceRecord;
 use crate::logical::observation::ObservationRecord;
 use crate::logical::record_type::RecordType;
+use crate::physical::checksum::ChecksumMode;
 use crate::physical::parser::PhysicalParser;
 
 /// Options controlling how [`LogicalParser::open_with_options`] reads a file.
-#[derive(Debug, Clone, Copy)]
+///
+/// Construct from [`Default`] and override what you need:
+///
+/// ```
+/// use pqdif::{ChecksumMode, OpenOptions};
+///
+/// let lenient = OpenOptions {
+///     checksum_mode: ChecksumMode::WhenPresent,
+///     ..Default::default()
+/// };
+/// ```
+#[derive(Debug, Clone, Copy, Default)]
 pub struct OpenOptions {
-    /// If `true` (the default), the Adler-32 checksum in each record's header
-    /// is verified against the on-disk body bytes and a mismatch raises
-    /// [`PqdifError::ChecksumMismatch`]. Set to `false` to accept files
-    /// produced by writers that ship a zero checksum.
-    pub verify_checksums: bool,
-}
-
-impl Default for OpenOptions {
-    fn default() -> Self {
-        Self {
-            verify_checksums: true,
-        }
-    }
+    /// When to verify the Adler-32 checksum in each record's header against
+    /// the on-disk body bytes; a mismatch raises
+    /// [`PqdifError::ChecksumMismatch`]. Defaults to
+    /// [`ChecksumMode::Always`]. Use [`ChecksumMode::WhenPresent`] to accept
+    /// files from writers that leave the field zero while still checking
+    /// those that populate it.
+    pub checksum_mode: ChecksumMode,
 }
 
 /// Iterator over the typed records inside a PQDIF file.
@@ -76,14 +82,14 @@ impl<R: Read + Seek> LogicalParser<R> {
     /// Use this to open files that ship with a zero Adler-32 checksum — a
     /// common quirk of third-party writers (the reference GSF implementation
     /// computes but does not verify on read). Constructing a `LogicalParser`
-    /// via [`Self::open`] and then calling [`Self::verify_checksums`] is too
+    /// via [`Self::open`] and then calling [`Self::checksum_mode`] is too
     /// late for the Container record, which is decoded during `open`.
     pub fn open_with_options(
         reader: R,
         options: OpenOptions,
     ) -> Result<(Self, ContainerRecord), PqdifError> {
         let mut physical = PhysicalParser::new(reader)?;
-        physical.verify_checksums(options.verify_checksums);
+        physical.checksum_mode(options.checksum_mode);
         let first = physical
             .next_record()?
             .ok_or(PqdifError::BadHeader("file has no records"))?;
@@ -102,7 +108,20 @@ impl<R: Read + Seek> LogicalParser<R> {
         ))
     }
 
+    /// Set the checksum verification policy on the underlying physical
+    /// parser, for the records read from here on.
+    ///
+    /// The Container record is already decoded by the time you can call
+    /// this; pass a mode to [`Self::open_with_options`] to cover it too.
+    pub fn checksum_mode(&mut self, mode: ChecksumMode) -> &mut Self {
+        self.physical.checksum_mode(mode);
+        self
+    }
+
     /// Toggle checksum verification on the underlying physical parser.
+    ///
+    /// Shorthand for [`ChecksumMode::Always`] / [`ChecksumMode::Never`]; use
+    /// [`Self::checksum_mode`] to reach [`ChecksumMode::WhenPresent`].
     pub fn verify_checksums(&mut self, verify: bool) -> &mut Self {
         self.physical.verify_checksums(verify);
         self

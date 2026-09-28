@@ -35,6 +35,7 @@ pub mod header;
 pub mod parser;
 pub mod physical_type;
 
+pub use checksum::ChecksumMode;
 pub use compression::{CompressionAlgorithm, CompressionStyle};
 pub use element::{CollectionElement, Element, ScalarElement, VectorElement};
 pub use header::RecordHeader;

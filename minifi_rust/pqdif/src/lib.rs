@@ -51,10 +51,15 @@
 //!   `GSF.PQDIF` computes the Adler-32 checksum on read but does not verify
 //!   it. This crate does, because it is intended to process files from
 //!   untrusted sources in a data-collection agent. Real-world writers ship
-//!   this field zero far more often than they compute it; open such files
-//!   with [`LogicalParser::open_with_options`](logical::LogicalParser::open_with_options)
-//!   or toggle
-//!   [`PhysicalParser::verify_checksums`](physical::PhysicalParser::verify_checksums)
+//!   this field zero far more often than they compute it, so
+//!   [`ChecksumMode`] offers three policies — [`Always`](ChecksumMode::Always)
+//!   (the default), [`WhenPresent`](ChecksumMode::WhenPresent) (verify only
+//!   records that carry a non-zero checksum, for mixed-provenance files from
+//!   trusted sources), and [`Never`](ChecksumMode::Never). Select one via
+//!   [`OpenOptions`] passed to
+//!   [`LogicalParser::open_with_options`](logical::LogicalParser::open_with_options),
+//!   or with
+//!   [`PhysicalParser::checksum_mode`](physical::PhysicalParser::checksum_mode)
 //!   on the underlying physical parser.
 //! - **`Read + Seek` is required.** PQDIF is a linked list of records via
 //!   absolute file offsets; supporting pure `Read` would require buffering
@@ -84,6 +89,6 @@ pub use logical::{
     OpenOptions, RecordType, SeriesInstance,
 };
 pub use physical::{
-    CollectionElement, Element, PhysicalParser, PhysicalRecord, PhysicalType, RecordHeader,
-    ScalarElement, VectorElement,
+    ChecksumMode, CollectionElement, Element, PhysicalParser, PhysicalRecord, PhysicalType,
+    RecordHeader, ScalarElement, VectorElement,
 };

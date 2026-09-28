@@ -22,7 +22,7 @@ use std::collections::HashSet;
 use std::io::{Read, Seek, SeekFrom};
 
 use crate::error::PqdifError;
-use crate::physical::checksum::adler32;
+use crate::physical::checksum::{ChecksumMode, adler32};
 use crate::physical::compression::{
     CompressionAlgorithm, CompressionStyle, decode_body as decompress,
 };
@@ -54,8 +54,9 @@ pub struct PhysicalRecord {
 /// and following each header's `next_record_pos` pointer.
 ///
 /// Cycle detection is unconditional: revisiting an offset already yielded
-/// this walk produces [`PqdifError::RecordCycle`]. Checksum verification is
-/// on by default; toggle it with [`PhysicalParser::verify_checksums`].
+/// this walk produces [`PqdifError::RecordCycle`]. Checksum verification
+/// defaults to [`ChecksumMode::Always`]; change it with
+/// [`PhysicalParser::checksum_mode`].
 pub struct PhysicalParser<R: Read + Seek> {
     reader: R,
     next_offset: Option<u64>,
@@ -64,7 +65,7 @@ pub struct PhysicalParser<R: Read + Seek> {
     /// the Container has been parsed (i.e. before the first `next_record()`
     /// call). The Container record body itself is always uncompressed.
     compression: Option<(CompressionStyle, CompressionAlgorithm)>,
-    verify: bool,
+    checksum_mode: ChecksumMode,
     records_yielded: u64,
 }
 
@@ -77,20 +78,33 @@ impl<R: Read + Seek> PhysicalParser<R> {
             next_offset: Some(0),
             visited: HashSet::new(),
             compression: None,
-            verify: true,
+            checksum_mode: ChecksumMode::default(),
             records_yielded: 0,
         })
     }
 
-    /// Enable or disable Adler-32 checksum verification.
+    /// Set the Adler-32 checksum verification policy.
     ///
-    /// Defaults to **on**. This is deliberately stricter than the reference
-    /// implementation, which computes the checksum on read but never
-    /// verifies it. Turn off if you know your input source produces valid
-    /// files and you want to accept minor corruption.
-    pub fn verify_checksums(&mut self, verify: bool) -> &mut Self {
-        self.verify = verify;
+    /// Defaults to [`ChecksumMode::Always`], which is deliberately stricter
+    /// than the reference implementation (it computes the checksum on read
+    /// but never compares it). Use [`ChecksumMode::WhenPresent`] for
+    /// real-world files from trusted sources, where writers vary in whether
+    /// they populate the field.
+    pub fn checksum_mode(&mut self, mode: ChecksumMode) -> &mut Self {
+        self.checksum_mode = mode;
         self
+    }
+
+    /// Enable or disable checksum verification.
+    ///
+    /// Shorthand for [`ChecksumMode::Always`] / [`ChecksumMode::Never`]; use
+    /// [`Self::checksum_mode`] to reach [`ChecksumMode::WhenPresent`].
+    pub fn verify_checksums(&mut self, verify: bool) -> &mut Self {
+        self.checksum_mode(if verify {
+            ChecksumMode::Always
+        } else {
+            ChecksumMode::Never
+        })
     }
 
     /// Read and decode the next record. Returns `Ok(None)` when the chain
@@ -111,7 +125,7 @@ impl<R: Read + Seek> PhysicalParser<R> {
         let mut on_disk_body = vec![0u8; header.body_size as usize];
         self.reader.read_exact(&mut on_disk_body)?;
 
-        if self.verify {
+        if self.checksum_mode.should_verify(header.checksum) {
             let actual = adler32(&on_disk_body);
             if actual != header.checksum {
                 return Err(PqdifError::ChecksumMismatch {

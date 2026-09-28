@@ -80,9 +80,37 @@ The binary format was ported from the reference implementation:
 Only the tag-registry XML is vendored; the parser is a from-scratch idiomatic
 Rust port that returns `Result` instead of throwing, uses zero-copy iteration
 over borrowed byte slices where possible, and adds a deliberately-stricter
-checksum policy: verification is **on by default**, opt-out with
-`PhysicalParser::verify_checksums(false)`. (GSF computes but does not verify
-the record checksum.)
+checksum policy. (GSF computes but does not verify the record checksum.)
+
+### Checksum modes
+
+PQDIF has no "checksum absent" flag — writers that do not compute one simply
+leave the header field `0x00000000`, which is common in the wild. `ChecksumMode`
+therefore offers three policies:
+
+| Mode | Behaviour |
+| --- | --- |
+| `Always` (default) | Verify every record; a zero field is treated as corruption. Use for untrusted input. |
+| `WhenPresent` | Verify records whose checksum is non-zero, accept those that leave it zero. Use for real files from **trusted** sources, where writers vary. |
+| `Never` | Skip verification; the field is still exposed on `RecordHeader::checksum`. |
+
+`WhenPresent` decides per record, not per file, so a file that checksums some
+records and not others is still fully checked wherever a checksum exists.
+
+```rust
+use pqdif::{ChecksumMode, LogicalParser, OpenOptions};
+
+let (mut parser, container) = LogicalParser::open_with_options(
+    file,
+    OpenOptions { checksum_mode: ChecksumMode::WhenPresent },
+)?;
+```
+
+Pass the mode to `open_with_options` rather than setting it afterwards: the
+Container record is decoded during `open`, so a later call would not cover it.
+On the physical layer the equivalent setter is
+`PhysicalParser::checksum_mode(mode)`; the older
+`verify_checksums(bool)` remains as shorthand for `Always` / `Never`.
 
 ## Testing
 

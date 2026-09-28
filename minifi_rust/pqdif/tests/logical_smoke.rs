@@ -20,9 +20,34 @@
 
 use std::io::Cursor;
 
-use pqdif::{LogicalParser, PqdifError};
+use pqdif::{ChecksumMode, LogicalParser, OpenOptions, PqdifError};
 
 mod fixtures;
+
+/// Walk the record chain in `bytes` and hand each record's header offset to
+/// `patch`. Records are laid out contiguously by the fixture writer, and each
+/// header carries `header_size` at 32..36 and `body_size` at 36..40, so the
+/// walk needs no knowledge of which fixture produced the file.
+fn for_each_record_header(bytes: &mut [u8], mut patch: impl FnMut(&mut [u8])) -> usize {
+    let mut offset = 0usize;
+    let mut count = 0usize;
+    while offset + 64 <= bytes.len() {
+        let header_size =
+            u32::from_le_bytes(bytes[offset + 32..offset + 36].try_into().unwrap()) as usize;
+        let body_size =
+            u32::from_le_bytes(bytes[offset + 36..offset + 40].try_into().unwrap()) as usize;
+        patch(&mut bytes[offset..offset + 64]);
+        count += 1;
+        offset += header_size + body_size;
+    }
+    count
+}
+
+/// Zero every record's checksum field (header bytes 44..48), imitating a
+/// writer that never computed one. Returns the number of records patched.
+fn strip_all_checksums(bytes: &mut [u8]) -> usize {
+    for_each_record_header(bytes, |header| header[44..48].fill(0))
+}
 
 #[test]
 fn open_yields_container_and_first_observation() {
@@ -192,4 +217,90 @@ fn two_channels_are_decoded_independently() {
     assert_eq!(obs.channels[0].series[0].values, s0);
     assert_eq!(obs.channels[1].name.as_deref(), Some("CH_RIGHT"));
     assert_eq!(obs.channels[1].series[0].values, s1);
+}
+
+#[test]
+fn checksumless_file_is_rejected_by_default() {
+    // The strict default must fire on the *Container*, i.e. inside `open`,
+    // not merely on later records.
+    let (mut bytes, _) = fixtures::synthetic::build_multi_observation(3);
+    assert_eq!(strip_all_checksums(&mut bytes), 5, "container + ds + 3 obs");
+    assert!(
+        matches!(
+            LogicalParser::open(Cursor::new(&bytes)),
+            Err(PqdifError::ChecksumMismatch { expected: 0, .. })
+        ),
+        "a file with no checksums must fail the default strict mode",
+    );
+}
+
+#[test]
+fn when_present_walks_a_checksumless_file_end_to_end() {
+    // The motivating case: a real file from a trusted writer that populates
+    // no checksums at all. Every record must decode, including the Container
+    // (which is read during `open`, before any post-hoc setter could apply).
+    let (mut bytes, expected) = fixtures::synthetic::build_multi_observation(3);
+    strip_all_checksums(&mut bytes);
+
+    let (mut parser, container) = LogicalParser::open_with_options(
+        Cursor::new(&bytes),
+        OpenOptions {
+            checksum_mode: ChecksumMode::WhenPresent,
+        },
+    )
+    .expect("WhenPresent must accept a fully checksumless file");
+    assert_eq!(container.application.as_deref(), Some("pqdif-rs"));
+
+    let mut values = Vec::new();
+    while let Some(obs) = parser.next_observation().expect("observation ok") {
+        values.push(obs.channels[0].series[0].values.clone());
+    }
+    assert_eq!(values, expected);
+}
+
+#[test]
+fn when_present_still_rejects_a_corrupt_body() {
+    // Leniency is scoped to absent checksums. The fixture writer computes
+    // real ones, so corrupting a body must still be caught under
+    // WhenPresent — otherwise the mode would be indistinguishable from
+    // disabling verification.
+    let (mut bytes, _) = fixtures::synthetic::build();
+    let container_body_start = 64;
+    bytes[container_body_start] ^= 0xff;
+
+    assert!(
+        matches!(
+            LogicalParser::open_with_options(
+                Cursor::new(&bytes),
+                OpenOptions {
+                    checksum_mode: ChecksumMode::WhenPresent,
+                },
+            ),
+            Err(PqdifError::ChecksumMismatch { .. })
+        ),
+        "WhenPresent must verify records that do carry a checksum",
+    );
+}
+
+#[test]
+fn when_present_is_a_mix_per_record_not_per_file() {
+    // Strip the checksum from the Container only, leaving the DataSource and
+    // Observation checksums intact and correct. A per-file "does this writer
+    // use checksums?" heuristic would get this wrong; the decision is made
+    // independently for each record.
+    let (mut bytes, samples) = fixtures::synthetic::build();
+    bytes[44..48].fill(0);
+
+    let (mut parser, _container) = LogicalParser::open_with_options(
+        Cursor::new(&bytes),
+        OpenOptions {
+            checksum_mode: ChecksumMode::WhenPresent,
+        },
+    )
+    .expect("container with a stripped checksum is accepted");
+    let obs = parser
+        .next_observation()
+        .expect("later records still verify and pass")
+        .expect("present");
+    assert_eq!(obs.channels[0].series[0].values, samples);
 }
