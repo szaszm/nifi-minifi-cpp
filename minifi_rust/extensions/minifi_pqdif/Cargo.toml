@@ -1,0 +1,27 @@
+[package]
+name = "minifi_pqdif"
+version = "0.1.0"
+edition = "2024"
+description = "MiNiFi extension that parses PQDIF (IEEE Std 1159.3) power-quality recordings into JSON."
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+minifi_native = { path = "../../minifi_native" }
+# The reader itself. Kept as a separate, minifi-independent crate in the
+# `pqdif/` subdirectory so it stays publishable on its own; this extension is
+# the only thing here that knows about MiNiFi.
+pqdif = { path = "pqdif" }
+serde_json = "1"
+strum = "0.28.0"
+strum_macros = "0.28.0"
+
+[dev-dependencies]
+# `test-fixtures` exposes pqdif's hand-built byte-array writers, so the
+# processor tests can feed the parser genuine PQDIF bytes rather than a second,
+# divergent fixture writer maintained here.
+pqdif = { path = "pqdif", features = ["test-fixtures"] }
+# `test-utils` adds TransformedFlowFile::into_bytes, which is how a test reads
+# back the content the processor produced.
+minifi_native = { path = "../../minifi_native", features = ["test-utils"] }

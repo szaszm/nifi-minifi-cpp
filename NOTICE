@@ -41,8 +41,9 @@ This bundles PQDIF tag definitions from Grid Protection Alliance's GSF.PQDIF (MI
 Copyright (c) 2015 Grid Protection Alliance
 The vendored data file is
   Source/Libraries/GSF.PQDIF/TagDefinitions.xml
-and can be found in minifi_rust/pqdif/tags/tag_definitions.xml. The MIT license
-text is preserved alongside it as minifi_rust/pqdif/tags/LICENSE-GSF-PQDIF.
+and can be found in minifi_rust/extensions/minifi_pqdif/pqdif/tags/tag_definitions.xml.
+The MIT license text is preserved alongside it as
+minifi_rust/extensions/minifi_pqdif/pqdif/tags/LICENSE-GSF-PQDIF.
 
 **********************
 THIRD PARTY COMPONENTS

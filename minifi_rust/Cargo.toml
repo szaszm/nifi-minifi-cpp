@@ -1,6 +1,9 @@
 [workspace]
 resolver = "3"
-members = ["minifi_native_sys", "minifi_native", "minifi_native_macros", "minifi_rs_behave", "pqdif", "extensions/*"]
+# `extensions/*` also picks up crates nested inside an extension — notably
+# `extensions/minifi_pqdif/pqdif`, the minifi-independent reader library that
+# the PQDIF extension wraps.
+members = ["minifi_native_sys", "minifi_native", "minifi_native_macros", "minifi_rs_behave", "extensions/*"]
 
 [profile.release]
 panic = "abort"

@@ -1,0 +1,34 @@
+[package]
+name = "pqdif"
+version = "0.1.0"
+edition = "2024"
+description = "Pure-Rust reader for the Power Quality Data Interchange Format (IEEE Std 1159.3)"
+license = "Apache-2.0"
+
+[lib]
+crate-type = ["rlib"]
+
+[dependencies]
+uuid = { version = "1", features = ["v4"] }
+flate2 = "1"
+chrono = { version = "0.4", default-features = false, features = ["std"] }
+thiserror = "2"
+
+[build-dependencies]
+xml-rs = "0.8"
+
+[dev-dependencies]
+# Depending on ourselves with `test-fixtures` enabled is how the integration
+# tests reach `pqdif::test_fixtures` without forcing the feature on for real
+# dependents. Cargo resolves this to the same crate, not a second copy.
+pqdif = { path = ".", features = ["test-fixtures"] }
+
+[features]
+# Off-by-default: exercise the parser against a real .pqd file whose path is
+# supplied via the PQDIF_TEST_FILE environment variable. Not run in CI.
+real-file-tests = []
+# Off-by-default: expose `test_fixtures`, the hand-built PQDIF byte-array
+# writers, for this crate's own tests and for dependents' tests (the
+# `minifi_pqdif` extension drives its processor tests through them, so there is
+# only one fixture writer to keep correct).
+test-fixtures = []
